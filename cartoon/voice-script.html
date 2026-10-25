@@ -1,0 +1,182 @@
+<title>Озвучка «Чистона»</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pangolin&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: phone-first script you read from while recording; role filter on top, one card per line. Same tile-teal look as the cartoon page. */
+:root{
+  --bg:#0e3a46; --panel:#134b59; --line:#2b6c79; --fg:#f2fbfa; --muted:#a7cdd2; --soap:#ffd23f; --ink:#0b2d36;
+  --display:"Pangolin","Comic Sans MS","Chalkboard SE",cursive;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;display:grid;gap:22px;padding-block:24px 56px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1{font-family:var(--display);font-weight:400;color:var(--soap);font-size:clamp(2rem,6vw,2.8rem);line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:1.5rem;margin:0}
+p{margin:0;max-width:65ch}
+.muted{color:var(--muted)}
+.how{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;gap:10px}
+.how ol{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.how b{color:var(--soap)}
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{font:inherit;font-weight:700;font-size:.92rem;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:.45em .95em;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--soap);color:var(--ink);border-color:var(--soap)}
+.filters button:focus-visible{outline:3px solid var(--soap);outline-offset:2px}
+.cast{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.role{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.role .n{font-family:var(--display);font-size:1.25rem;color:var(--soap)}
+.role .c{font-size:.9rem;color:var(--muted)}
+.lines{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ln{display:grid;grid-template-columns:3.2rem 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.num{font-family:var(--display);font-size:1.7rem;color:var(--soap);line-height:1;font-variant-numeric:tabular-nums}
+.file{font-size:.75rem;color:var(--muted);margin-top:4px}
+.body{min-width:0;display:grid;gap:4px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.85rem;color:var(--muted)}
+.meta .who{color:var(--fg);font-weight:800}
+.say{font-family:var(--display);font-size:1.35rem;line-height:1.3}
+.tone{font-size:.9rem;color:var(--muted)}
+.tone::before{content:"Как: ";color:var(--soap)}
+.group{background:rgba(255,210,63,.1);border:1px dashed var(--soap);border-radius:14px;padding:12px 14px;display:grid;gap:10px}
+.group > p{font-size:.92rem}
+</style>
+
+<main class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>Озвучка «Чистона»</h1>
+    <p class="muted">Все 40 реплик мультфильма по ролям. Читайте отсюда во время записи.</p>
+  </header>
+
+  <section class="how">
+    <h2>Как записывать</h2>
+    <ol>
+      <li><b>Одна реплика = один файл.</b> Назовите файл номером реплики: <b>07.m4a</b>, <b>33.m4a</b> и так далее. На iPhone подойдёт «Диктофон»: после записи нажмите на название и переименуйте.</li>
+      <li><b>Тихая комната.</b> Выключите телевизор, закройте окно. Держите телефон в 15–20 см ото рта, сбоку, а не прямо перед губами.</li>
+      <li><b>Играйте, а не читайте.</b> Чем ярче эмоция, тем лучше для мультфильма. Подсказка «Как» под каждой репликой.</li>
+      <li><b>Время — ориентир, а не закон.</b> Если реплика вышла длиннее, не торопитесь: я растяну сцену под вашу запись.</li>
+      <li><b>Ошиблись — запишите заново</b> и пришлите только удачный дубль.</li>
+      <li><b>Пришлите файлы сюда, в чат.</b> Можно частями, по мере записи.</li>
+    </ol>
+  </section>
+
+  <section style="display:grid;gap:10px">
+    <h2>Роли</h2>
+    <div class="cast" id="cast"></div>
+  </section>
+
+  <section style="display:grid;gap:12px">
+    <h2>Реплики</h2>
+    <div class="filters" id="filters" role="group" aria-label="Показать роль"></div>
+    <ol class="lines" id="lines"></ol>
+  </section>
+</main>
+
+<script>
+(() => {
+const ROLES = {
+  'Рассказчик': { cast: 'Мама или бабушка', voice: 'Спокойный тёплый голос, как будто читаете сказку на ночь.' },
+  'Тимур': { cast: 'Мальчик 7–10 лет', voice: 'Живой, азартный, иногда капризный. Обычный ребёнок, не идеальный.' },
+  'Лея': { cast: 'Девочка 4–6 лет', voice: 'Звонко, по-детски, немного упрямо.' },
+  'Чистон': { cast: 'Папа или дедушка', voice: 'Весёлый ведущий игры. Добрый, с улыбкой в голосе, никогда не ругает.' },
+  'Пиксель': { cast: 'Ребёнок постарше или подросток', voice: 'Обиженный гаджет. Можно чуть чётче и «электроннее», чем обычная речь.' },
+  'Кроссовки': { cast: 'Двое детей хором', voice: 'Пискляво, наперебой, весело.' },
+  'Хрум': { cast: 'Дедушка или папа', voice: 'Ворчливо, басом, но добродушно.' },
+  'Липучки': { cast: 'Дети хором', voice: 'Хихикая, хитро, как маленькие озорники.' },
+  'Песня': { cast: 'Тимур (можно с Леей)', voice: 'Поётся или проговаривается ритмично, весело, под счёт.' },
+  'Все': { cast: 'Все вместе', voice: 'Хором, радостно, как финальная песенка.' }
+};
+// [№, роль, секунд, текст, как]
+const L = [
+  [1, 'Рассказчик', 5, 'Новая сказка о чистоте — для ребят двадцать первого века.', 'Загадочно, приглашая в сказку.'],
+  [2, 'Рассказчик', 3, 'Утро. Тимур проснулся и… сразу за планшет.', 'С лёгкой иронией, пауза перед «сразу».'],
+  [3, 'Тимур', 3.5, 'Ура! Сейчас пройду новый уровень!', 'Радостно, азартно.'],
+  [4, 'Пиксель', 3, 'Ошибка! Экран загрязнён!', 'Как сигнал тревоги, резко.'],
+  [5, 'Пиксель', 3, 'Я ничего не вижу через твои отпечатки!', 'Обиженно, почти плача.'],
+  [6, 'Пиксель', 3, 'Я ухожу! Найди меня, когда отмоешься!', 'Гордо, с вызовом.'],
+  [7, 'Кроссовки', 3, 'И мы! И мы! Нам тоже грязновато!', 'Наперебой, пискляво.'],
+  [8, 'Рассказчик', 3, 'Вещи одна за другой вышли из чата.', 'С улыбкой.'],
+  [9, 'Тимур', 3, 'Эй! Стойте! А как же моя игра?!', 'Растерянно, вдогонку.'],
+  [10, 'Тимур', 3.5, 'Куда они все побежали?..', 'Тихо, растерянно.'],
+  [11, 'Чистон', 3, 'Внимание, игрок Тимур!', 'Торжественно, как ведущий шоу.'],
+  [12, 'Чистон', 3, 'Ваш статус: «Чумазый-ур»!', 'Весело, по слогам: чу-ма-зый-УР.'],
+  [13, 'Чистон', 2.5, 'Вещи вышли из чата —', 'Ритмично, как стишок.'],
+  [14, 'Чистон', 3, 'им с тобою грязновато!', 'Ритмично, с улыбкой на последнем слове.'],
+  [15, 'Тимур', 2, 'А как их вернуть?', 'С надеждой.'],
+  [16, 'Чистон', 4, 'Пройди квест чистоты. Три уровня — и вещи вернутся!', 'Как объявление игры, бодро.'],
+  [17, 'Чистон', 4, 'Надень AR-очки. Видишь, кто на тебе живёт?', '«Эй-ар очки». Таинственно на втором предложении.'],
+  [18, 'Липучки', 3, 'Хи-хи! Мы тут навсегда!', 'Хихикая, хитро.'],
+  [19, 'Чистон', 3, 'Руки! Моем двадцать секунд.', 'Бодро, как старт забега.'],
+  [20, 'Песня', 4, 'Мыло в ладошки — раз, два, три!', 'Ритмично, весело.'],
+  [21, 'Песня', 4, 'Пальчики, ногти, между — потри!', 'В том же ритме.'],
+  [22, 'Песня', 4, 'Тыльную сторону не забывай,', 'В том же ритме.'],
+  [23, 'Песня', 4, 'Липучек с ладоней прочь прогоняй!', 'В том же ритме.'],
+  [24, 'Песня', 4, 'Раз, два, три — и водой смывай!', 'В том же ритме, громче на финале.'],
+  [25, 'Чистон', 1.5, 'Уровень пройден!', 'Как в игре, коротко и празднично.'],
+  [26, 'Чистон', 3, 'Уровень второй: зубы! Две минуты!', 'Бодро.'],
+  [27, 'Песня', 4.5, 'Щёткой вверх и щёткой вниз — Липучки, сдавайтесь, брысь!', 'Весело, с нажимом на «брысь».'],
+  [28, 'Тимур', 2.5, 'Ску-у-учно! Не буду больше.', 'Протяжно, капризно, со вздохом.'],
+  [29, 'Лея', 2.5, 'Тимур не чистит — и я не буду!', 'Упрямо, подражая брату.'],
+  [30, 'Тимур', 4, 'Нет уж! Смотри, как надо. Чистим вместе!', 'Решительно, как старший брат.'],
+  [31, 'Чистон', 3.5, 'Командная работа! Двойные очки!', 'Восторженно.'],
+  [32, 'Рассказчик', 3.5, 'Две минуты прошли. Зубы сияют.', 'Спокойно, довольно.'],
+  [33, 'Хрум', 4.5, 'Хрум-хрум! Крошки — мои! Остальное убирай сам!', 'Ворчливо, но смешно.'],
+  [34, 'Тимур', 4, 'Кроссовки — на полку, рюкзак — на крючок!', 'Командуя сам себе, весело.'],
+  [35, 'Кроссовки', 3, 'Ой, как тут уютно! Мы остаёмся!', 'Радостно, наперебой.'],
+  [36, 'Пиксель', 4.5, 'Экран чистый! Теперь я тебя вижу. Привет, Тимур!', 'Счастливо, тепло, без обиды.'],
+  [37, 'Чистон', 4, 'Все уровни пройдены! Тимуру — значок «Мастер чистоты»!', 'Торжественно, как награждение.'],
+  [38, 'Все', 4, 'Кто умылся с утра — у того игра бодра!', 'Хором, радостно.'],
+  [39, 'Все', 4.5, 'Чистые руки, чистый экран — вот это, друзья, настоящий план!', 'Хором, радостно.'],
+  [40, 'Тимур', 3.5, 'Лея, бежим мыть руки перед завтраком!', 'Весело, зовя сестру.']
+];
+const pad = n => String(n).padStart(2, '0');
+const sec = s => String(s).replace('.', ',') + ' с';
+const order = Object.keys(ROLES);
+const count = r => L.filter(x => x[1] === r).length;
+
+const cast = document.getElementById('cast');
+order.forEach(r => {
+  const d = document.createElement('div'); d.className = 'role';
+  d.innerHTML = `<div class="n">${r}</div><div class="c">${ROLES[r].cast} · реплик: ${count(r)}</div><p style="margin-top:6px;font-size:.92rem">${ROLES[r].voice}</p>`;
+  cast.appendChild(d);
+});
+
+let filter = 'all';
+try { filter = localStorage.getItem('chiston-role') || 'all'; } catch (e) {}
+if (filter !== 'all' && !ROLES[filter]) filter = 'all';
+const fl = document.getElementById('filters');
+['all', ...order].forEach(r => {
+  const b = document.createElement('button'); b.type = 'button'; b.id = 'f-' + (r === 'all' ? 'all' : order.indexOf(r));
+  b.textContent = r === 'all' ? 'Все реплики' : r;
+  b.addEventListener('click', () => { filter = r; try { localStorage.setItem('chiston-role', r); } catch (e) {} draw(); });
+  fl.appendChild(b); b.dataset.role = r;
+});
+
+function card(x) {
+  const li = document.createElement('li'); li.className = 'ln';
+  li.innerHTML = `<div><div class="num">${pad(x[0])}</div><div class="file">${pad(x[0])}.m4a</div></div>
+    <div class="body"><div class="meta"><span class="who">${x[1]}</span><span>до ~${sec(x[2])}</span></div>
+    <div class="say">${x[3]}</div><div class="tone">${x[4]}</div></div>`;
+  return li;
+}
+function draw() {
+  [...fl.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.role === filter));
+  const ol = document.getElementById('lines'); ol.innerHTML = '';
+  const items = L.filter(x => filter === 'all' || x[1] === filter || (filter === 'Тимур' && x[1] === 'Песня'));
+  let songOpen = null;
+  items.forEach(x => {
+    if (x[1] === 'Песня' && (x[0] >= 20 && x[0] <= 24)) {
+      if (!songOpen) {
+        songOpen = document.createElement('li'); songOpen.className = 'group';
+        songOpen.innerHTML = '<p><b style="color:var(--soap)">Песня «20 секунд», реплики 20–24.</b> Её можно записать одним файлом <b>20-24.m4a</b>, целиком, примерно за 20 секунд: столько и нужно мыть руки. Либо пятью отдельными файлами.</p>';
+        const inner = document.createElement('ol'); inner.className = 'lines'; songOpen.appendChild(inner); ol.appendChild(songOpen);
+      }
+      songOpen.querySelector('ol').appendChild(card(x));
+    } else ol.appendChild(card(x));
+  });
+}
+draw();
+})();
+</script>
