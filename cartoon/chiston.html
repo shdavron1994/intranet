@@ -104,7 +104,7 @@ h2{font-family:var(--display);font-weight:400;font-size:1.6rem;margin:0;color:va
     <div class="note">
       <h3>Чем прототип отличается от фильма</h3>
       <ul>
-        <li>Голос выдаёт синтезатор браузера. На некоторых устройствах русского голоса нет, тогда остаются субтитры.</li>
+        <li>Все роли озвучивает один синтезированный голос (Piper, русский голос «Ирина»). Персонажей различает только высота тона. Живые актёры звучали бы гораздо лучше.</li>
         <li>Движения простые, мимика условная. Это раскадровка в движении, а не финальная анимация.</li>
         <li>Музыка написана кодом и звучит как старая приставка.</li>
       </ul>
@@ -472,7 +472,7 @@ const SCENES = [
       txt('мультфильм-прототип', 640, 628, 26, '#a7cdd2');
     } },
   { name: 'Утро', dur: 13,
-    cues: [[.5, 3.5, 'Рассказчик', 'Утро. Тимур проснулся и… сразу за планшет.'],
+    cues: [[.3, 3.5, 'Рассказчик', 'Утро. Тимур проснулся и… сразу за планшет.'],
       [3.5, 7, 'Тимур', 'Ура! Сейчас пройду новый уровень!'],
       [7, 10, 'Пиксель', 'Ошибка! Экран загрязнён!'],
       [10, 13, 'Пиксель', 'Я ничего не вижу через твои отпечатки!']],
@@ -518,27 +518,27 @@ const SCENES = [
       const k = ease(seg(t, 0, 3));
       kid(lerp(-120, 300, k), 700 - Math.abs(Math.sin(t * 8)) * 8 * (k < 1), 1, { dirty: 1, mood: t < 3 ? 'sad' : 'wow', talk: speaking('Тимур'), t });
     } },
-  { name: 'Квест чистоты', dur: 11,
-    cues: [[0, 3, 'Тимур', 'А как их вернуть?'],
-      [3, 6.5, 'Чистон', 'Пройди квест чистоты. Три уровня — и вещи вернутся!'],
-      [6.5, 8.5, 'Чистон', 'Надень AR-очки. Видишь, кто на тебе живёт?'],
-      [8.5, 11, 'Липучки', 'Хи-хи! Мы тут навсегда!']],
-    sfx: [[6.8, 'pop']],
+  { name: 'Квест чистоты', dur: 14,
+    cues: [[0, 2.2, 'Тимур', 'А как их вернуть?'],
+      [2.2, 6.6, 'Чистон', 'Пройди квест чистоты. Три уровня — и вещи вернутся!'],
+      [6.6, 11, 'Чистон', 'Надень AR-очки. Видишь, кто на тебе живёт?'],
+      [11, 14, 'Липучки', 'Хи-хи! Мы тут навсегда!']],
+    sfx: [[7.6, 'pop']],
     draw(t) {
       bathroom(); sink();
       chiston(640, 215, 1, { talk: speaking('Чистон'), t });
-      const ar = t >= 6.5;
+      const ar = t >= 7.3;
       const p = kid(300, 700, 1, { dirty: 1, mood: ar ? 'wow' : 'happy', talk: speaking('Тимур'), t, glasses: ar });
       if (ar) {
         ctx.fillStyle = 'rgba(37,227,255,.07)'; ctx.fillRect(0, 0, W, H);
-        const pop = ease(seg(t, 6.6, 7.4));
+        const pop = ease(seg(t, 7.4, 8.2));
         const spots = [[p.hl[0] - 10, p.hl[1]], [p.hr[0] + 12, p.hr[1] - 4], [p.face[0] - 40, p.face[1] - 30], [p.face[0] + 34, p.face[1] + 30], [p.face[0] + 10, p.face[1] + 130], [p.face[0] - 30, p.face[1] + 180]];
         spots.forEach((s, i) => microbe(s[0] + Math.sin(t * 3 + i) * 4, s[1] + Math.cos(t * 3 + i) * 4, (14 + (i % 3) * 4) * pop, MCOL[i], t, i));
         arTag();
       }
     } },
   { name: 'Уровень 1 · Руки', dur: 24,
-    cues: [[0, 3, 'Чистон', 'Уровень первый: руки. Мыло — и двадцать секунд!'],
+    cues: [[0, 3, 'Чистон', 'Руки! Моем двадцать секунд.'],
       [3, 7, 'Песня', 'Мыло в ладошки — раз, два, три!'],
       [7, 11, 'Песня', 'Пальчики, ногти, между — потри!'],
       [11, 15, 'Песня', 'Тыльную сторону не забывай,'],
@@ -565,14 +565,14 @@ const SCENES = [
       timerRing(1130, 230, 70, rem / 20, t >= 23 ? '✓' : Math.ceil(rem) + ' с', 'мой руки');
       banner('Уровень 1 · Руки'); score(t >= 23 ? 100 : 0); arTag();
     } },
-  { name: 'Уровень 2 · Зубы', dur: 22,
-    cues: [[0, 3, 'Чистон', 'Уровень второй: зубы. Две минуты — не меньше!'],
+  { name: 'Уровень 2 · Зубы', dur: 23.5,
+    cues: [[0, 3, 'Чистон', 'Уровень второй: зубы! Две минуты!'],
       [3, 7.5, 'Песня', 'Щёткой вверх и щёткой вниз — Липучки, сдавайтесь, брысь!'],
       [7.5, 10, 'Тимур', 'Ску-у-учно! Не буду больше.'],
       [10, 12.5, 'Лея', 'Тимур не чистит — и я не буду!'],
-      [12.5, 16, 'Тимур', 'Э, нет! Смотри, как надо. Чистим вместе!'],
-      [16, 20, 'Чистон', 'Командная работа! Двойные очки!'],
-      [20, 22, 'Рассказчик', 'Две минуты прошли. Зубы сияют.']],
+      [12.5, 16.6, 'Тимур', 'Нет уж! Смотри, как надо. Чистим вместе!'],
+      [16.6, 20, 'Чистон', 'Командная работа! Двойные очки!'],
+      [20, 23.5, 'Рассказчик', 'Две минуты прошли. Зубы сияют.']],
     sfx: [[11, 'drop'], [20, 'ding']],
     draw(t) {
       bathroom();
@@ -602,15 +602,16 @@ const SCENES = [
       timerRing(1130, 230, 70, rem / 120, t >= 20 ? '✓' : mmss(rem), t >= 7.5 && t < 12.5 ? 'пауза' : 'ускорено ×10');
       banner('Уровень 2 · Зубы'); score(t >= 20 ? 300 : 100); arTag();
     } },
-  { name: 'Уровень 3 · Порядок', dur: 14,
-    cues: [[0, 3, 'Хрум', 'Хрум-хрум! Крошки — мой завтрак. Остальное убирай сам!'],
-      [3, 7, 'Тимур', 'Кроссовки — на полку, рюкзак — на крючок!'],
-      [7, 10, 'Кроссовки', 'Ой, как тут уютно! Мы остаёмся!'],
-      [10, 14, 'Пиксель', 'Экран чистый! Теперь я тебя вижу. Привет, Тимур!']],
-    sfx: [[7, 'boing'], [12.5, 'ding']],
-    draw(t) {
+  { name: 'Уровень 3 · Порядок', dur: 16,
+    cues: [[0, 4.5, 'Хрум', 'Хрум-хрум! Крошки — мои! Остальное убирай сам!'],
+      [4.5, 8.5, 'Тимур', 'Кроссовки — на полку, рюкзак — на крючок!'],
+      [8.5, 11.5, 'Кроссовки', 'Ой, как тут уютно! Мы остаёмся!'],
+      [11.5, 16, 'Пиксель', 'Экран чистый! Теперь я тебя вижу. Привет, Тимур!']],
+    sfx: [[8.5, 'boing'], [14, 'ding']],
+    draw(tRaw) {
+      const t = Math.max(0, tRaw - 1.5);
       room();
-      const hx = lerp(-120, 1400, seg(t, 0, 9));
+      const hx = lerp(-120, 1400, seg(tRaw, 0, 10.5));
       crumbs(hx);
       box(1050, 470, 230, 14, 6, '#a0643c'); box(1070, 484, 12, 30, 4, '#a0643c'); box(1250, 484, 12, 30, 4, '#a0643c');
       circ(860, 300, 9, '#a0643c');
@@ -622,7 +623,7 @@ const SCENES = [
         sneaker(lerp(1460, 1110, k), lerp(690, 470, k) - Math.sin(Math.PI * k) * 140 - settle, 1, true, -2);
         sneaker(lerp(1560, 1215, k), lerp(690, 470, k) - Math.sin(Math.PI * k) * 160 - settle, 1, true, -2);
       }
-      hrum(hx, 664 + Math.sin(t * 2) * 6, 1, t);
+      hrum(hx, 664 + Math.sin(tRaw * 2) * 6, 1, tRaw);
       if (t >= 9) {
         const pk = ease(seg(t, 9, 11));
         pixel(lerp(1460, 840, pk), 690 - (pk < 1 ? Math.abs(Math.sin(t * 9)) * 30 : 0), .8, { smudge: 0, mood: 'happy', talk: speaking('Пиксель'), t, walk: pk < 1 ? t * 14 : 0, wave: pk >= 1 });
@@ -633,8 +634,8 @@ const SCENES = [
   { name: 'Мастер чистоты', dur: 16,
     cues: [[0, 3.5, 'Чистон', 'Все уровни пройдены! Тимуру — значок «Мастер чистоты»!'],
       [4, 8, 'Все', 'Кто умылся с утра — у того игра бодра!'],
-      [8, 12, 'Все', 'Чистые руки, чистый экран — вот это, друзья, настоящий план!'],
-      [12, 16, 'Тимур', 'Лея, бежим мыть руки перед завтраком!']],
+      [8, 12.6, 'Все', 'Чистые руки, чистый экран — вот это, друзья, настоящий план!'],
+      [12.6, 16, 'Тимур', 'Лея, бежим мыть руки перед завтраком!']],
     sfx: [[.3, 'fanfare']],
     draw(t) {
       bathroom(); sink();
@@ -721,6 +722,8 @@ function pickVoice() {
 if (synth) { pickVoice(); try { synth.onvoiceschanged = pickVoice; } catch (e) {} }
 function speak(text, who) {
   if (!synth || !voiceOn) return;
+  if (!ruVoice) pickVoice();
+  if (!ruVoice) { statusEl.textContent = 'Не удалось загрузить озвучку. Смотрите с субтитрами.'; return; }
   try {
     synth.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -729,7 +732,34 @@ function speak(text, who) {
     synth.speak(u);
   } catch (e) {}
 }
-function hush() { if (synth) try { synth.cancel(); } catch (e) {} }
+/* recorded voice clips (voice/c{scene}_{cue}.mp3); the browser voice is only a fallback */
+const clips = {};
+let clipsLoading = false, clipsFailed = 0, curSrc = null;
+function loadClips() {
+  if (clipsLoading || !actx) return;
+  clipsLoading = true;
+  SCENES.forEach((sc, si) => sc.cues.forEach((c, ci) => {
+    const key = si + '_' + ci;
+    fetch('voice/c' + key + '.mp3')
+      .then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(ab => new Promise((ok, bad) => actx.decodeAudioData(ab, ok, bad)))
+      .then(buf => { clips[key] = buf; })
+      .catch(() => { clips[key] = null; clipsFailed++; });
+  }));
+}
+function say(si, ci, offset = 0) {
+  if (!voiceOn) return;
+  const c = SCENES[si].cues[ci], buf = clips[si + '_' + ci];
+  stopClip();
+  if (buf && actx) {
+    if (offset >= buf.duration - .2) return;
+    const src = actx.createBufferSource(); src.buffer = buf;
+    const g = actx.createGain(); g.gain.value = 1.6; src.connect(g); g.connect(master);
+    src.start(0, offset); curSrc = src;
+  } else if (buf === null || buf === undefined) speak(c[3], c[2]);
+}
+function stopClip() { if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; } }
+function hush() { stopClip(); if (synth) try { synth.cancel(); } catch (e) {} }
 
 /* ---------- engine ---------- */
 let T = 0, playing = false, last = 0, voiceOn = true, musicOn = true, lastSubKey = '';
@@ -788,7 +818,8 @@ function burnSub(c) {
 }
 function triggers(a, b) {
   SCENES.forEach(sc => {
-    sc.cues.forEach(c => { const g = sc.start + c[0]; if (g > a && g <= b) speak(c[3], c[2]); });
+    const si = SCENES.indexOf(sc);
+    sc.cues.forEach((c, ci) => { const g = sc.start + c[0]; if (g > a && g <= b) say(si, ci); });
     sc.sfx.forEach(x => { const g = sc.start + x[0]; if (g > a && g <= b) sfx(x[1]); });
   });
 }
@@ -808,10 +839,9 @@ function setPlaying(on) {
   if (on) {
     if (T >= TOTAL) T = 0;
     if (ensureAudio()) nextAt = actx.currentTime + .05;
-    if (voiceOn && synth && !ruVoice) { pickVoice(); if (!ruVoice) statusEl.textContent = 'Русского голоса на этом устройстве не нашлось. Реплики читает голос по умолчанию; его можно выключить, субтитры останутся.'; }
-    if (voiceOn && !synth) statusEl.textContent = 'Этот браузер не умеет озвучивать текст. Смотрите с субтитрами.';
+    loadClips();
     const sc = sceneAt(T), c = sc.cues.find(c => T - sc.start >= c[0] && T - sc.start < c[1]);
-    if (c) speak(c[3], c[2]);
+    if (c) say(SCENES.indexOf(sc), sc.cues.indexOf(c), T - sc.start - c[0]);
     last = performance.now(); requestAnimationFrame(frame);
   } else hush();
 }
@@ -834,6 +864,7 @@ document.addEventListener('fullscreenchange', () => setTimeout(resize, 60));
 window.addEventListener('resize', resize);
 window.__seek = time => { T = time; render(); };
 window.__total = TOTAL;
+window.__scenes = SCENES.map(s => ({ name: s.name, start: s.start, dur: s.dur, cues: s.cues, sfx: s.sfx }));
 resize();
 if (document.fonts && document.fonts.load) document.fonts.load(`40px Pangolin`).then(() => { lastSubKey = '-'; render(); }).catch(() => {});
 })();

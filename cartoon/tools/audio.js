@@ -1,5 +1,6 @@
 const fs = require('fs');
-const SR = 44100, TOTAL = 140, N = SR * TOTAL, buf = new Float32Array(N);
+const SC = JSON.parse(fs.readFileSync('cues.json'));
+const SR = 44100, TOTAL = SC.reduce((a, x) => a + x.dur, 0), N = SR * TOTAL, buf = new Float32Array(N);
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 function tone(f, at, dur, type, vol, f2) {
   const s0 = Math.floor(at * SR), n = Math.floor((dur + .05) * SR); let ph = 0;
@@ -23,7 +24,7 @@ const fx = { ding: t => { tone(mtof(88), t, .5, 'sine', .5*S); tone(mtof(91), t+
   error: t => { tone(220, t, .2, 'square', .2*S); tone(180, t+.22, .3, 'square', .2*S); },
   power: t => tone(200, t, .7, 'sine', .4*S, 900), drop: t => tone(600, t, .25, 'triangle', .3*S, 150),
   fanfare: t => [72,76,79,84].forEach((m,i) => tone(mtof(m), t+i*.14, .5, 'triangle', .4*S)) };
-[[13,'error'],[20.5,'boing'],[23,'boing'],[34,'power'],[52.8,'pop'],[80,'ding'],[92,'drop'],[101,'ding'],[110,'boing'],[115.5,'ding'],[117.3,'fanfare']].forEach(([t,n]) => fx[n](t));
+SC.forEach(x => x.sfx.forEach(([t, n]) => fx[n](x.start + t)));
 // fade out last 3 s
 for (let i = 0; i < 3 * SR; i++) buf[N - 1 - i] *= i / (3 * SR);
 const pcm = Buffer.alloc(N * 2); for (let i = 0; i < N; i++) pcm.writeInt16LE(Math.round(Math.max(-1, Math.min(1, buf[i])) * 32000), i * 2);
