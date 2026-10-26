@@ -3,7 +3,7 @@ const PJ = '#9fc3ff';
 const MESS = { sock: [700, 112, .15], sock2: [420, 700, 1.4], car1: [770, 690, 0], car2: [350, 706, 0], sneakA: [585, 696, 0], sneakB: [990, 664, 0],
   back: [455, 610, 0], pixel: [520, 706, 0], shirt: [880, 688, .3], pants: [1070, 690, -.2] };
 const PLACE = { sock: [1020, 452, 0], sock2: [1020, 452, 0], car1: [785, 600, 0], car2: [785, 600, 0], sneakA: [1190, 702, 0], sneakB: [1248, 706, 0],
-  back: [1120, 336, 0], pixel: [1060, 410, 0], shirt: [300, 372, 0], pants: [390, 372, 0] };
+  back: [1120, 336, 0], pixel: [1060, 410, 0], shirt: [190, 372, 0], pants: [240, 372, 0] };
 const HIDE_AT_PLACE = { sock: 1, sock2: 1, car1: 1, car2: 1 };
 const RUNNERS = ['pixel', 'sneakA', 'sneakB', 'sock', 'sock2', 'car1', 'car2', 'back'];
 
@@ -36,20 +36,18 @@ const SCENES = [
     cues: [[.8, 4.6, 'Рассказчик', 'Чистон. Серия первая: «Вещи сбежали».']],
     draw(t) { titleCard(t, 'Чистон', 'Серия 1. Вещи сбежали', 'мультфильм-прототип'); } },
 
-  { name: 'Мама будит', dur: 15,
-    cues: [[1.4, 4.4, 'Мама', 'Дилшод, солнышко, просыпайся! Утро!'],
-      [4.6, 6.6, 'Томирис', 'Братик, вставай!'],
-      [6.8, 9, 'Дилшод', 'Ещё пять минуточек…'],
-      [9.2, 12.6, 'Мама', 'Вставайте, в садик пора. Я пошла готовить завтрак.']],
+  { name: 'Мама будит', dur: 14.5,
+    cues: [[1.4, 4.6, 'Мама', 'Дилшод, Томирис, солнышки, просыпайтесь! Утро!'],
+      [4.8, 7, 'Дети', 'Ещё пять минуточек…'],
+      [7.4, 11, 'Мама', 'Вставайте, в садик пора. Я пошла готовить завтрак.']],
     draw(t) {
-      bedroom({ curtain: ease(seg(t, 1.2, 2.6)), door: t < 13 ? seg(t, 0, .5) : 1 - seg(t, 14, 14.8), t });
+      bedroom({ curtain: ease(seg(t, 1.2, 2.6)), door: t < 12.6 ? seg(t, 0, .5) : 1 - seg(t, 13.4, 14.2), t });
       messy(t);
-      sleepyHead(150, 352, t);
-      const mx = t < 12.8 ? lerp(1260, 990, ease(seg(t, 0, 1.2))) : lerp(990, 1400, ease(seg(t, 12.8, 14.4)));
-      const walking = t < 1.2 || t > 12.8;
+      sleepyHead(95, 352, t); sleepyHead(385, 354, t + 1.3, true);
+      const mx = t < 11.2 ? lerp(1260, 990, ease(seg(t, 0, 1.2))) : lerp(990, 1400, ease(seg(t, 11.2, 12.8)));
+      const walking = t < 1.2 || t > 11.2;
       const up = t >= 1.2 && t < 2.8;
-      mom(mx, 702 - (walking ? Math.abs(Math.sin(t * 8)) * 6 : 0), .95, { t, talk: speaking('Мама'), armL: up ? 2.7 : .15, armR: up ? 2.7 : (t > 3 && t < 12.6 ? .9 : .15) });
-      tomiris(lerp(1320, 840, ease(seg(t, .4, 1.8))), 704, 1, { t, shirt: TPJ, armL: t > 4.6 && t < 6.6 ? 2.5 : .2 });
+      mom(mx, 702 - (walking ? Math.abs(Math.sin(t * 8)) * 6 : 0), .95, { t, talk: speaking('Мама'), armL: up ? 2.7 : .15, armR: up ? 2.7 : (t > 3 && t < 11 ? .9 : .15) });
     } },
 
   { name: 'Планшет ругается', dur: 14,
@@ -61,7 +59,7 @@ const SCENES = [
       bedroom({ t });
       messy(t, { pixel: 1 });
       const k = ease(seg(t, 0, 1.2));
-      const tx = lerp(250, 640, k), ty = 690 - Math.sin(Math.PI * k) * 90;
+      const tx = lerp(130, 640, k), ty = 690 - Math.sin(Math.PI * k) * 90;
       const awake = t >= 2.4;
       thing('pixel', [lerp(520, 520, 0), 706, 0], false, t, { s: .62, px: { sleep: !awake, error: awake && t < 7, smudge: 1, mood: 'angry', talk: speaking('Пиксель'), wave: awake } });
       if (t >= 7 && t < 11) {
@@ -70,7 +68,8 @@ const SCENES = [
           const p = MESS[id]; ctx.beginPath(); ctx.arc(p[0], p[1] - 14, 44, 0, TAU); ctx.strokeStyle = `rgba(255,210,63,${.4 + .5 * pulse})`; ctx.lineWidth = 5; ctx.stroke();
         });
       }
-      tomiris(880, 704, 1, { t, shirt: TPJ, mood: t > 7 && t < 11 ? 'wow' : 'happy' });
+      const k2 = ease(seg(t, .15, 1.35));
+      tomiris(lerp(420, 880, k2), 704 - Math.sin(Math.PI * k2) * 80, 1, { t, shirt: TPJ, mood: t > 7 && t < 11 ? 'wow' : 'happy', armL: t < 1.35 ? 2.4 : .2, armR: t < 1.35 ? 2.4 : .2 });
       const look = t >= 7 && t < 11 ? [Math.sin(t * 1.6), -.2] : [0, 0];
       kid(tx, ty, 1, Object.assign({}, PAJAMA, { dirty: .5, dirtyHands: 1, t, talk: speaking('Дилшод'), look,
         mood: t < 2.4 ? 'happy' : t < 11 ? 'wow' : 'happy', armL: t < 1.2 ? 2.4 : .25, armR: t < 1.2 ? 2.4 : (t > 1.4 && t < 2.4 ? 1.2 : .25) }));

@@ -293,9 +293,13 @@ function room() {
   box(560, 110, 170, 210, 8, '#2d3142'); box(574, 124, 142, 182, 4, '#6c4cff');
   ctx.fillStyle = '#ffd23f'; [[0, 0], [1, 0], [2, 0], [0, 1], [2, 1], [1, 2]].forEach(p => ctx.fillRect(614 + p[0] * 22, 170 + p[1] * 22, 22, 22));
   txt('LEVEL 99', 645, 270, 24, '#ffffff');
-  box(70, 300, 30, 230, 10, '#a0643c'); box(80, 410, 400, 110, 14, '#a0643c');
-  box(90, 380, 380, 50, 18, '#ffffff'); box(100, 352, 90, 42, 16, '#ffffff');
-  box(170, 368, 300, 72, 20, '#7c5cff'); line(190, 404, 450, 404, 'rgba(255,255,255,.3)', 4);
+  ROOM_BEDS.forEach(b => bedAt(b[0], b[1], b[2]));
+}
+let ROOM_BEDS = [[70, 410, '#7c5cff']];
+function bedAt(x, w, col) {
+  box(x, 300, 30, 230, 10, '#a0643c'); box(x + 10, 410, w - 10, 110, 14, '#a0643c');
+  box(x + 20, 380, w - 30, 50, 18, '#ffffff'); box(x + 30, 352, 90, 42, 16, '#ffffff');
+  box(x + 100, 368, w - 110, 72, 20, col); line(x + 120, 404, x + w - 30, 404, 'rgba(255,255,255,.3)', 4);
 }
 function crumbs(minX = -1) {
   CRUMBS.forEach(c => { if (c[0] > minX) { circ(c[0], c[1], 6, '#e0a93b'); circ(c[0] + 2, c[1] + 1, 2.5, '#a86a1f'); } });

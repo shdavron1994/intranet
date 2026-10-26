@@ -35,9 +35,11 @@ function mom(x, y, s, o) {
   return { hl: [x + hl[0] * s, y + hl[1] * s], hr: [x + hr[0] * s, y + hr[1] * s] };
 }
 
-function sleepyHead(x, y, t) {
+ROOM_BEDS = [[20, 270, '#7c5cff'], [310, 250, '#ff8fb1']];
+function sleepyHead(x, y, t, girl) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(-.35);
-  circ(0, 0, 50, SKIN);
+  if (girl) { circ(-52, -22, 20, HAIR); circ(52, -22, 20, HAIR); }
+  circ(0, 0, girl ? 44 : 50, SKIN);
   ctx.beginPath(); ctx.arc(0, -4, 52, Math.PI * 1.05, Math.PI * 1.95); ctx.lineTo(30, -32); ctx.lineTo(12, -24); ctx.lineTo(-8, -34); ctx.lineTo(-28, -24); ctx.closePath(); ctx.fillStyle = HAIR; ctx.fill();
   [-18, 18].forEach(ex => { ctx.beginPath(); ctx.arc(ex, 2, 8, .15 * Math.PI, .85 * Math.PI); ctx.strokeStyle = '#2a1c16'; ctx.lineWidth = 3.5; ctx.stroke(); });
   ell(0, 26, 6, 5 + Math.sin(t * 2) * 1.5, MOUTH);
