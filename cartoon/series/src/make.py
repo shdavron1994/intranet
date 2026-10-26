@@ -4,7 +4,7 @@ base = sys.argv[1]; cues_path = sys.argv[2]; outdir = sys.argv[3]
 v = PiperVoice.load(f"{base}/voice/ru-irinia-medium.onnx", config_path=f"{base}/voice/ru-irinia-medium.onnx.json")
 scenes = json.load(open(cues_path))
 # small, formant-preserving shifts: big shifts are what made the voice sound like a robot
-PITCH = {'Мама':1.0,'Тимур':1.06,'Лея':1.12,'Чистон':0.93,'Пиксель':1.03,'Хрум':0.86,'Кроссовки':1.12,'Рассказчик':1.0,'Песня':1.06,'Липучки':1.15}
+PITCH = {'Мама':1.0,'Дилшод':1.06,'Томирис':1.15,'Тимур':1.06,'Лея':1.12,'Чистон':0.93,'Пиксель':1.03,'Хрум':0.86,'Кроссовки':1.12,'Рассказчик':1.0,'Песня':1.06,'Липучки':1.15}
 SPEED = {'Рассказчик':1.12,'Чистон':1.05,'Хрум':1.15}
 WARM = 'highpass=f=70,equalizer=f=250:t=q:w=1:g=2,equalizer=f=6500:t=q:w=1.5:g=-3,aecho=0.8:0.6:35:0.08'
 def norm(t):
@@ -29,8 +29,8 @@ for si,s in enumerate(scenes):
         avail = (min(later) if later else s['start']+s['dur']) - g - 0.15
         raw=f"{base}/voice/raw/c{si}_{ci}.wav"; synth(norm(text), raw, who)
         parts=[]
-        if who in ('Все', 'Вещи'):
-            for j,k in enumerate([1.06,1.12,0.93] if who=='Все' else [1.1,1.16,1.03]):
+        if who in ('Все', 'Вещи', 'Дети'):
+            for j,k in enumerate({'Все':[1.06,1.12,0.93],'Вещи':[1.1,1.16,1.03],'Дети':[1.06,1.15,1.1]}[who]):
                 pj=f"{base}/voice/raw/c{si}_{ci}_{j}.wav"; shift(raw,k,pj); parts.append(pj)
             mixed=f"{base}/voice/raw/c{si}_{ci}_s.wav"
             subprocess.run(['ffmpeg','-loglevel','error','-y','-i',parts[0],'-i',parts[1],'-i',parts[2],'-filter_complex','amix=inputs=3:normalize=0,volume=0.6',mixed],check=True)

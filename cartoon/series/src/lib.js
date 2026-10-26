@@ -356,8 +356,9 @@ function speaking(name) {
   const c = CUR.sc.cues.find(c => CUR.t >= c[0] && CUR.t < c[1]);
   if (!c) return false;
   if (c[2] === name) return true;
-  if (c[2] === 'Песня' && name === 'Тимур') return true;
-  if (c[2] === 'Все' && (name === 'Тимур' || name === 'Лея' || name === 'Чистон')) return true;
+  const KIDS = ['Тимур', 'Лея', 'Дилшод', 'Томирис'];
+  if ((c[2] === 'Песня' || c[2] === 'Дети') && KIDS.includes(name)) return true;
+  if (c[2] === 'Все' && (KIDS.includes(name) || name === 'Чистон' || name === 'Мама')) return true;
   return false;
 }
 

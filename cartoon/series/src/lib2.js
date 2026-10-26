@@ -187,6 +187,7 @@ function car(x, y, t, moving) {
   box(-38, -148, 56, 50, 8, '#c4f1ff'); box(28, -148, 56, 50, 8, '#c4f1ff');
   // passengers: mom drives (front), Timur in the back
   circ(60, -118, 20, SKIN); ctx.beginPath(); ctx.arc(60, -122, 21, Math.PI, TAU); ctx.fillStyle = MOMHAIR; ctx.fill();
+  circ(-62, -112, 15, SKIN); ctx.beginPath(); ctx.arc(-62, -116, 16, Math.PI, TAU); ctx.fillStyle = HAIR; ctx.fill(); circ(-79, -120, 7, HAIR); circ(-45, -120, 7, HAIR);
   circ(-8, -116, 18, SKIN); ctx.beginPath(); ctx.arc(-8, -120, 19, Math.PI, TAU); ctx.fillStyle = HAIR; ctx.fill();
   circ(-14, -116, 2.5, '#2a1c16'); circ(-2, -116, 2.5, '#2a1c16');
   [-120, 120].forEach(wx => { circ(wx, -20, 34, '#2d3142'); circ(wx, -20, 16, '#c9d4de'); const a = moving ? t * 10 : 0; line(wx, -20, wx + Math.cos(a) * 14, -20 + Math.sin(a) * 14, '#5a6270', 4); });
@@ -222,3 +223,6 @@ function titleCard(t, big, small, note) {
   if (note) txt(note, 640, 610, 26, '#a7cdd2');
 }
 const fly = (a, b, k, h) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k) - Math.sin(Math.PI * k) * h, lerp(a[2] || 0, b[2] || 0, k)];
+
+const TPJ = '#ffc2d6', TDRESS = '#ff8fb1';
+function tomiris(x, y, s, o) { return kid(x, y, s * .8, Object.assign({ girl: true, shirt: TDRESS }, o, { talk: speaking('Томирис') })); }

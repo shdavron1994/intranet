@@ -1,8 +1,10 @@
 /* ---------- episode 2: Завтрак ---------- */
-const TX = 480, TY = 640; // Timur at the table
-function seated(t, o) {
+const TX = 480, TY = 640, TX2 = 650, TY2 = 630; // Дилшод and Томирис at the table
+function tomSeat(t, o) { chairBack(TX2); tomiris(TX2, TY2, 1, Object.assign({ t }, o)); }
+function seated(t, o, o2) {
   chairBack(TX);
-  const p = kid(TX, TY, 1, Object.assign({ dirty: 0, dirtyHands: 0, t, talk: speaking('Тимур') }, o));
+  const p = kid(TX, TY, 1, Object.assign({ dirty: 0, dirtyHands: 0, t, talk: speaking('Дилшод') }, o));
+  tomSeat(t, o2 || {});
   table();
   return p;
 }
@@ -54,20 +56,21 @@ const SCENES = [
     draw(t) { titleCard(t, 'Чистон', 'Серия 2. Завтрак', 'мультфильм-прототип'); } },
 
   { name: 'Телефон за столом', dur: 13,
-    cues: [[1, 4.6, 'Мама', 'Тимур, убери телефон. За столом не смотрят.'],
-      [5, 8, 'Тимур', 'Ну мам, ещё одну серию!']],
+    cues: [[1, 4.6, 'Мама', 'Дилшод, убери телефон. За столом не смотрят.'],
+      [5, 8, 'Дилшод', 'Ну мам, ещё одну серию!'],
+      [8.4, 11, 'Томирис', 'А я тоже хочу мультики!']],
     draw(t) {
       kitchen(); stovePot(t);
       mom(1010, 702, .95, { t, talk: speaking('Мама'), apron: true, armL: t < 1 || t > 9 ? 1.2 + Math.sin(t * 4) * .25 : .3 });
-      seated(t, { hold: 'phone', handR: [30, -150], glow: '#7fe3ff', look: [0, .7], redEyes: seg(t, 8, 12), mood: 'happy' });
-      kettle(660, 498, .7, 0, false, t);
+      seated(t, { hold: 'phone', handR: [30, -150], glow: '#7fe3ff', look: [0, .7], redEyes: seg(t, 8, 12), mood: 'happy' }, { look: t > 8.4 ? [-1, .5] : [0, 0], mood: t > 8.4 && t < 11 ? 'wow' : 'happy' });
+      kettle(330, 498, .7, 0, false, t);
     } },
 
   { name: 'Чистон в чайнике', dur: 15,
-    cues: [[.6, 4.4, 'Чистон', 'Тимур, посмотри на себя: глаза красные!'],
+    cues: [[.6, 4.4, 'Чистон', 'Дилшод, посмотри на себя: глаза красные!'],
       [4.6, 10, 'Чистон', 'Когда долго смотришь в экран, глаза устают. Они чешутся, слезятся и могут хуже видеть вдаль.'],
-      [10.2, 12, 'Тимур', 'А что же делать?'],
-      [12.2, 15, 'Чистон', 'Давать глазкам отдых! Давай гимнастику для глаз!']],
+      [10.2, 12, 'Дилшод', 'А что же делать?'],
+      [12.2, 15, 'Чистон', 'Давать глазкам отдых! Давайте гимнастику для глаз — все вместе!']],
     sfx: [[.2, 'power']],
     draw(t) {
       kitchen(); stovePot(t);
@@ -75,22 +78,23 @@ const SCENES = [
       const rub = t >= 6.5 && t < 9.5, sc = Math.sin(t * 12) * 5;
       const phone = t < 10;
       seated(t, Object.assign({ redEyes: 1, mood: t < 6.5 ? 'wow' : 'happy', look: [.8, 0] },
-        rub ? { handL: [-24 + sc, -268], handR: [24 - sc, -268], closed: true } : phone ? { hold: 'phone', handR: [30, -150], glow: '#7fe3ff' } : {}));
-      if (!phone) phoneOnTable(380);
-      kettle(660, 498, .7, seg(t, 0, 1), speaking('Чистон'), t);
+        rub ? { handL: [-24 + sc, -268], handR: [24 - sc, -268], closed: true } : phone ? { hold: 'phone', handR: [30, -150], glow: '#7fe3ff' } : {}), { look: [-1, 0], mood: t > 0.6 && t < 4.4 ? 'wow' : 'happy' });
+      if (!phone) phoneOnTable(565);
+      kettle(330, 498, .7, seg(t, 0, 1), speaking('Чистон'), t);
     } },
 
-  { name: 'Гимнастика для глаз', dur: 23,
+  { name: 'Гимнастика для глаз', dur: 25.6,
     cues: [[0, 3.5, 'Чистон', 'Глазки вверх — вниз!'],
       [3.5, 7, 'Чистон', 'Вправо — влево!'],
       [7, 10.5, 'Чистон', 'Поморгай быстро-быстро!'],
       [10.5, 14, 'Чистон', 'А теперь посмотри в окно, вдаль.'],
       [14, 17, 'Чистон', 'А за едой экран выключаем.'],
-      [17.2, 20.4, 'Тимур', 'Мама, возьми телефон. Я потом посмотрю.'],
-      [20.6, 23, 'Мама', 'Спасибо, сынок!']],
+      [17.2, 20.4, 'Дилшод', 'Мама, возьми телефон. Я потом посмотрю.'],
+      [20.6, 23, 'Томирис', 'И я не буду смотреть, пока кушаю!'],
+      [23.2, 25.6, 'Мама', 'Спасибо, мои хорошие!']],
     draw(t) {
       kitchen(); stovePot(t);
-      const mx = t < 17.5 ? 1010 : lerp(1010, 720, ease(seg(t, 17.5, 19)));
+      const mx = t < 17.5 ? 1010 : lerp(1010, 860, ease(seg(t, 17.5, 19)));
       const took = t >= 20.4;
       const m = mom(mx, 702, .95, { t, talk: speaking('Мама'), apron: true, armL: t > 19 && t < 20.6 ? 1.2 : (t < 17.5 ? 1.2 + Math.sin(t * 4) * .25 : .3) });
       let look = [0, 0], closed = false;
@@ -99,32 +103,33 @@ const SCENES = [
       else if (t < 10.5) closed = Math.sin(t * 22) > 0;
       else if (t < 14) look = [-1, -.6];
       const give = t >= 17.2 && t < 20.4;
-      seated(t, Object.assign({ redEyes: 1 - seg(t, 10.5, 14), look, closed, mood: 'happy' }, give ? { hold: 'phone', armR: 1.5 + seg(t, 17.2, 18.5) * .3, glow: '#2d3142' } : {}));
-      if (t < 17.2) phoneOnTable(380);
+      seated(t, Object.assign({ redEyes: 1 - seg(t, 10.5, 14), look, closed, mood: 'happy' }, give ? { hold: 'phone', armR: 1.5 + seg(t, 17.2, 18.5) * .3, glow: '#2d3142' } : {}), { look, closed, mood: 'happy' });
+      if (t < 17.2) phoneOnTable(565);
       if (took) { ctx.save(); ctx.translate(m.hl[0], m.hl[1]); box(-14, -40, 28, 46, 6, '#1f2430'); ctx.restore(); }
-      kettle(660, 498, .7, 1, speaking('Чистон'), t);
+      kettle(330, 498, .7, 1, speaking('Чистон'), t);
     } },
 
   { name: 'Не в то горло', dur: 16,
-    cues: [[3, 6, 'Тимур', 'Мам, а знаешь, вчера в садике…'],
+    cues: [[3, 6, 'Дилшод', 'Мам, а знаешь, вчера в садике…'],
       [8, 11, 'Мама', 'Тише, тише, откашляйся.'],
-      [11.6, 13.8, 'Тимур', 'Кхе… Всё, нормально.'],
+      [11.6, 13.8, 'Дилшод', 'Кхе… Всё, нормально.'],
       [14, 16, 'Чистон', 'Знаешь, почему так вышло? Смотри!']],
     draw(t) {
       kitchen(); stovePot(t, false);
       const bring = seg(t, 0, 1.6);
-      mom(lerp(1010, 720, ease(bring)), 702, .95, { t, talk: speaking('Мама'), apron: true, hold: t < 1.8 ? 'bowl' : null, armL: t < 1.8 ? 1.1 : (t > 8 && t < 11 ? 1.5 : .3), armR: t < 1.8 ? 1.1 : .2 });
+      mom(lerp(1010, 860, ease(bring)), 702, .95, { t, talk: speaking('Мама'), apron: true, hold: t < 1.8 ? 'bowl' : null, armL: t < 1.8 ? 1.1 : (t > 8 && t < 11 ? 1.5 : .3), armR: t < 1.8 ? 1.1 : .2 });
       const cough = t >= 6.6 && t < 11.2;
       const shake = cough ? Math.sin(t * 40) * 5 : 0;
       const eat = t >= 1.8 && t < 3;
       const spoonUp = eat ? Math.abs(Math.sin((t - 1.8) * Math.PI * 1.6)) : 0;
       chairBack(TX);
-      kid(TX + shake, TY, 1, { t, talk: speaking('Тимур') || (t >= 6 && t < 6.6), full: t >= 2.6 && t < 6.6, mood: cough ? 'sad' : 'happy', closed: cough && Math.sin(t * 9) > 0,
+      kid(TX + shake, TY, 1, { t, talk: speaking('Дилшод') || (t >= 6 && t < 6.6), full: t >= 2.6 && t < 6.6, mood: cough ? 'sad' : 'happy', closed: cough && Math.sin(t * 9) > 0,
         hold: t < 6.6 ? 'spoon' : null, handR: t < 6.6 ? [40, -150 - spoonUp * 50] : (cough ? [10, -226] : null), spoonTo: t < 6.6 ? [6, -184 - spoonUp * 50] : null });
+      tomSeat(t, { mood: cough ? 'wow' : 'happy' });
       table();
-      if (t >= 1.8) bowl(TX, 500, 1);
+      if (t >= 1.8) { bowl(TX, 500, 1); bowl(TX2, 500, 1); }
       if (cough) speech(TX + 120, 300, 'Кхе-кхе!', 30);
-      kettle(660, 498, .7, 1, speaking('Чистон'), t);
+      kettle(330, 498, .7, 1, speaking('Чистон'), t);
     } },
 
   { name: 'Две дорожки', dur: 22,
@@ -136,39 +141,44 @@ const SCENES = [
     sfx: [[11.2, 'error'], [14.4, 'boing']],
     draw(t) { throat(t); } },
 
-  { name: 'Правила завтрака', dur: 14,
+  { name: 'Правила завтрака', dur: 16,
     cues: [[0, 4, 'Чистон', 'Правила завтрака: сидим ровно и едим не спеша.'],
       [4.2, 8, 'Чистон', 'Хорошо жуём. Прожевал, проглотил — потом говори!'],
-      [9.6, 12.2, 'Тимур', 'Мам, каша очень вкусная!'],
-      [12.4, 14, 'Мама', 'Я рада!']],
+      [9.6, 12.2, 'Дилшод', 'Мам, каша очень вкусная!'],
+      [12.4, 14, 'Томирис', 'Очень-очень!'],
+      [14.2, 16, 'Мама', 'Я рада!']],
     draw(t) {
       kitchen(); stovePot(t, false);
-      mom(720, 702, .95, { t, talk: speaking('Мама'), apron: true });
+      mom(860, 702, .95, { t, talk: speaking('Мама'), apron: true });
       const cyc = (t % 2.4) / 2.4, eating = t < 9.4, up = eating ? Math.max(0, Math.sin(cyc * Math.PI * 2)) : 0;
       chairBack(TX);
-      kid(TX, TY, 1, { t, talk: speaking('Тимур'), mood: 'happy', full: eating && cyc > .45, hold: 'spoon', handR: [40, -150 - up * 50], spoonTo: [6, -184 - up * 50] });
-      table(); bowl(TX, 500, 1 - seg(t, 0, 14) * .8);
-      kettle(660, 498, .7, 1, speaking('Чистон'), t);
+      kid(TX, TY, 1, { t, talk: speaking('Дилшод'), mood: 'happy', full: eating && cyc > .45, hold: 'spoon', handR: [40, -150 - up * 50], spoonTo: [6, -184 - up * 50] });
+      const up2 = eating ? Math.max(0, Math.sin(cyc * Math.PI * 2 + 1.5)) : 0;
+      tomSeat(t, { mood: 'happy', hold: 'spoon', handR: [40, -150 - up2 * 50], spoonTo: [6, -184 - up2 * 50] });
+      table(); bowl(TX, 500, 1 - seg(t, 0, 14) * .8); bowl(TX2, 500, 1 - seg(t, 0, 14) * .8);
+      kettle(330, 498, .7, 1, speaking('Чистон'), t);
       const rules = ['Сидим ровно', 'Едим не спеша', 'Хорошо жуём', 'Прожевал — потом говори'];
       checklist(rules, Math.min(4, Math.floor(seg(t, .3, 7.5) * 4) + 1), t > 8 ? 4 : 0, 800, 60, 'Правила завтрака');
     } },
 
   { name: 'Спасибо, мама', dur: 16,
-    cues: [[0, 2.8, 'Тимур', 'Спасибо, мама! Я всё доел.'],
+    cues: [[0, 2.6, 'Дилшод', 'Спасибо, мама! Я всё доел.'],
+      [2.7, 4.6, 'Томирис', 'И я всё доела!'],
       [7, 9.4, 'Чистон', 'А теперь что?'],
-      [9.6, 13, 'Тимур', 'Помыть руки и прополоскать рот!']],
+      [9.6, 13, 'Дилшод', 'Помыть руки и прополоскать рот!']],
     sfx: [[15, 'ding']],
     draw(t) {
       kitchen(); stovePot(t, false);
-      mom(660, 702, .95, { t, apron: true, mood: 'happy' });
+      mom(860, 702, .95, { t, apron: true, mood: 'happy' });
       const walk = seg(t, 3, 6.4);
-      if (t < 3) { chairBack(TX); kid(TX, TY, 1, { t, talk: speaking('Тимур'), mood: 'happy' }); table(); bowl(TX, 500, 0); kettle(560, 498, .7, 1, speaking('Чистон'), t); return; }
-      table();
-      kettle(560, 498, .7, 1, speaking('Чистон'), t);
+      if (t < 3) { chairBack(TX); kid(TX, TY, 1, { t, talk: speaking('Дилшод'), mood: 'happy' }); tomSeat(t, { mood: 'happy' }); table(); bowl(TX, 500, 0); bowl(TX2, 500, 0); kettle(330, 498, .7, 1, speaking('Чистон'), t); return; }
+      tomSeat(t, { mood: 'happy', armL: 2.5 + Math.sin(t * 6) * .3 });
+      table(); bowl(TX2, 500, 0);
+      kettle(330, 498, .7, 1, speaking('Чистон'), t);
       box(990, 640, 110, 60, 8, '#ffd23f');
       const x = lerp(TX, 1045, ease(walk)), y = walk < 1 ? 700 - Math.abs(Math.sin(t * 8)) * 6 : 640;
       const wash = t >= 11 && t < 15.6, sc = Math.sin(t * 14) * 8;
-      const pr = kid(x, y, 1, Object.assign({ t, talk: speaking('Тимур'), mood: 'happy' },
+      const pr = kid(x, y, 1, Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy' },
         wash ? { handL: [-26 + sc, -218], handR: [26 - sc, -218] } : walk < 1 ? { handL: [-20, -170], handR: [20, -170] } : {}));
       if (walk < 1) bowl(x, 700 - 170 + 14, 0);
       else if (!wash || t < 11) bowl(1040, 430, 0);
@@ -178,7 +188,7 @@ const SCENES = [
   { name: 'В садик', dur: 20,
     cues: [[.5, 3, 'Кроссовки', 'Мы здесь! Обувайся!'],
       [5, 7.6, 'Мама', 'Молодец! Поехали в садик.'],
-      [12, 14.4, 'Тимур', 'Пока, Чистон!'],
+      [12, 14.4, 'Дети', 'Пока, Чистон!'],
       [14.6, 18, 'Чистон', 'До завтра, утренний герой!']],
     sfx: [[3.2, 'boing'], [8.4, 'power']],
     draw(t) {
@@ -187,8 +197,9 @@ const SCENES = [
         const k = seg(t, 0, 2.4), bk = seg(t, 3, 4.6);
         if (bk < 1) { const p = fly([440, 232], [560, 470], bk, 120); backpack(p[0], p[1], 1); }
         else backpack(600, 470, 1);
-        kid(640, 690, 1, { t, talk: speaking('Тимур'), mood: 'happy', armL: t > 5 ? 2.6 + Math.sin(t * 6) * .25 : .25 });
+        kid(640, 690, 1, { t, talk: speaking('Дилшод'), mood: 'happy', armL: t > 5 ? 2.6 + Math.sin(t * 6) * .25 : .25 });
         if (bk >= 1) { line(600, 486, 610, 560, '#c46f00', 7); line(680, 486, 670, 560, '#c46f00', 7); }
+        tomiris(480, 704, 1, { t, mood: 'happy', armR: t > 5 ? 2.6 + Math.sin(t * 6 + 1) * .25 : .2 });
         sneaker(lerp(1400, 720, ease(k)), 700 - Math.abs(Math.sin(t * 9)) * 26 * (k < 1), 1, true, -2);
         sneaker(lerp(1500, 800, ease(k)), 704 - Math.abs(Math.sin(t * 9 + 1)) * 26 * (k < 1), 1, true, -2);
         if (t >= 4.4) mom(lerp(1300, 880, ease(seg(t, 4.4, 5.4))), 702, .95, { t, talk: speaking('Мама'), armL: t > 5.4 ? 1.2 : .15 });
@@ -211,6 +222,6 @@ const SCENES = [
     } },
 
   { name: 'Конец', dur: 7,
-    cues: [[.8, 5.6, 'Рассказчик', 'Конец второй серии. Тимур — настоящий утренний герой!']],
-    draw(t) { titleCard(t, 'Конец', 'второй серии', 'Утренний герой едет в садик'); } }
+    cues: [[.8, 5.6, 'Рассказчик', 'Конец второй серии. Дилшод и Томирис — настоящие утренние герои!']],
+    draw(t) { titleCard(t, 'Конец', 'второй серии', 'Утренние герои едут в садик'); } }
 ];
