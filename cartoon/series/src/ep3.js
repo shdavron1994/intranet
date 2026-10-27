@@ -219,11 +219,10 @@ const SCENES = [
       bathroom();
       chiston(640, 215, 1, { talk: speaking('Чистон'), t });
       const wash = t >= 1 && t < 9.6, sc = wash ? Math.sin(t * 14) * 8 : 0;
-      kid(640, SY, 1.1, Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy' }, wash ? { handL: [-30 + sc, -176], handR: [30 - sc, -176] } : { armL: t > 9.8 ? 2.6 : .2 }));
+      kid(DXS, SY, 1.1, Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy' }, wash ? DHANDS(sc) : { armL: t > 9.8 ? 2.6 : .2 }));
+      tomiris(TXS, TYS, TSC, Object.assign({ t, mood: 'happy' }, wash ? THANDS(sc) : { armR: t > 9.8 ? 2.6 : .2 }));
       sink();
-      if (wash) { ctx.fillStyle = 'rgba(120,200,255,.75)'; ctx.fillRect(633, SY - 184, 9, 498 - SY + 184); foam(640, SY - 176 * 1.1 + 4, seg(t, 1, 2) * (1 - seg(t, 9, 9.6)), t); }
-      tomiris(1010, 704, 1, Object.assign({ t, mood: 'happy' }, wash ? { handL: [-24 + sc, -190], handR: [24 - sc, -190] } : { armR: t > 9.8 ? 2.6 : .2 }));
-      if (wash) foam(1010, 704 - 190 * .8, seg(t, 1, 2) * (1 - seg(t, 9, 9.6)) * .6, t);
+      if (wash) { const k = seg(t, 1, 2) * (1 - seg(t, 9, 9.6)); water(); foam(...DFOAM(), k, t); foam(...TFOAM(), k * .8, t); }
       if (t > 9.8) confetti(t);
     } },
 

@@ -228,3 +228,10 @@ const fly = (a, b, k, h) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k) - Math.sin
 
 const TPJ = '#ffc2d6', TDRESS = '#ff8fb1';
 function tomiris(x, y, s, o) { return kid(x, y, s * .8, Object.assign({ girl: true, shirt: TDRESS }, o, { talk: speaking('Томирис') })); }
+
+// both kids behind the sink: Dilshod left, Tomiris right on a little step
+const DXS = 555, TXS = 745, TYS = SY - 14, TSC = 1.1;
+const DHANDS = sc => ({ handL: [18 + sc, -176], handR: [58 - sc, -176] });
+const THANDS = sc => ({ handL: [-62 + sc, -192], handR: [-22 - sc, -192] });
+const DFOAM = () => [DXS + 38 * 1.1, SY - 176 * 1.1 + 4], TFOAM = () => [TXS - 42 * TSC * .8, TYS - 192 * TSC * .8 + 4];
+function water() { ctx.fillStyle = 'rgba(120,200,255,.75)'; ctx.fillRect(633, 470, 9, 30); }

@@ -123,11 +123,11 @@ const SCENES = [
       bathroom();
       chiston(640, 215, 1, { talk: speaking('Чистон'), t });
       const brushing = t >= 2 && t < 14, sc = Math.sin(t * 22) * 6;
-      kid(640, SY, 1.1, Object.assign({}, PAJAMA, { dirty: .5, dirtyHands: 1, t, mood: 'happy', hold: 'brush' },
+      kid(DXS, SY, 1.1, Object.assign({}, PAJAMA, { dirty: .5, dirtyHands: 1, t, mood: 'happy', hold: 'brush' },
         brushing ? { handR: [26 + sc, -214], brushTo: [-6 + sc, -234] } : { armR: .35, talk: speaking('Дилшод') }));
-      sink();
       const ls = Math.sin(t * 22 + 1) * 5;
-      tomiris(1010, 704, 1, Object.assign({ t, shirt: TPJ, hold: 'brush' }, brushing ? { handR: [24 + ls, -214], brushTo: [-6 + ls, -234] } : { armR: .35 }));
+      tomiris(TXS, TYS, TSC, Object.assign({ t, shirt: TPJ, hold: 'brush' }, brushing ? { handR: [24 + ls, -214], brushTo: [-6 + ls, -234] } : { armR: .35 }));
+      sink();
       const rem = t < 2 ? 120 : Math.max(0, 120 - (t - 2) * 10);
       timerRing(1130, 230, 70, rem / 120, t >= 14 ? '✓' : mmss(rem), 'ускорено ×10');
       banner('Шаг 1 из 5 · Зубы');
@@ -142,14 +142,14 @@ const SCENES = [
       bathroom();
       chiston(640, 215, 1, { talk: speaking('Чистон'), t });
       const face = t >= 3.6 && t < 7, hands = t >= 7 && t < 9.6, sc = Math.sin(t * 14) * 8;
-      const hp = face ? { handL: [-32 + sc * .5, -250], handR: [32 - sc * .5, -250] } : hands ? { handL: [-30 + sc, -176], handR: [30 - sc, -176] } : {};
-      kid(640, SY, 1.1, Object.assign({}, PAJAMA, hp, { dirty: .5 * (1 - seg(t, 3.6, 6.5)), dirtyHands: 1 - seg(t, 7, 9.4), t,
+      const fc = { handL: [-32 + sc * .5, -250], handR: [32 - sc * .5, -250] };
+      kid(DXS, SY, 1.1, Object.assign({}, PAJAMA, face ? fc : hands ? DHANDS(sc) : {}, { dirty: .5 * (1 - seg(t, 3.6, 6.5)), dirtyHands: 1 - seg(t, 7, 9.4), t,
         talk: speaking('Дилшод'), mood: face ? 'sleepy' : 'happy' }));
+      tomiris(TXS, TYS, TSC, Object.assign({ t, shirt: TPJ, mood: face ? 'sleepy' : 'happy' }, face ? fc : hands ? THANDS(sc) : {}));
       sink();
-      if (face || hands) { ctx.fillStyle = 'rgba(120,200,255,.75)'; ctx.fillRect(633, SY - 184, 9, 498 - SY + 184); }
-      if (face) for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + t * 2, d = 70 + ((t * 90 + i * 20) % 50); circ(640 + Math.cos(a) * d, SY - 268 * 1.1 + Math.sin(a) * d * .7, 6, 'rgba(120,200,255,.85)'); }
-      if (hands) foam(640, SY - 176 * 1.1 + 4, seg(t, 7, 7.8) * (1 - seg(t, 9, 9.6)), t);
-      tomiris(1010, 704, 1, Object.assign({ t, shirt: TPJ, mood: face ? 'sleepy' : 'happy' }, face ? { handL: [-30 + sc * .5, -250], handR: [30 - sc * .5, -250] } : {}));
+      if (face || hands) water();
+      if (face) [[DXS, SY - 268 * 1.1], [TXS, TYS - 268 * TSC * .8]].forEach(([fx, fy]) => { for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + t * 2, d = 60 + ((t * 90 + i * 20) % 40); circ(fx + Math.cos(a) * d, fy + Math.sin(a) * d * .7, 5, 'rgba(120,200,255,.85)'); } });
+      if (hands) { const k = seg(t, 7, 7.8) * (1 - seg(t, 9, 9.6)); foam(...DFOAM(), k, t); foam(...TFOAM(), k * .8, t); }
       banner('Шаг 2 из 5 · Умыться');
     } },
 

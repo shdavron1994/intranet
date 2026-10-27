@@ -714,6 +714,13 @@ const fly = (a, b, k, h) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k) - Math.sin
 const TPJ = '#ffc2d6', TDRESS = '#ff8fb1';
 function tomiris(x, y, s, o) { return kid(x, y, s * .8, Object.assign({ girl: true, shirt: TDRESS }, o, { talk: speaking('Томирис') })); }
 
+// both kids behind the sink: Dilshod left, Tomiris right on a little step
+const DXS = 555, TXS = 745, TYS = SY - 14, TSC = 1.1;
+const DHANDS = sc => ({ handL: [18 + sc, -176], handR: [58 - sc, -176] });
+const THANDS = sc => ({ handL: [-62 + sc, -192], handR: [-22 - sc, -192] });
+const DFOAM = () => [DXS + 38 * 1.1, SY - 176 * 1.1 + 4], TFOAM = () => [TXS - 42 * TSC * .8, TYS - 192 * TSC * .8 + 4];
+function water() { ctx.fillStyle = 'rgba(120,200,255,.75)'; ctx.fillRect(633, 470, 9, 30); }
+
 /* ---------- episode 3: Пойдём гулять! ---------- */
 const SOFA_X = 990;
 function skyCol(k) { // 0 = day, 1 = late afternoon
@@ -935,11 +942,10 @@ const SCENES = [
       bathroom();
       chiston(640, 215, 1, { talk: speaking('Чистон'), t });
       const wash = t >= 1 && t < 9.6, sc = wash ? Math.sin(t * 14) * 8 : 0;
-      kid(640, SY, 1.1, Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy' }, wash ? { handL: [-30 + sc, -176], handR: [30 - sc, -176] } : { armL: t > 9.8 ? 2.6 : .2 }));
+      kid(DXS, SY, 1.1, Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy' }, wash ? DHANDS(sc) : { armL: t > 9.8 ? 2.6 : .2 }));
+      tomiris(TXS, TYS, TSC, Object.assign({ t, mood: 'happy' }, wash ? THANDS(sc) : { armR: t > 9.8 ? 2.6 : .2 }));
       sink();
-      if (wash) { ctx.fillStyle = 'rgba(120,200,255,.75)'; ctx.fillRect(633, SY - 184, 9, 498 - SY + 184); foam(640, SY - 176 * 1.1 + 4, seg(t, 1, 2) * (1 - seg(t, 9, 9.6)), t); }
-      tomiris(1010, 704, 1, Object.assign({ t, mood: 'happy' }, wash ? { handL: [-24 + sc, -190], handR: [24 - sc, -190] } : { armR: t > 9.8 ? 2.6 : .2 }));
-      if (wash) foam(1010, 704 - 190 * .8, seg(t, 1, 2) * (1 - seg(t, 9, 9.6)) * .6, t);
+      if (wash) { const k = seg(t, 1, 2) * (1 - seg(t, 9, 9.6)); water(); foam(...DFOAM(), k, t); foam(...TFOAM(), k * .8, t); }
       if (t > 9.8) confetti(t);
     } },
 
