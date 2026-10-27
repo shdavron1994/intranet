@@ -1,48 +1,4 @@
 /* ---------- episode 3: Пойдём гулять! ---------- */
-const SOFA_X = 990;
-function skyCol(k) { // 0 = day, 1 = late afternoon
-  const a = [143, 211, 255], b = [255, 205, 150];
-  return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')})`;
-}
-function livingRoom(o) {
-  o = Object.assign({ tv: 'off', sky: 0, clock: 0, talk: false, t: 0 }, o);
-  ctx.fillStyle = '#e6f2df'; ctx.fillRect(0, 0, W, 560);
-  ctx.fillStyle = 'rgba(255,255,255,.4)'; for (let x = 40; x < W; x += 90) ctx.fillRect(x, 0, 30, 560);
-  ctx.fillStyle = '#c99a6b'; ctx.fillRect(0, 560, W, 160);
-  for (let y = 590; y < H; y += 40) line(0, y, W, y, 'rgba(120,70,30,.2)', 2);
-  ell(560, 650, 300, 46, '#ff9f9f'); ell(560, 650, 240, 34, '#ffc2c2');
-  // window
-  box(470, 80, 300, 220, 10, '#ffffff'); box(482, 92, 276, 196, 6, skyCol(o.sky));
-  circ(700, 140, 26, o.sky > .5 ? '#ffb347' : '#ffe066');
-  circ(540, 260, 40, '#5fbf6a'); circ(600, 270, 34, '#6fcf7a'); line(620, 92, 620, 288, '#ffffff', 8);
-  // family photo
-  box(830, 110, 150, 110, 8, '#a0643c'); box(840, 120, 130, 90, 4, '#fff4dc');
-  [[870, 175, 14, MOMHAIR], [905, 168, 16, '#3b2a1e'], [935, 182, 10, HAIR], [955, 185, 9, HAIR]].forEach(p => { circ(p[0], p[1], p[2], SKIN); circ(p[0], p[1] - p[2] * .6, p[2] * .8, p[3]); });
-  // clock
-  circ(1180, 150, 46, '#ffffff'); ctx.beginPath(); ctx.arc(1180, 150, 46, 0, TAU); ctx.strokeStyle = '#a0643c'; ctx.lineWidth = 6; ctx.stroke();
-  const hA = o.clock * TAU / 12 - Math.PI / 2 + 1, mA = o.clock * TAU - Math.PI / 2;
-  line(1180, 150, 1180 + Math.cos(hA) * 22, 150 + Math.sin(hA) * 22, '#2d3142', 6);
-  line(1180, 150, 1180 + Math.cos(mA) * 34, 150 + Math.sin(mA) * 34, '#2d3142', 4);
-  // TV on a stand
-  box(60, 470, 340, 90, 8, '#a0643c'); box(80, 490, 140, 50, 6, '#c98b55'); box(240, 490, 140, 50, 6, '#c98b55');
-  box(66, 276, 328, 190, 12, '#1f2430'); box(220, 466, 20, 10, 2, '#1f2430');
-  const sx = 80, sy = 290, sw = 300, sh = 162;
-  if (o.tv === 'on') {
-    box(sx, sy, sw, sh, 6, '#7fd3ff');
-    ctx.save(); rr(sx, sy, sw, sh, 6); ctx.clip();
-    ell(sx + 150, sy + 160, 200, 50, '#5fbf6a');
-    const bx = sx + 150 + Math.sin(o.t * 3) * 90, by = sy + 90 - Math.abs(Math.sin(o.t * 6)) * 40;
-    circ(bx, by, 22, '#ff5a5f'); circ(bx - 7, by - 5, 4, '#fff'); circ(bx + 7, by - 5, 4, '#fff');
-    star(sx + 60 + Math.sin(o.t * 2) * 20, sy + 40, 16, 7, '#ffd23f');
-    ctx.restore();
-  } else if (o.tv === 'chiston') {
-    box(sx, sy, sw, sh, 6, '#c9f4ff');
-    ctx.save(); ctx.shadowColor = 'rgba(120,240,255,.9)'; ctx.shadowBlur = 30; box(sx, sy, sw, sh, 6, 'rgba(200,250,255,.6)'); ctx.restore();
-    faceOf(sx + sw / 2, sy + sh / 2 - 4, .7, o.talk, o.t);
-  } else box(sx, sy, sw, sh, 6, '#2d3142');
-}
-function sofaBack() { box(SOFA_X - 230, 420, 460, 150, 34, '#4fb3a9'); box(SOFA_X - 250, 470, 60, 150, 24, '#3f9a91'); box(SOFA_X + 190, 470, 60, 150, 24, '#3f9a91'); }
-function sofaFront() { box(SOFA_X - 200, 560, 400, 56, 18, '#5cc4b9'); box(SOFA_X - 200, 612, 400, 18, 6, '#3f9a91'); }
 function ballAt(x, y, t) { circ(x, y, 20, '#ffffff'); ctx.save(); ctx.beginPath(); ctx.arc(x, y, 20, 0, TAU); ctx.clip(); box(x - 22, y - 5 + Math.sin(t * 8) * 6, 44, 10, 0, '#ff5a5f'); ctx.restore(); }
 function playground(t, o) {
   o = Object.assign({ sky: .2 }, o);
