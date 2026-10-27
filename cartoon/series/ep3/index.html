@@ -1,0 +1,1169 @@
+<title>Чистон: Пойдём гулять</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pangolin&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: one column, the player is the hero; controls, chapters and notes stack under it. Single deliberate look: deep bathroom-tile teal with soap-yellow. */
+:root{
+  --bg:#0e3a46;
+  --panel:#134b59;
+  --line:#2b6c79;
+  --fg:#f2fbfa;
+  --muted:#a7cdd2;
+  --soap:#ffd23f;
+  --ink:#0b2d36;
+  --display:"Pangolin","Comic Sans MS","Chalkboard SE",cursive;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1040px;margin:0 auto;display:grid;gap:20px;
+  padding-block:28px 56px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px))}
+header{display:grid;gap:6px}
+.eyebrow{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.1rem,5.5vw,3.4rem);line-height:1.05;margin:0;text-wrap:balance;color:var(--soap)}
+.lead{margin:0;color:var(--muted);max-width:65ch}
+.player{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.player canvas{display:block;width:100%;height:100%;object-fit:contain}
+.player:fullscreen{border-radius:0;aspect-ratio:auto;width:100vw;height:100vh}
+.sub{position:absolute;left:50%;bottom:4.5%;transform:translateX(-50%);max-width:88%;width:max-content;
+  background:rgba(8,22,28,.78);color:#fff;padding:.35em .9em .4em;border-radius:12px;
+  font-family:var(--display);font-size:clamp(13px,2.3vw,26px);line-height:1.25;text-align:center;text-wrap:balance}
+.sub .who{color:var(--soap);margin-right:.35em}
+.bigplay{position:absolute;inset:0;margin:auto;width:92px;height:92px;border-radius:50%;border:0;cursor:pointer;
+  background:var(--soap);color:var(--ink);font-size:2.1rem;display:grid;place-items:center;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.bigplay:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--soap);outline-offset:3px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:inherit;font-weight:700;font-size:.95rem;color:var(--fg);background:var(--panel);border:1px solid var(--line);
+  border-radius:999px;padding:.5em 1.05em;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--soap);color:var(--ink);border-color:var(--soap)}
+button[aria-pressed="false"]{color:var(--muted)}
+.seekrow{display:flex;gap:12px;align-items:center;flex:1 1 260px;min-width:0}
+#seek{flex:1;min-width:0;accent-color:var(--soap)}
+.time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem;white-space:nowrap}
+.status{color:var(--muted);font-size:.88rem;margin:0;min-height:1.4em}
+h2{font-family:var(--display);font-weight:400;font-size:1.6rem;margin:0;color:var(--fg)}
+.chapters{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.chapters button{width:100%;text-align:left;border-radius:12px;display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.chapters button .t{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:400}
+.chapters button.on{border-color:var(--soap);box-shadow:inset 0 0 0 1px var(--soap)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.note h3{margin:0 0 6px;font-size:1rem;color:var(--soap)}
+.note ul{margin:0;padding-left:1.1em;color:var(--fg)}
+.note li+li{margin-top:4px}
+@media (prefers-reduced-motion: reduce){.bigplay{transition:none}}
+</style>
+
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Мультфильм «Чистон» · прототип</div>
+    <h1>Серия 3. Пойдём гулять!</h1>
+    <p class="lead">Дети вернулись из садика: Дилшод сидит в телефоне, Томирис смотрит телевизор. Чистон появляется прямо в экране и показывает, что во дворе играют ребята. Дети выключают экраны и идут гулять с мамой.</p>
+  </header>
+
+  <div class="player" id="player">
+    <canvas id="cv" width="1280" height="720" aria-label="Мультфильм «Чистон». Серия 3. Пойдём гулять!"></canvas>
+    <div class="sub" id="sub" hidden><span class="who" id="who"></span><span id="line"></span></div>
+    <button class="bigplay" id="bigplay" aria-label="Смотреть мультфильм">▶</button>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="play">Смотреть</button>
+    <button id="restart">С начала</button>
+    <div class="seekrow">
+      <input type="range" id="seek" min="0" max="100" step="0.1" value="0" aria-label="Перемотка">
+      <span class="time" id="time">0:00 / 0:00</span>
+    </div>
+    <button id="voice" aria-pressed="true">Голос: вкл</button>
+    <button id="music" aria-pressed="true">Музыка: вкл</button>
+    <button id="fs">На весь экран</button>
+  </div>
+  <p class="status" id="status"></p>
+
+  <section style="display:grid;gap:10px">
+    <h2>Сцены</h2>
+    <ol class="chapters" id="chapters"></ol>
+  </section>
+
+  <section class="notes">
+    <div class="note">
+      <h3>Как смотреть</h3>
+      <ul>
+        <li>Нажмите ▶ и включите звук.</li>
+        <li>Сцены можно переключать кнопками выше.</li>
+        <li>Голос синтезированный, его можно выключить: субтитры останутся.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Это прототип</h3>
+      <ul>
+        <li>Анимация простая, это раскадровка в движении.</li>
+        <li>У каждого героя свой русский голос из бесплатного синтезатора RHVoice. Живые голоса можно вставить вместо них.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+
+<script>
+(() => {
+const WARP = {"3": [[0.0, 0.0], [1, 1.0], [5.2, 6.838], [9.8, 12.127], [12.2, 14.527], [14.3, 16.627], [18.7, 21.812], [22, 25.142]], "5": [[0.0, 0.0], [1, 1.0], [6.5, 6.5], [8.7, 8.7], [11.2, 11.2], [14, 14.504]], "6": [[0.0, 0.0], [0.5, 0.5], [4.5, 4.5], [7, 7.0], [10, 10.0], [12.8, 12.8], [15.5, 15.5], [18.3, 18.3], [20.5, 20.5], [26, 26.181]], "8": [[0.0, 0.0], [4, 4.0], [9.8, 10.413], [13, 13.613]]};
+const W = 1280, H = 720, TAU = Math.PI * 2;
+const FONT = '"Pangolin","Comic Sans MS","Chalkboard SE",cursive';
+const SKIN = '#f3c6a0', HAIR = '#4a2f22', INK = '#1d4e89', MOUTH = '#7a2b2b';
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+/* ---------- helpers ---------- */
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+const lerp = (a, b, k) => a + (b - a) * k;
+function rr(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function box(x, y, w, h, r, c) { rr(x, y, w, h, r); ctx.fillStyle = c; ctx.fill(); }
+function circ(x, y, r, c) { ctx.beginPath(); ctx.arc(x, y, Math.max(r, 0), 0, TAU); ctx.fillStyle = c; ctx.fill(); }
+function ell(x, y, rx, ry, c) { ctx.beginPath(); ctx.ellipse(x, y, Math.max(rx, 0), Math.max(ry, 0), 0, 0, TAU); ctx.fillStyle = c; ctx.fill(); }
+function line(x1, y1, x2, y2, c, w) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke(); }
+function txt(s, x, y, size, c, align = 'center') {
+  ctx.font = `${size}px ${FONT}`; ctx.fillStyle = c; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y);
+}
+function pill(x, y, s, size, bg, fg, anchor = 'left') {
+  ctx.font = `${size}px ${FONT}`;
+  const w = ctx.measureText(s).width + size * 1.3, h = size * 1.75;
+  const left = anchor === 'left' ? x : anchor === 'right' ? x - w : x - w / 2;
+  box(left, y, w, h, h / 2, bg); txt(s, left + w / 2, y + h / 2 + 1, size, fg);
+}
+function star(cx, cy, r1, r2, c) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? r2 : r1, a = -Math.PI / 2 + i * Math.PI / 5;
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  ctx.closePath(); ctx.fillStyle = c; ctx.fill();
+}
+
+/* ---------- characters ---------- */
+function arm(a, b, sleeve) {
+  line(a[0], a[1], b[0], b[1], SKIN, 17);
+  line(a[0], a[1], lerp(a[0], b[0], .4), lerp(a[1], b[1], .4), sleeve, 26);
+  circ(b[0], b[1], 14, SKIN);
+}
+function brush(h, to, handle) {
+  const ang = Math.atan2(to[1] - h[1], to[0] - h[0]);
+  const len = Math.max(30, Math.hypot(to[0] - h[0], to[1] - h[1]));
+  ctx.save(); ctx.translate(h[0], h[1]); ctx.rotate(ang);
+  box(-14, -5, len + 14, 10, 5, handle);
+  box(len - 18, -14, 22, 10, 3, '#ffffff');
+  ctx.restore();
+  circ(h[0], h[1], 14, SKIN);
+}
+function kid(x, y, s, o) {
+  o = Object.assign({ girl: false, dirty: 0, dirtyHands: null, mood: 'happy', talk: false, armL: .2, armR: .2,
+    handL: null, handR: null, shirt: '#3b8beb', hold: null, brushTo: null, glasses: false, badge: 0, t: 0,
+    pants: null, redEyes: 0, look: [0, 0], squat: 0, tilt: 0, pajama: false, full: false, closed: false, spoonTo: null, glow: null }, o);
+  const LL = 100 * (1 - .45 * o.squat);
+  const dh = o.dirtyHands == null ? o.dirty : o.dirtyHands;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(o.tilt); ctx.scale(s, s);
+  ell(0, 0, 62, 11, 'rgba(0,0,0,.16)');
+  const legC = o.pants || (o.girl ? SKIN : '#2b3f73');
+  box(-34, -LL, 26, LL, 12, legC); box(8, -LL, 26, LL, 12, legC);
+  const shoe = o.girl ? '#ff7aa2' : '#ffffff';
+  ell(-22, -6, 22, 10, shoe); ell(22, -6, 22, 10, shoe);
+  ctx.translate(0, 100 - LL);
+  if (o.girl) {
+    ctx.beginPath(); ctx.moveTo(-34, -205); ctx.lineTo(34, -205); ctx.lineTo(64, -90);
+    ctx.quadraticCurveTo(0, -78, -64, -90); ctx.closePath(); ctx.fillStyle = o.shirt; ctx.fill();
+    [[-25, -130], [18, -160], [30, -110], [-8, -105], [-14, -175]].forEach(p => circ(p[0], p[1], 6, 'rgba(255,255,255,.7)'));
+  } else {
+    box(-52, -210, 104, 125, 30, o.shirt);
+    if (o.pajama) { ctx.save(); rr(-52, -210, 104, 125, 30); ctx.clip(); for (let yy = -200; yy < -85; yy += 22) { ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(-52, yy, 104, 8); } ctx.restore(); } else {
+    const rows = ['.X.X.', 'XXXXX', '.XXX.', '..X..'];
+    ctx.fillStyle = '#ffd23f';
+    rows.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === 'X') ctx.fillRect(-18 + i * 7, -178 + j * 7, 7, 7); }));
+    }
+  }
+  const hl = o.handL || [-46 - Math.sin(o.armL) * 86, -192 + Math.cos(o.armL) * 86];
+  const hr = o.handR || [46 + Math.sin(o.armR) * 86, -192 + Math.cos(o.armR) * 86];
+  arm([-46, -192], hl, o.shirt); arm([46, -192], hr, o.shirt);
+  if (o.badge > 0) {
+    ctx.save(); ctx.translate(0, -150); ctx.scale(o.badge, o.badge);
+    circ(0, 0, 20, '#ffd23f'); star(0, 0, 13, 6, '#ff7a1a'); ctx.restore();
+  }
+  // head
+  circ(-62, -265, 13, SKIN); circ(62, -265, 13, SKIN);
+  circ(0, -268, 64, SKIN);
+  ctx.fillStyle = HAIR;
+  if (o.girl) {
+    circ(-70, -295, 26, HAIR); circ(70, -295, 26, HAIR);
+    ctx.beginPath(); ctx.arc(0, -268, 66, Math.PI, TAU); ctx.lineTo(52, -284);
+    ctx.quadraticCurveTo(0, -310, -52, -284); ctx.closePath(); ctx.fillStyle = HAIR; ctx.fill();
+    [[-70, -322], [70, -322]].forEach(p => { ell(p[0] - 10, p[1], 12, 8, '#ff4f8b'); ell(p[0] + 10, p[1], 12, 8, '#ff4f8b'); circ(p[0], p[1], 5, '#ff4f8b'); });
+  } else {
+    ctx.beginPath(); ctx.moveTo(-64, -262);
+    ctx.quadraticCurveTo(-66, -345, 0, -342); ctx.quadraticCurveTo(66, -345, 64, -262);
+    ctx.lineTo(46, -298); ctx.lineTo(30, -284); ctx.lineTo(12, -302); ctx.lineTo(-8, -286);
+    ctx.lineTo(-28, -302); ctx.lineTo(-46, -288); ctx.closePath(); ctx.fill();
+  }
+  // eyes
+  const blink = (o.t % 3.3) < .12;
+  [-23, 23].forEach(ex => {
+    if (o.mood === 'sleepy' || blink || o.closed) {
+      ctx.beginPath(); ctx.arc(ex, -272, 10, .15 * Math.PI, .85 * Math.PI);
+      ctx.strokeStyle = '#2a1c16'; ctx.lineWidth = 4; ctx.stroke();
+    } else {
+      const big = o.mood === 'wow';
+      ell(ex, -270, big ? 15 : 12, big ? 18 : 15, '#fff');
+      if (o.redEyes > 0) ell(ex, -270, big ? 15 : 12, big ? 18 : 15, `rgba(255,70,70,${.5 * o.redEyes})`);
+      circ(ex + (o.girl ? 0 : 1) + o.look[0] * 5, -267 + o.look[1] * 6, big ? 6 : 7, '#2a1c16');
+      circ(ex + 3 + o.look[0] * 5, -271 + o.look[1] * 6, 2.4, '#fff');
+      if (o.mood === 'bored') box(ex - 15, -290, 30, 19, 6, SKIN);
+    }
+  });
+  if (o.mood === 'sad') { line(-34, -296, -12, -290, '#2a1c16', 4); line(34, -296, 12, -290, '#2a1c16', 4); }
+  if (o.glasses) {
+    ctx.lineWidth = 4; ctx.strokeStyle = '#25e3ff';
+    [-23, 23].forEach(ex => { rr(ex - 20, -288, 40, 34, 10); ctx.fillStyle = 'rgba(60,230,255,.22)'; ctx.fill(); ctx.stroke(); });
+    line(-3, -272, 3, -272, '#25e3ff', 4);
+  }
+  circ(-42, -240, 10, 'rgba(255,110,140,.35)'); circ(42, -240, 10, 'rgba(255,110,140,.35)');
+  if (o.full) { circ(-34, -238, 18, SKIN); circ(34, -238, 18, SKIN); circ(-36, -238, 10, 'rgba(255,110,140,.4)'); circ(36, -238, 10, 'rgba(255,110,140,.4)'); }
+  // mouth
+  if (o.talk) ell(0, -232, 13, 4 + Math.abs(Math.sin(o.t * 17)) * 10, MOUTH);
+  else if (o.mood === 'wow') ell(0, -230, 9, 12, MOUTH);
+  else if (o.mood === 'sleepy') ell(0, -232, 7, 6, MOUTH);
+  else if (o.mood === 'bored') line(-12, -230, 12, -230, MOUTH, 5);
+  else if (o.mood === 'sad') { ctx.beginPath(); ctx.arc(0, -218, 16, 1.2 * Math.PI, 1.8 * Math.PI); ctx.strokeStyle = MOUTH; ctx.lineWidth = 5; ctx.stroke(); }
+  else { ctx.beginPath(); ctx.arc(0, -244, 18, .2 * Math.PI, .8 * Math.PI); ctx.strokeStyle = MOUTH; ctx.lineWidth = 5; ctx.stroke(); }
+  // dirt
+  if (o.dirty > 0) {
+    ctx.globalAlpha = o.dirty;
+    [[-34, -246, 10], [30, -302, 8], [20, -222, 6], [-24, -160, 13], [26, -122, 10], [2, -150, 7]].forEach(p => circ(p[0], p[1], p[2], '#7a5230'));
+    [[-10, -120], [14, -190], [-36, -135]].forEach(p => circ(p[0], p[1], 3.5, '#f0b73c'));
+    ctx.globalAlpha = 1;
+  }
+  if (dh > 0) { ctx.globalAlpha = dh; circ(hl[0] + 4, hl[1] + 2, 8, '#7a5230'); circ(hr[0] - 4, hr[1] + 3, 8, '#7a5230'); ctx.globalAlpha = 1; }
+  if (o.hold === 'brush') brush(hr, o.brushTo || [hr[0] - 15, hr[1] - 60], o.girl ? '#ff7aa2' : '#4cc3ff');
+  if (o.hold === 'phone') {
+    if (o.glow) { ctx.save(); ctx.globalAlpha = .07; circ(0, -262, 70, o.glow); ctx.restore(); }
+    ctx.save(); ctx.translate(hr[0], hr[1]); ctx.rotate(-.3); box(-20, -66, 40, 72, 8, '#1f2430'); box(-16, -60, 32, 58, 5, o.glow || '#7fe3ff');
+    circ(-4, -36, 6, '#ffd23f'); circ(8, -24, 5, '#ff7aa2'); ctx.restore(); circ(hr[0], hr[1], 14, SKIN);
+  }
+  if (o.hold === 'spoon') {
+    const to = o.spoonTo || [hr[0] - 10, hr[1] - 50];
+    line(hr[0], hr[1], to[0], to[1], '#c9d4de', 7); ell(to[0], to[1], 13, 8, '#c9d4de'); ell(to[0], to[1] - 2, 9, 5, '#f3e2b8');
+    circ(hr[0], hr[1], 14, SKIN);
+  }
+  ctx.restore();
+  const yy = y + (100 - LL) * s;
+  return { hl: [x + hl[0] * s, yy + hl[1] * s], hr: [x + hr[0] * s, yy + hr[1] * s], mouth: [x, yy - 232 * s], face: [x, yy - 268 * s] };
+}
+
+function chiston(cx, cy, on, o) {
+  o = Object.assign({ talk: false, t: 0 }, o);
+  ctx.save();
+  if (on > 0) { ctx.shadowColor = `rgba(120,240,255,${.8 * on})`; ctx.shadowBlur = 45 * on; }
+  ell(cx, cy, 135, 155, '#e9eff5');
+  ctx.restore();
+  ctx.beginPath(); ctx.ellipse(cx, cy, 135, 155, 0, 0, TAU); ctx.strokeStyle = '#9fb6c9'; ctx.lineWidth = 8; ctx.stroke();
+  const gOff = ctx.createLinearGradient(cx - 110, cy - 130, cx + 110, cy + 130);
+  gOff.addColorStop(0, '#a9cfdc'); gOff.addColorStop(1, '#6d9fb3');
+  ell(cx, cy, 115, 135, gOff);
+  if (on > 0) {
+    const gOn = ctx.createLinearGradient(cx - 110, cy - 130, cx + 110, cy + 130);
+    gOn.addColorStop(0, '#e2fdff'); gOn.addColorStop(1, '#8fe6f5');
+    ctx.globalAlpha = on; ell(cx, cy, 115, 135, gOn); ctx.globalAlpha = 1;
+  }
+  ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy, 115, 135, 0, 0, TAU); ctx.clip();
+  ctx.globalAlpha = .35; ctx.translate(cx - 60, cy - 70); ctx.rotate(-.6);
+  box(-80, -6, 160, 12, 6, '#fff'); box(-60, 18, 120, 6, 3, '#fff');
+  ctx.restore();
+  circ(cx, cy - 150, 7, on > .5 ? '#5dff9a' : '#556677');
+  if (on > 0) {
+    ctx.globalAlpha = on;
+    const blink = (o.t % 3.7) < .12, eh = blink ? 4 : 30;
+    box(cx - 54, cy - 38 - eh / 2, 24, eh, 11, INK); box(cx + 30, cy - 38 - eh / 2, 24, eh, 11, INK);
+    line(cx - 60, cy - 72, cx - 26, cy - 78, INK, 6); line(cx + 26, cy - 78, cx + 60, cy - 72, INK, 6);
+    if (o.talk) ell(cx, cy + 42, 28, 6 + Math.abs(Math.sin(o.t * 15)) * 18, INK);
+    else { ctx.beginPath(); ctx.arc(cx, cy + 18, 40, .18 * Math.PI, .82 * Math.PI); ctx.strokeStyle = INK; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke(); }
+    circ(cx - 72, cy + 18, 13, 'rgba(255,120,160,.45)'); circ(cx + 72, cy + 18, 13, 'rgba(255,120,160,.45)');
+    ctx.globalAlpha = 1;
+  }
+}
+
+function pixel(cx, fy, s, o) {
+  o = Object.assign({ smudge: 0, mood: 'happy', walk: 0, sleep: false, error: false, talk: false, t: 0, tilt: 0, wave: false }, o);
+  ctx.save(); ctx.translate(cx, fy); ctx.rotate(o.tilt); ctx.scale(s, s);
+  const sw = Math.sin(o.walk) * 16;
+  line(-24, -24, -24 + sw, -6, '#2d3142', 8); line(24, -24, 24 - sw, -6, '#2d3142', 8);
+  ell(-24 + sw, -4, 13, 6, '#ff5a5f'); ell(24 - sw, -4, 13, 6, '#ff5a5f');
+  const wv = o.wave ? Math.sin(o.t * 12) * 30 : 0;
+  line(-60, -120, -88, -95 - wv, '#2d3142', 8); line(60, -120, 88, -95 + wv, '#2d3142', 8);
+  box(-62, -210, 124, 190, 20, '#2d3142');
+  box(-52, -200, 104, 158, 12, o.error ? '#ffd6d6' : '#c4f1ff');
+  circ(0, -31, 6, '#555b70');
+  if (o.sleep) {
+    [-22, 22].forEach(ex => { ctx.beginPath(); ctx.arc(ex, -142, 9, .15 * Math.PI, .85 * Math.PI); ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = 4; ctx.stroke(); });
+    const zy = (o.t * 30) % 50;
+    ctx.globalAlpha = 1 - zy / 50; txt('z', 60, -230 - zy, 34, '#ffffff'); ctx.globalAlpha = 1;
+  } else {
+    [-22, 22].forEach(ex => { ell(ex, -140, 10, 13, '#1b2a41'); circ(ex + 3, -144, 3, '#fff'); });
+    if (o.mood === 'angry') { line(-34, -164, -12, -156, '#1b2a41', 5); line(34, -164, 12, -156, '#1b2a41', 5); }
+    if (o.talk) ell(0, -100, 14, 4 + Math.abs(Math.sin(o.t * 17)) * 9, '#1b2a41');
+    else {
+      ctx.beginPath();
+      if (o.mood === 'angry') ctx.arc(0, -88, 15, 1.2 * Math.PI, 1.8 * Math.PI); else ctx.arc(0, -112, 16, .2 * Math.PI, .8 * Math.PI);
+      ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.stroke();
+    }
+  }
+  if (o.error) txt('ОШИБКА', 0, -180, 20, '#d62839');
+  if (o.smudge > 0) {
+    ctx.globalAlpha = o.smudge; ctx.strokeStyle = 'rgba(120,75,35,.75)'; ctx.lineWidth = 2;
+    [[-30, -168], [30, -60], [-28, -70], [34, -176]].forEach(p => {
+      for (let k = 1; k <= 4; k++) { ctx.beginPath(); ctx.ellipse(p[0], p[1], k * 3.5, k * 4.5, .4, 0, TAU); ctx.stroke(); }
+    });
+    ell(-36, -110, 9, 6, 'rgba(110,60,25,.8)');
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
+function sneaker(x, y, s, flip, look = 0) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s);
+  ell(0, 2, 46, 6, 'rgba(0,0,0,.15)');
+  ctx.beginPath(); ctx.moveTo(-42, -2); ctx.lineTo(46, -2); ctx.quadraticCurveTo(58, -4, 52, -16);
+  ctx.quadraticCurveTo(40, -26, 16, -30); ctx.lineTo(4, -50); ctx.lineTo(-36, -50);
+  ctx.quadraticCurveTo(-48, -30, -42, -2); ctx.closePath(); ctx.fillStyle = '#ff5a5f'; ctx.fill();
+  box(-46, -9, 104, 10, 5, '#ffffff');
+  line(-6, -42, 10, -36, '#fff', 3); line(-10, -34, 8, -28, '#fff', 3);
+  circ(32, -16, 7, '#fff'); circ(33 + look, -16, 3.5, '#1b2a41');
+  ctx.restore();
+}
+
+function hrum(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ell(0, 18, 80, 14, 'rgba(0,0,0,.18)');
+  ell(0, 6, 74, 26, '#4f5d6c'); ell(0, -6, 74, 26, '#8b9bab');
+  circ(0, -10, 10, '#5dff9a');
+  [-22, 22].forEach(ex => { circ(ex + 30, 2, 8, '#fff'); circ(ex + 33, 3, 4, '#1b2a41'); });
+  ctx.save(); ctx.translate(-62, 16);
+  for (let i = 0; i < 4; i++) { const a = t * 14 + i * Math.PI / 2; line(0, 0, Math.cos(a) * 18, Math.sin(a) * 7, '#c9d4de', 3); }
+  ctx.restore();
+  ctx.restore();
+}
+
+function microbe(x, y, r, col, t, ph, alpha = 1) {
+  if (alpha <= 0 || r <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.beginPath();
+  for (let i = 0; i <= 12; i++) {
+    const a = i / 12 * TAU, rad = r * (1 + .13 * Math.sin(t * 5 + i * 1.7 + ph));
+    ctx.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
+  }
+  ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+  [-1, 1].forEach(d => { circ(x + d * r * .32, y - r * .15, r * .26, '#fff'); circ(x + d * r * .32 + r * .05, y - r * .12, r * .12, '#1b2a41'); });
+  ctx.beginPath(); ctx.arc(x, y + r * .15, r * .3, .2 * Math.PI, .8 * Math.PI); ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = Math.max(2, r * .09); ctx.stroke();
+  ctx.restore();
+}
+const MCOL = ['#7ddc4a', '#b06bff', '#ffb238', '#4fd6c4', '#ff6fa8', '#9be36b'];
+
+function backpack(x, y, a) {
+  if (a <= 0) return;
+  ctx.globalAlpha = a;
+  box(x - 36, y, 72, 92, 22, '#ff9f1c'); box(x - 24, y + 46, 48, 32, 10, '#ffbf5c');
+  line(x - 18, y + 4, x - 10, y - 14, '#c46f00', 6); line(x + 18, y + 4, x + 10, y - 14, '#c46f00', 6);
+  ctx.globalAlpha = 1;
+}
+function medal(x, y, s, label) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.beginPath(); ctx.moveTo(-50, -150); ctx.lineTo(-10, -150); ctx.lineTo(10, -60); ctx.lineTo(-30, -60); ctx.closePath(); ctx.fillStyle = '#3b8beb'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(50, -150); ctx.lineTo(10, -150); ctx.lineTo(-10, -60); ctx.lineTo(30, -60); ctx.closePath(); ctx.fillStyle = '#ff5a5f'; ctx.fill();
+  circ(0, 0, 84, '#ffb000'); circ(0, 0, 70, '#ffd23f'); star(0, 0, 50, 22, '#ff7a1a');
+  if (label) pill(0, 100, 'Мастер чистоты', 34, '#ffffff', '#0e3a46', 'center');
+  ctx.restore();
+}
+
+/* ---------- scenery ---------- */
+const SY = 652; // Timur's feet when he stands behind the sink
+const CRUMBS = [[640, 650], [700, 668], [760, 640], [820, 676], [880, 655], [300, 690], [360, 660], [1000, 690], [1150, 672], [1220, 650], [540, 700], [460, 670], [1080, 640]];
+function room() {
+  ctx.fillStyle = '#bfe3ff'; ctx.fillRect(0, 0, W, 540);
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
+  for (let y = 40; y < 520; y += 80) for (let x = (y / 80 % 2) * 40 + 20; x < W; x += 80) { ctx.beginPath(); ctx.arc(x, y, 5, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#e8b77a'; ctx.fillRect(0, 540, W, 180);
+  for (let y = 570; y < H; y += 40) line(0, y, W, y, 'rgba(150,95,45,.25)', 2);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 528, W, 14);
+  box(900, 80, 230, 210, 10, '#ffffff'); box(912, 92, 206, 186, 6, '#8fd3ff');
+  circ(1060, 150, 34, '#ffe066'); ell(970, 230, 50, 18, '#ffffff'); ell(1010, 222, 36, 16, '#ffffff');
+  line(1015, 92, 1015, 278, '#ffffff', 8); line(912, 185, 1118, 185, '#ffffff', 8);
+  box(560, 110, 170, 210, 8, '#2d3142'); box(574, 124, 142, 182, 4, '#6c4cff');
+  ctx.fillStyle = '#ffd23f'; [[0, 0], [1, 0], [2, 0], [0, 1], [2, 1], [1, 2]].forEach(p => ctx.fillRect(614 + p[0] * 22, 170 + p[1] * 22, 22, 22));
+  txt('LEVEL 99', 645, 270, 24, '#ffffff');
+  ROOM_BEDS.forEach(b => bedAt(b[0], b[1], b[2]));
+}
+let ROOM_BEDS = [[70, 410, '#7c5cff']];
+function bedAt(x, w, col) {
+  box(x, 300, 30, 230, 10, '#a0643c'); box(x + 10, 410, w - 10, 110, 14, '#a0643c');
+  box(x + 20, 380, w - 30, 50, 18, '#ffffff'); box(x + 30, 352, 90, 42, 16, '#ffffff');
+  box(x + 100, 368, w - 110, 72, 20, col); line(x + 120, 404, x + w - 30, 404, 'rgba(255,255,255,.3)', 4);
+}
+function crumbs(minX = -1) {
+  CRUMBS.forEach(c => { if (c[0] > minX) { circ(c[0], c[1], 6, '#e0a93b'); circ(c[0] + 2, c[1] + 1, 2.5, '#a86a1f'); } });
+}
+function bathroom() {
+  ctx.fillStyle = '#d6f1ee'; ctx.fillRect(0, 0, W, 570);
+  for (let x = 0; x <= W; x += 64) line(x, 0, x, 570, '#bde2dd', 2);
+  for (let y = 0; y <= 570; y += 64) line(0, y, W, y, '#bde2dd', 2);
+  for (let y = 570; y < H; y += 50) for (let x = 0; x < W; x += 50) { ctx.fillStyle = ((x + y) / 50) % 2 ? '#79b2bf' : '#8dc3cf'; ctx.fillRect(x, y, 50, 50); }
+  box(960, 300, 96, 170, 14, '#ffd23f'); box(960, 430, 96, 14, 4, '#ffb000'); circ(1008, 296, 9, '#9fb6c9');
+}
+function sink() {
+  box(470, 528, 340, 192, 10, '#ffffff'); line(640, 540, 640, 710, '#d9e4ea', 4);
+  circ(620, 620, 6, '#9fb6c9'); circ(660, 620, 6, '#9fb6c9');
+  box(440, 498, 400, 40, 16, '#f4f7fa'); ell(640, 506, 140, 9, '#d9e4ea');
+  box(628, 472, 24, 34, 8, '#b7c6d3'); box(600, 466, 50, 14, 7, '#b7c6d3');
+  box(486, 452, 34, 46, 8, '#ff9fbd'); line(496, 452, 490, 420, '#4cc3ff', 7); line(510, 452, 516, 424, '#ff7aa2', 7);
+}
+function bubbles(t, n = 22, a = .55) {
+  for (let i = 0; i < n; i++) {
+    const sp = 40 + (i % 5) * 18, r = 8 + (i % 4) * 7;
+    const x = (i * 173) % W + Math.sin(t * 1.3 + i) * 20;
+    const y = H + 60 - ((t * sp + i * 97) % (H + 120));
+    ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = `rgba(255,255,255,${a})`; ctx.lineWidth = 2.5; ctx.stroke();
+    circ(x - r * .35, y - r * .35, r * .22, `rgba(255,255,255,${a + .15})`);
+  }
+}
+function confetti(t) {
+  const cols = ['#ffd23f', '#ff5a5f', '#3b8beb', '#5dff9a', '#ff7aa2', '#b06bff'];
+  for (let i = 0; i < 70; i++) {
+    const x = (i * 97) % W + Math.sin(t * 2 + i) * 30, y = ((t * (120 + (i % 7) * 25) + i * 61) % (H + 40)) - 20;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(t * 3 + i); ctx.fillStyle = cols[i % cols.length]; ctx.fillRect(-6, -3, 12, 7); ctx.restore();
+  }
+}
+function foam(cx, cy, k, t) {
+  if (k <= 0) return;
+  for (let i = 0; i < 16; i++) {
+    const a = i / 16 * TAU + t * .8, d = 22 + (i % 3) * 12;
+    circ(cx + Math.cos(a) * d, cy + Math.sin(a) * d * .6, (7 + (i % 4) * 3) * k, 'rgba(255,255,255,.92)');
+  }
+}
+function timerRing(x, y, r, frac, label, sub) {
+  circ(x, y, r + 14, 'rgba(14,58,70,.88)');
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 12; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(frac)); ctx.strokeStyle = '#ffd23f'; ctx.lineCap = 'round'; ctx.stroke();
+  txt(label, x, y - 4, r * .5, '#ffffff');
+  if (sub) txt(sub, x, y + r * .42, 17, '#a7cdd2');
+}
+const banner = s => pill(28, 26, s, 30, '#ffd23f', '#0e3a46');
+const score = n => pill(W - 28, 26, 'Очки: ' + n, 28, 'rgba(14,58,70,.88)', '#ffffff', 'right');
+const arTag = () => pill(28, 92, 'AR-режим: видны микробы', 20, 'rgba(37,227,255,.9)', '#0b2d36');
+const mmss = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+
+/* ---------- scenes ---------- */
+let CUR = null; // current scene + local time, for speaking()
+function speaking(name) {
+  if (!CUR) return false;
+  const c = CUR.sc.cues.find(c => CUR.t >= c[0] && CUR.t < c[1]);
+  if (!c) return false;
+  if (c[2] === name) return true;
+  const KIDS = ['Тимур', 'Лея', 'Дилшод', 'Томирис'];
+  if ((c[2] === 'Песня' || c[2] === 'Дети') && KIDS.includes(name)) return true;
+  if (c[2] === 'Все' && (KIDS.includes(name) || name === 'Чистон' || name === 'Мама')) return true;
+  return false;
+}
+
+
+/* ---------- series characters ---------- */
+const MOMHAIR = '#6b3e26', DRESS = '#8e6cd8';
+function mom(x, y, s, o) {
+  o = Object.assign({ talk: false, t: 0, armL: .15, armR: .15, handL: null, handR: null, apron: false, hold: null, mood: 'happy' }, o);
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ell(0, 0, 72, 12, 'rgba(0,0,0,.16)');
+  box(-30, -122, 22, 122, 10, SKIN); box(8, -122, 22, 122, 10, SKIN);
+  ell(-20, -6, 22, 9, '#5b3b8c'); ell(20, -6, 22, 9, '#5b3b8c');
+  ctx.beginPath(); ctx.moveTo(-40, -300); ctx.lineTo(40, -300); ctx.lineTo(80, -104);
+  ctx.quadraticCurveTo(0, -90, -80, -104); ctx.closePath(); ctx.fillStyle = DRESS; ctx.fill();
+  if (o.apron) { box(-42, -252, 84, 142, 18, '#ffffff'); box(-22, -196, 44, 30, 8, '#ffd6e4'); }
+  const hl = o.handL || [-38 - Math.sin(o.armL) * 100, -288 + Math.cos(o.armL) * 100];
+  const hr = o.handR || [38 + Math.sin(o.armR) * 100, -288 + Math.cos(o.armR) * 100];
+  arm([-38, -288], hl, DRESS); arm([38, -288], hr, DRESS);
+  if (o.hold === 'bowl') { const bx = (hl[0] + hr[0]) / 2, by = (hl[1] + hr[1]) / 2 - 8; ell(bx, by - 6, 46, 12, '#f3e2b8'); ctx.beginPath(); ctx.ellipse(bx, by - 4, 50, 34, 0, 0, Math.PI); ctx.fillStyle = '#ff9f1c'; ctx.fill(); }
+  if (o.hold === 'spoon') { line(hr[0], hr[1], hr[0] - 10, hr[1] - 70, '#a0643c', 8); ell(hr[0] - 12, hr[1] - 78, 10, 14, '#a0643c'); circ(hr[0], hr[1], 14, SKIN); }
+  box(-12, -322, 24, 30, 8, SKIN);
+  box(-66, -372, 16, 78, 8, MOMHAIR); box(50, -372, 16, 78, 8, MOMHAIR);
+  circ(0, -364, 56, SKIN);
+  circ(0, -430, 28, MOMHAIR);
+  ctx.beginPath(); ctx.arc(0, -366, 60, Math.PI, TAU); ctx.lineTo(58, -342);
+  ctx.quadraticCurveTo(44, -384, 0, -388); ctx.quadraticCurveTo(-44, -384, -58, -342); ctx.closePath();
+  ctx.fillStyle = MOMHAIR; ctx.fill();
+  const blink = (o.t % 4.1) < .12;
+  [-20, 20].forEach(ex => {
+    if (blink) line(ex - 8, -362, ex + 8, -362, '#2a1c16', 3);
+    else { ell(ex, -362, 9, 11, '#fff'); circ(ex, -360, 5, '#2a1c16'); circ(ex + 2, -363, 1.8, '#fff'); line(ex + 6, -374, ex + 11, -379, '#2a1c16', 2.5); }
+  });
+  circ(-36, -342, 9, 'rgba(255,110,140,.35)'); circ(36, -342, 9, 'rgba(255,110,140,.35)');
+  circ(-56, -344, 4, '#ffd23f'); circ(56, -344, 4, '#ffd23f');
+  if (o.talk) ell(0, -333, 11, 3 + Math.abs(Math.sin(o.t * 16)) * 8, '#9b2f45');
+  else if (o.mood === 'wow') ell(0, -333, 8, 10, '#9b2f45');
+  else { ctx.beginPath(); ctx.arc(0, -344, 15, .2 * Math.PI, .8 * Math.PI); ctx.strokeStyle = '#9b2f45'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.stroke(); }
+  ctx.restore();
+  return { hl: [x + hl[0] * s, y + hl[1] * s], hr: [x + hr[0] * s, y + hr[1] * s] };
+}
+
+ROOM_BEDS = [[20, 270, '#7c5cff'], [310, 250, '#ff8fb1']];
+function sleepyHead(x, y, t, girl) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-.35);
+  if (girl) { circ(-52, -22, 20, HAIR); circ(52, -22, 20, HAIR); }
+  circ(0, 0, girl ? 44 : 50, SKIN);
+  ctx.beginPath(); ctx.arc(0, -4, 52, Math.PI * 1.05, Math.PI * 1.95); ctx.lineTo(30, -32); ctx.lineTo(12, -24); ctx.lineTo(-8, -34); ctx.lineTo(-28, -24); ctx.closePath(); ctx.fillStyle = HAIR; ctx.fill();
+  [-18, 18].forEach(ex => { ctx.beginPath(); ctx.arc(ex, 2, 8, .15 * Math.PI, .85 * Math.PI); ctx.strokeStyle = '#2a1c16'; ctx.lineWidth = 3.5; ctx.stroke(); });
+  ell(0, 26, 6, 5 + Math.sin(t * 2) * 1.5, MOUTH);
+  ctx.restore();
+  for (let i = 0; i < 3; i++) {
+    const k = ((t * .5 + i / 3) % 1);
+    ctx.globalAlpha = 1 - k; txt('z', x + 50 + k * 40, y - 60 - k * 90, 26 + i * 6, '#5b6fb5'); ctx.globalAlpha = 1;
+  }
+}
+
+function sockChar(x, y, s, rot, alive, t) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.beginPath(); ctx.moveTo(-12, -40); ctx.lineTo(12, -40); ctx.lineTo(12, 4); ctx.quadraticCurveTo(12, 16, 26, 16);
+  ctx.lineTo(30, 16); ctx.quadraticCurveTo(40, 22, 30, 30); ctx.lineTo(-4, 30); ctx.quadraticCurveTo(-12, 30, -12, 18); ctx.closePath();
+  ctx.fillStyle = '#ffffff'; ctx.fill();
+  box(-12, -40, 24, 7, 2, '#ff5a5f'); box(-12, -28, 24, 5, 2, '#3b8beb');
+  if (alive) { circ(-3, -12, 4, '#1b2a41'); circ(6, -12, 4, '#1b2a41'); ctx.beginPath(); ctx.arc(1, -4, 5, .2 * Math.PI, .8 * Math.PI); ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = 2; ctx.stroke(); }
+  ctx.restore();
+}
+function carChar(x, y, s, col, alive, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  box(-34, -26, 68, 18, 8, col); box(-20, -40, 38, 18, 8, col); box(-15, -36, 12, 10, 3, '#c4f1ff'); box(1, -36, 12, 10, 3, '#c4f1ff');
+  [-20, 20].forEach(wx => { circ(wx, -6, 9, '#2d3142'); line(wx, -6, wx + Math.cos(t * 12) * 6, -6 + Math.sin(t * 12) * 6, '#9aa5b1', 3); });
+  if (alive) { circ(30, -18, 4, '#fff'); circ(31, -18, 2, '#1b2a41'); }
+  ctx.restore();
+}
+function shirtShape(x, y, s, rot, col) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.beginPath(); ctx.moveTo(-30, -30); ctx.lineTo(-12, -38); ctx.quadraticCurveTo(0, -30, 12, -38); ctx.lineTo(30, -30); ctx.lineTo(44, -12); ctx.lineTo(30, -4); ctx.lineTo(26, -14);
+  ctx.lineTo(26, 30); ctx.lineTo(-26, 30); ctx.lineTo(-26, -14); ctx.lineTo(-30, -4); ctx.lineTo(-44, -12); ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+  ctx.fillStyle = '#ffd23f'; [[-7, -8], [3, -8], [-10, -1], [-3, -1], [4, -1], [-6, 6], [1, 6]].forEach(p => ctx.fillRect(p[0], p[1], 6, 6));
+  ctx.restore();
+}
+function pantsShape(x, y, s, rot, col) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.beginPath(); ctx.moveTo(-28, -34); ctx.lineTo(28, -34); ctx.lineTo(32, 34); ctx.lineTo(8, 34); ctx.lineTo(0, -6); ctx.lineTo(-8, 34); ctx.lineTo(-32, 34); ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+  ctx.restore();
+}
+function eyesOn(x, y, k = 1) { circ(x - 9 * k, y, 6 * k, '#fff'); circ(x + 9 * k, y, 6 * k, '#fff'); circ(x - 8 * k, y + 1, 3 * k, '#1b2a41'); circ(x + 10 * k, y + 1, 3 * k, '#1b2a41'); }
+
+/* a small Chiston face that can live in any shiny thing */
+function faceOf(cx, cy, k, talk, t) {
+  const blink = (t % 3.7) < .12, eh = (blink ? 4 : 30) * k;
+  box(cx - 54 * k, cy - 38 * k - eh / 2, 24 * k, eh, 11 * k, INK); box(cx + 30 * k, cy - 38 * k - eh / 2, 24 * k, eh, 11 * k, INK);
+  if (talk) ell(cx, cy + 34 * k, 26 * k, (6 + Math.abs(Math.sin(t * 15)) * 16) * k, INK);
+  else { ctx.beginPath(); ctx.arc(cx, cy + 12 * k, 36 * k, .18 * Math.PI, .82 * Math.PI); ctx.strokeStyle = INK; ctx.lineWidth = 7 * k; ctx.lineCap = 'round'; ctx.stroke(); }
+  circ(cx - 70 * k, cy + 14 * k, 12 * k, 'rgba(255,120,160,.45)'); circ(cx + 70 * k, cy + 14 * k, 12 * k, 'rgba(255,120,160,.45)');
+}
+function miniChiston(x, y, k, on, o) { ctx.save(); ctx.translate(x, y); ctx.scale(k, k); chiston(0, 0, on, o); ctx.restore(); }
+function kettle(x, y, s, on, talk, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ell(0, 6, 90, 12, 'rgba(0,0,0,.15)');
+  ctx.beginPath(); ctx.moveTo(70, -60); ctx.quadraticCurveTo(120, -70, 130, -120); ctx.lineTo(116, -122); ctx.quadraticCurveTo(104, -84, 68, -84); ctx.fillStyle = '#b7c6d3'; ctx.fill();
+  ctx.beginPath(); ctx.arc(-80, -90, 40, Math.PI * .5, Math.PI * 1.5); ctx.strokeStyle = '#2d3142'; ctx.lineWidth = 12; ctx.stroke();
+  const g = ctx.createLinearGradient(-80, -170, 80, 0); g.addColorStop(0, '#f4f8fb'); g.addColorStop(.5, '#c3d2de'); g.addColorStop(1, '#8fa4b6');
+  ctx.beginPath(); ctx.ellipse(0, -80, 86, 82, 0, 0, TAU); ctx.fillStyle = g; ctx.fill();
+  box(-50, -172, 100, 20, 10, '#9fb6c9'); circ(0, -178, 12, '#2d3142');
+  ctx.globalAlpha = .5; box(-60, -140, 14, 50, 7, '#ffffff'); ctx.globalAlpha = 1;
+  if (on > 0) {
+    ctx.save(); ctx.globalAlpha = on; ctx.shadowColor = 'rgba(120,240,255,.9)'; ctx.shadowBlur = 30;
+    ell(0, -80, 70, 64, 'rgba(200,250,255,.55)'); ctx.restore();
+    ctx.globalAlpha = on; faceOf(0, -78, .62, talk, t); ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
+/* ---------- series scenery ---------- */
+function curtains(k) {
+  line(880, 74, 1150, 74, '#a0643c', 8);
+  const w = 18 + 105 * (1 - k);
+  box(886, 76, w, 228, 10, '#ff8f8f'); box(1144 - w, 76, w, 228, 10, '#ff8f8f');
+  for (let i = 1; i < 4; i++) { line(886 + w * i / 4, 90, 886 + w * i / 4, 296, 'rgba(160,40,40,.25)', 3); line(1144 - w * i / 4, 90, 1144 - w * i / 4, 296, 'rgba(160,40,40,.25)', 3); }
+}
+function bedroom(o) {
+  o = Object.assign({ curtain: 1, door: 0, mirrorOn: 0, mirrorTalk: false, t: 0 }, o);
+  room();
+  curtains(o.curtain);
+  // door
+  box(1150, 170, 120, 372, 8, '#c98b55');
+  if (o.door > 0) { box(1150, 170, 120 * o.door, 372, 4, '#3b2a1e'); }
+  circ(1166 + 92 * (1 - o.door), 370, 7, '#ffd23f');
+  // dresser + toy box + hook
+  box(930, 410, 180, 130, 10, '#d39b62'); box(942, 424, 156, 50, 6, '#e8b77a'); box(942, 480, 156, 50, 6, '#e8b77a');
+  circ(1020, 449, 5, '#7a4b25'); circ(1020, 505, 5, '#7a4b25');
+  box(720, 575, 130, 90, 10, '#3b8beb'); txt('ИГРУШКИ', 785, 620, 18, '#ffffff');
+  circ(1120, 330, 7, '#7a4b25');
+  // lamp
+  line(700, 0, 700, 60, '#555', 3); ctx.beginPath(); ctx.moveTo(660, 92); ctx.lineTo(740, 92); ctx.lineTo(718, 58); ctx.lineTo(682, 58); ctx.closePath(); ctx.fillStyle = '#ffd23f'; ctx.fill();
+  // small wall mirror over the bed: Chiston lives here too
+  miniChiston(300, 170, .48, o.mirrorOn, { talk: o.mirrorTalk, t: o.t });
+}
+function kitchen() {
+  ctx.fillStyle = '#ffe9c7'; ctx.fillRect(0, 0, W, 560);
+  for (let x = 760; x < 1120; x += 40) for (let y = 300; y < 440; y += 40) { ctx.fillStyle = ((x + y) / 40) % 2 ? '#ffffff' : '#ffd9a8'; ctx.fillRect(x, y, 40, 40); }
+  ctx.fillStyle = '#d9a46c'; ctx.fillRect(0, 560, W, 160);
+  for (let y = 590; y < H; y += 40) line(0, y, W, y, 'rgba(120,70,30,.2)', 2);
+  box(90, 90, 240, 190, 10, '#ffffff'); box(102, 102, 216, 166, 6, '#8fd3ff'); circ(150, 150, 26, '#ffe066');
+  line(210, 102, 210, 268, '#ffffff', 8);
+  box(80, 80, 60, 210, 10, '#7cc6a4'); box(280, 80, 60, 210, 10, '#7cc6a4');
+  // counter, stove, fridge
+  box(760, 440, 360, 260, 8, '#f4f7fa'); box(760, 430, 360, 22, 6, '#9b6b43');
+  [[800, 520], [960, 520]].forEach(p => { box(p[0], p[1], 130, 150, 8, '#e3e9ef'); circ(p[0] + 110, p[1] + 75, 5, '#9fb6c9'); });
+  box(1130, 170, 140, 530, 16, '#eef3f7'); line(1130, 330, 1270, 330, '#c9d4de', 4); box(1145, 200, 10, 90, 5, '#9fb6c9'); box(1145, 350, 10, 120, 5, '#9fb6c9');
+  box(985, 424, 110, 12, 6, '#c9d4de'); box(1032, 392, 12, 34, 5, '#b7c6d3'); box(1008, 388, 40, 10, 5, '#b7c6d3');
+}
+function stovePot(t, steam = true) {
+  ell(860, 432, 46, 8, '#2d3142');
+  box(818, 380, 84, 52, 10, '#ff5a5f'); box(808, 376, 104, 12, 6, '#d63b40');
+  if (steam) for (let i = 0; i < 3; i++) { const k = (t * .6 + i / 3) % 1; ctx.globalAlpha = .5 * (1 - k); circ(840 + i * 20 + Math.sin(t * 3 + i) * 6, 360 - k * 90, 10 + k * 14, '#ffffff'); ctx.globalAlpha = 1; }
+}
+function table() {
+  box(280, 520, 20, 180, 6, '#a86a3a'); box(700, 520, 20, 180, 6, '#a86a3a');
+  box(250, 498, 500, 26, 10, '#c98b55');
+  box(256, 512, 488, 112, 10, '#fff4dc');
+  ctx.fillStyle = 'rgba(255,90,95,.35)'; for (let x = 268; x < 740; x += 36) ctx.fillRect(x, 512, 16, 112);
+}
+function chairBack(x) { box(x - 60, 380, 120, 20, 8, '#a86a3a'); box(x - 60, 380, 16, 200, 6, '#a86a3a'); box(x + 44, 380, 16, 200, 6, '#a86a3a'); }
+function bowl(x, y, food) { ell(x, y - 6, 44, 11, food > 0 ? '#f3e2b8' : '#ffd9a8'); ctx.beginPath(); ctx.ellipse(x, y - 4, 48, 30, 0, 0, Math.PI); ctx.fillStyle = '#3b8beb'; ctx.fill(); }
+function hallway() {
+  ctx.fillStyle = '#dfeeff'; ctx.fillRect(0, 0, W, 560); ctx.fillStyle = '#c9a27a'; ctx.fillRect(0, 560, W, 160);
+  box(980, 150, 200, 410, 10, '#8a5a3c'); circ(1150, 370, 9, '#ffd23f'); box(1020, 190, 120, 90, 8, '#9e6c4b');
+  line(140, 220, 520, 220, '#8a5a3c', 10);
+  [200, 320, 440].forEach(x => circ(x, 232, 8, '#5b3b28'));
+  ctx.beginPath(); ctx.moveTo(300, 236); ctx.lineTo(360, 236); ctx.lineTo(392, 430); ctx.lineTo(270, 430); ctx.closePath(); ctx.fillStyle = '#ff9f1c'; ctx.fill();
+  box(160, 600, 360, 20, 6, '#8a5a3c');
+}
+function street(t, speed) {
+  const g = ctx.createLinearGradient(0, 0, 0, 500); g.addColorStop(0, '#8fd3ff'); g.addColorStop(1, '#d8f1ff');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 520);
+  circ(1100, 110, 46, '#ffe066');
+  const off = (t * speed * .35) % 400;
+  for (let i = -1; i < 5; i++) {
+    const x = i * 400 - off;
+    box(x + 30, 230, 160, 290, 6, ['#ffb4a2', '#b5e48c', '#ffd6a5', '#a0c4ff'][(i + 8) % 4]);
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 2; c++) box(x + 55 + c * 70, 260 + r * 80, 40, 46, 4, '#ffffff');
+    circ(x + 300, 400, 60, '#5fbf6a'); box(x + 292, 430, 16, 90, 4, '#8a5a3c');
+  }
+  ctx.fillStyle = '#5a6270'; ctx.fillRect(0, 520, W, 200); ctx.fillStyle = '#9aa5b1'; ctx.fillRect(0, 512, W, 12);
+  const doff = (t * speed) % 160;
+  for (let x = -doff; x < W; x += 160) box(x, 610, 80, 10, 4, '#ffffff');
+}
+function car(x, y, t, moving) {
+  ctx.save(); ctx.translate(x, y);
+  ell(0, 6, 210, 14, 'rgba(0,0,0,.25)');
+  ctx.beginPath(); ctx.moveTo(-200, -30); ctx.quadraticCurveTo(-200, -90, -140, -96); ctx.lineTo(-90, -96); ctx.lineTo(-50, -160); ctx.lineTo(90, -160); ctx.lineTo(140, -96); ctx.lineTo(180, -90); ctx.quadraticCurveTo(210, -80, 205, -30); ctx.closePath();
+  ctx.fillStyle = '#ff5a5f'; ctx.fill();
+  box(-38, -148, 56, 50, 8, '#c4f1ff'); box(28, -148, 56, 50, 8, '#c4f1ff');
+  // passengers: mom drives (front), Timur in the back
+  circ(60, -118, 20, SKIN); ctx.beginPath(); ctx.arc(60, -122, 21, Math.PI, TAU); ctx.fillStyle = MOMHAIR; ctx.fill();
+  circ(-62, -112, 15, SKIN); ctx.beginPath(); ctx.arc(-62, -116, 16, Math.PI, TAU); ctx.fillStyle = HAIR; ctx.fill(); circ(-79, -120, 7, HAIR); circ(-45, -120, 7, HAIR);
+  circ(-8, -116, 18, SKIN); ctx.beginPath(); ctx.arc(-8, -120, 19, Math.PI, TAU); ctx.fillStyle = HAIR; ctx.fill();
+  circ(-14, -116, 2.5, '#2a1c16'); circ(-2, -116, 2.5, '#2a1c16');
+  [-120, 120].forEach(wx => { circ(wx, -20, 34, '#2d3142'); circ(wx, -20, 16, '#c9d4de'); const a = moving ? t * 10 : 0; line(wx, -20, wx + Math.cos(a) * 14, -20 + Math.sin(a) * 14, '#5a6270', 4); });
+  circ(196, -60, 8, '#ffe066');
+  ctx.restore();
+}
+function checklist(items, shown, done, x = 820, y = 110, title = 'План утреннего героя') {
+  const h = 70 + items.length * 52;
+  box(x, y, 420, h, 20, 'rgba(14,58,70,.92)');
+  txt(title, x + 210, y + 36, 28, '#ffd23f');
+  items.forEach((s, i) => {
+    if (i >= shown) return;
+    const yy = y + 80 + i * 52, ok = i < done;
+    circ(x + 40, yy, 16, ok ? '#5dff9a' : 'rgba(255,255,255,.2)');
+    if (ok) txt('✓', x + 40, yy + 1, 22, '#0b2d36'); else txt(String(i + 1), x + 40, yy + 1, 20, '#ffffff');
+    txt(s, x + 70, yy + 1, 25, ok ? '#a7cdd2' : '#ffffff', 'left');
+    if (ok) line(x + 70, yy + 2, x + 70 + ctx.measureText(s).width, yy + 2, 'rgba(167,205,210,.8)', 2);
+  });
+}
+function speech(x, y, s, size = 30) {
+  ctx.font = `${size}px ${FONT}`; const w = ctx.measureText(s).width + 36;
+  box(x - w / 2, y - size, w, size * 1.8, 18, '#ffffff');
+  ctx.beginPath(); ctx.moveTo(x - 12, y + size * .8 - 2); ctx.lineTo(x + 6, y + size * .8 - 2); ctx.lineTo(x - 14, y + size * .8 + 20); ctx.closePath(); ctx.fillStyle = '#ffffff'; ctx.fill();
+  txt(s, x, y - size * .1, size, '#1b2a41');
+}
+function titleCard(t, big, small, note) {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0e3a46'); g.addColorStop(1, '#1b6f80');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  bubbles(t + 4);
+  chiston(640, 220, 1, { t });
+  txt(big, 640, 450 + Math.sin(t * 2) * 5, 92, '#ffd23f');
+  txt(small, 640, 540, 50, '#ffffff');
+  if (note) txt(note, 640, 610, 26, '#a7cdd2');
+}
+const fly = (a, b, k, h) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k) - Math.sin(Math.PI * k) * h, lerp(a[2] || 0, b[2] || 0, k)];
+
+const TPJ = '#ffc2d6', TDRESS = '#ff8fb1';
+function tomiris(x, y, s, o) { return kid(x, y, s * .8, Object.assign({ girl: true, shirt: TDRESS }, o, { talk: speaking('Томирис') })); }
+
+/* ---------- episode 3: Пойдём гулять! ---------- */
+const SOFA_X = 990;
+function skyCol(k) { // 0 = day, 1 = late afternoon
+  const a = [143, 211, 255], b = [255, 205, 150];
+  return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')})`;
+}
+function livingRoom(o) {
+  o = Object.assign({ tv: 'off', sky: 0, clock: 0, talk: false, t: 0 }, o);
+  ctx.fillStyle = '#e6f2df'; ctx.fillRect(0, 0, W, 560);
+  ctx.fillStyle = 'rgba(255,255,255,.4)'; for (let x = 40; x < W; x += 90) ctx.fillRect(x, 0, 30, 560);
+  ctx.fillStyle = '#c99a6b'; ctx.fillRect(0, 560, W, 160);
+  for (let y = 590; y < H; y += 40) line(0, y, W, y, 'rgba(120,70,30,.2)', 2);
+  ell(560, 650, 300, 46, '#ff9f9f'); ell(560, 650, 240, 34, '#ffc2c2');
+  // window
+  box(470, 80, 300, 220, 10, '#ffffff'); box(482, 92, 276, 196, 6, skyCol(o.sky));
+  circ(700, 140, 26, o.sky > .5 ? '#ffb347' : '#ffe066');
+  circ(540, 260, 40, '#5fbf6a'); circ(600, 270, 34, '#6fcf7a'); line(620, 92, 620, 288, '#ffffff', 8);
+  // family photo
+  box(830, 110, 150, 110, 8, '#a0643c'); box(840, 120, 130, 90, 4, '#fff4dc');
+  [[870, 175, 14, MOMHAIR], [905, 168, 16, '#3b2a1e'], [935, 182, 10, HAIR], [955, 185, 9, HAIR]].forEach(p => { circ(p[0], p[1], p[2], SKIN); circ(p[0], p[1] - p[2] * .6, p[2] * .8, p[3]); });
+  // clock
+  circ(1180, 150, 46, '#ffffff'); ctx.beginPath(); ctx.arc(1180, 150, 46, 0, TAU); ctx.strokeStyle = '#a0643c'; ctx.lineWidth = 6; ctx.stroke();
+  const hA = o.clock * TAU / 12 - Math.PI / 2 + 1, mA = o.clock * TAU - Math.PI / 2;
+  line(1180, 150, 1180 + Math.cos(hA) * 22, 150 + Math.sin(hA) * 22, '#2d3142', 6);
+  line(1180, 150, 1180 + Math.cos(mA) * 34, 150 + Math.sin(mA) * 34, '#2d3142', 4);
+  // TV on a stand
+  box(60, 470, 340, 90, 8, '#a0643c'); box(80, 490, 140, 50, 6, '#c98b55'); box(240, 490, 140, 50, 6, '#c98b55');
+  box(66, 276, 328, 190, 12, '#1f2430'); box(220, 466, 20, 10, 2, '#1f2430');
+  const sx = 80, sy = 290, sw = 300, sh = 162;
+  if (o.tv === 'on') {
+    box(sx, sy, sw, sh, 6, '#7fd3ff');
+    ctx.save(); rr(sx, sy, sw, sh, 6); ctx.clip();
+    ell(sx + 150, sy + 160, 200, 50, '#5fbf6a');
+    const bx = sx + 150 + Math.sin(o.t * 3) * 90, by = sy + 90 - Math.abs(Math.sin(o.t * 6)) * 40;
+    circ(bx, by, 22, '#ff5a5f'); circ(bx - 7, by - 5, 4, '#fff'); circ(bx + 7, by - 5, 4, '#fff');
+    star(sx + 60 + Math.sin(o.t * 2) * 20, sy + 40, 16, 7, '#ffd23f');
+    ctx.restore();
+  } else if (o.tv === 'chiston') {
+    box(sx, sy, sw, sh, 6, '#c9f4ff');
+    ctx.save(); ctx.shadowColor = 'rgba(120,240,255,.9)'; ctx.shadowBlur = 30; box(sx, sy, sw, sh, 6, 'rgba(200,250,255,.6)'); ctx.restore();
+    faceOf(sx + sw / 2, sy + sh / 2 - 4, .7, o.talk, o.t);
+  } else box(sx, sy, sw, sh, 6, '#2d3142');
+}
+function sofaBack() { box(SOFA_X - 230, 420, 460, 150, 34, '#4fb3a9'); box(SOFA_X - 250, 470, 60, 150, 24, '#3f9a91'); box(SOFA_X + 190, 470, 60, 150, 24, '#3f9a91'); }
+function sofaFront() { box(SOFA_X - 200, 560, 400, 56, 18, '#5cc4b9'); box(SOFA_X - 200, 612, 400, 18, 6, '#3f9a91'); }
+function ballAt(x, y, t) { circ(x, y, 20, '#ffffff'); ctx.save(); ctx.beginPath(); ctx.arc(x, y, 20, 0, TAU); ctx.clip(); box(x - 22, y - 5 + Math.sin(t * 8) * 6, 44, 10, 0, '#ff5a5f'); ctx.restore(); }
+function playground(t, o) {
+  o = Object.assign({ sky: .2 }, o);
+  const g = ctx.createLinearGradient(0, 0, 0, 480); g.addColorStop(0, skyCol(o.sky)); g.addColorStop(1, '#e8f7ff');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 500);
+  circ(1120, 100, 44, o.sky > .6 ? '#ffb347' : '#ffe066');
+  [[90, 380, 70], [190, 400, 56], [1220, 390, 64]].forEach(p => { box(p[0] - 8, p[1], 16, 110, 4, '#8a5a3c'); circ(p[0], p[1], p[2], '#5fbf6a'); });
+  ell(400, 120, 80, 22, '#ffffff'); ell(450, 110, 56, 20, '#ffffff');
+  ctx.fillStyle = '#8fd16a'; ctx.fillRect(0, 490, W, 230);
+  ell(640, 640, 520, 60, '#a8dc84');
+  // slide
+  box(300, 330, 16, 220, 4, '#ff9f1c'); box(372, 330, 16, 220, 4, '#ff9f1c');
+  for (let y = 360; y < 540; y += 36) line(306, y, 382, y, '#ff9f1c', 6);
+  ctx.beginPath(); ctx.moveTo(380, 340); ctx.lineTo(560, 540); ctx.lineTo(530, 552); ctx.lineTo(372, 368); ctx.closePath(); ctx.fillStyle = '#ffd23f'; ctx.fill();
+  // swings frame
+  line(820, 290, 780, 560, '#3b8beb', 12); line(1060, 290, 1100, 560, '#3b8beb', 12); line(810, 290, 1070, 290, '#3b8beb', 14);
+  // sandbox
+  box(560, 560, 200, 60, 10, '#c98b55'); box(572, 566, 176, 40, 8, '#f3dca0');
+}
+function swing(px, py, L, a, rider) {
+  const sx = px + Math.sin(a) * L, sy = py + Math.cos(a) * L;
+  line(px - 28, py, sx - 28, sy, '#555', 4); line(px + 28, py, sx + 28, sy, '#555', 4);
+  if (rider) rider(sx, sy);
+  box(sx - 40, sy - 6, 80, 12, 4, '#ff5a5f');
+  return [sx, sy];
+}
+const BOY = { shirt: '#5fbf6a', pants: '#3a3f5c' }, GIRL = { girl: true, shirt: '#ffd23f' };
+
+const SCENES = [
+  { name: 'Заставка', dur: 5,
+    cues: [[.8, 4.6, 'Рассказчик', 'Чистон. Серия третья: «Пойдём гулять!»']],
+    draw(t) { titleCard(t, 'Чистон', 'Серия 3. Пойдём гулять!', 'мультфильм-прототип'); } },
+
+  { name: 'Дома после садика', dur: 12,
+    cues: [[1.2, 4.6, 'Мама', 'Ну вот мы и дома! Разувайтесь и мойте руки.'],
+      [4.9, 7, 'Дети', 'Хорошо, мама!'],
+      [7.6, 11.6, 'Рассказчик', 'Дети помыли руки… а потом…']],
+    draw(t) {
+      hallway();
+      box(1000, 170, 160, 390, 4, '#3b2a1e');
+      const k = ease(seg(t, 0, 1.4));
+      mom(lerp(1100, 860, k), 702 - Math.abs(Math.sin(t * 8)) * 6 * (k < 1), .95, { t, talk: speaking('Мама') });
+      kid(lerp(1060, 620, k), 690 - Math.abs(Math.sin(t * 8 + 1)) * 8 * (k < 1), 1, { t, talk: speaking('Дилшод'), mood: 'happy', armL: t > 4.9 && t < 7 ? 2.5 : .2 });
+      tomiris(lerp(1080, 440, k), 704 - Math.abs(Math.sin(t * 8 + 2)) * 8 * (k < 1), 1, { t, mood: 'happy', armR: t > 4.9 && t < 7 ? 2.5 : .2 });
+      if (t > 8) { ctx.fillStyle = `rgba(6,18,22,${seg(t, 8, 11.5) * .5})`; ctx.fillRect(0, 0, W, H); }
+    } },
+
+  { name: 'Телефон и телевизор', dur: 14,
+    cues: [[.5, 5, 'Рассказчик', 'Дилшод взял телефон, а Томирис включила телевизор.'],
+      [6, 10.5, 'Рассказчик', 'Прошёл час… потом ещё один…'],
+      [11, 13.8, 'Дилшод', 'Ещё один уровень…']],
+    draw(t) {
+      const pass = seg(t, 6, 11);
+      livingRoom({ tv: 'on', sky: pass * .8, clock: 3 + pass * 2, t });
+      sofaBack();
+      kid(SOFA_X, 640, 1, { t, talk: speaking('Дилшод'), hold: 'phone', handR: [30, -150], glow: '#7fe3ff', look: [0, .7], redEyes: pass, mood: 'happy', tilt: pass * .08 });
+      sofaFront();
+      tomiris(470, 704, 1, { t, look: [-1, 0], redEyes: pass, mood: 'happy', tilt: -pass * .06 });
+      if (t > 6 && t < 11) pill(1180, 210, '+1 час', 24, '#ff5a5f', '#ffffff', 'center');
+    } },
+
+  { name: 'Чистон в телевизоре', dur: 22,
+    cues: [[1, 5, 'Чистон', 'Стоп-стоп-стоп! Дилшод, Томирис, вы уже два часа смотрите в экраны!'],
+      [5.2, 9.5, 'Чистон', 'Глазки устали, спинка устала, а ножки совсем заскучали.'],
+      [9.8, 12, 'Дилшод', 'Но мне интересно!'],
+      [12.2, 14, 'Томирис', 'А мне мультик!'],
+      [14.3, 18.5, 'Чистон', 'Экран — как конфета: немножко можно, а много — вредно.'],
+      [18.7, 22, 'Чистон', 'Посмотрите-ка в окно. Кто там играет?']],
+    sfx: [[.5, 'power']],
+    draw(t) {
+      livingRoom({ tv: t < .5 ? 'on' : 'chiston', talk: speaking('Чистон'), sky: .8, clock: 5, t });
+      if (t >= .5 && t < .8) { ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(80, 290, 300, 162); }
+      sofaBack();
+      const toWin = t >= 19;
+      kid(SOFA_X, 640, 1, { t, talk: speaking('Дилшод'), hold: t < 9.8 ? 'phone' : null, handR: t < 9.8 ? [30, -150] : null, glow: '#7fe3ff', look: toWin ? [-1, -1] : [-1, 0], redEyes: 1, mood: t < 5 ? 'wow' : 'happy' });
+      sofaFront();
+      tomiris(470, 704, 1, { t, look: toWin ? [1, -1] : [-1, 0], redEyes: 1, mood: t < 5 ? 'wow' : 'happy' });
+    } },
+
+  { name: 'За окном', dur: 10.5,
+    cues: [[1, 4, 'Дилшод', 'Ой, там ребята в мяч играют!'],
+      [4.3, 6.6, 'Томирис', 'И качели!'],
+      [7, 10.5, 'Дети', 'Пойдём гулять!']],
+    draw(t) {
+      livingRoom({ tv: 'chiston', sky: .8, clock: 5, t });
+      ctx.fillStyle = 'rgba(6,18,22,.35)'; ctx.fillRect(0, 0, W, H);
+      const k = ease(seg(t, 0, .8));
+      ctx.save(); ctx.translate(640, 330); ctx.scale(lerp(.3, .78, k), lerp(.3, .78, k)); ctx.translate(-640, -360);
+      box(-14, -14, W + 28, H + 28, 30, '#ffffff');
+      ctx.save(); rr(0, 0, W, H, 20); ctx.clip();
+      playground(t, { sky: .4 });
+      const bx = lerp(420, 760, (Math.sin(t * 2) + 1) / 2), by = 470 - Math.abs(Math.cos(t * 2)) * 120;
+      kid(360, 640, 1, Object.assign({ t, mood: 'happy', armL: 1.4 }, BOY));
+      kid(820, 650, .85, Object.assign({ t, mood: 'happy', armR: 1.4, shirt: '#ff9f1c' }, {}));
+      ballAt(bx, by, t);
+      swing(940, 290, 200, Math.sin(t * 2.2) * .4, (sx, sy) => kid(sx, sy + 70, .75, Object.assign({ t, mood: 'happy', squat: .6, armL: 2.9, armR: 2.9 }, GIRL)));
+      ctx.restore(); ctx.restore();
+      pill(640, 40, 'За окном', 28, '#ffd23f', '#0e3a46', 'center');
+      kid(1020, 820, 1.1, { t, talk: speaking('Дилшод'), mood: 'wow' });
+      tomiris(240, 820, 1.4, { t, mood: 'wow' });
+    } },
+
+  { name: 'Экраны отдыхают', dur: 14,
+    cues: [[1, 5, 'Чистон', 'Молодцы! Экраны отдыхают — и вы тоже!'],
+      [6.5, 8.5, 'Мама', 'Куда собрались?'],
+      [8.7, 11, 'Дети', 'Гулять, мама! Можно?'],
+      [11.2, 14, 'Мама', 'Конечно! Одевайтесь, я пойду с вами.']],
+    sfx: [[.6, 'pop'], [4.8, 'pop']],
+    draw(t) {
+      livingRoom({ tv: t < 5.2 ? 'chiston' : 'off', talk: speaking('Чистон'), sky: .8, clock: 5, t });
+      box(300, 448, 70, 14, 4, '#2d3142');
+      const put = seg(t, .3, 1.6);
+      kid(lerp(SOFA_X, 470, ease(put)), 690, 1, { t, talk: speaking('Дилшод'), mood: 'happy', armL: put > 0 && put < 1 ? 1.5 : .2 });
+      if (put < 1) { const px = lerp(SOFA_X - 40, 335, ease(put)); box(px - 18, 470 - put * 30, 36, 60, 6, '#1f2430'); } else box(318, 420, 34, 28, 4, '#1f2430');
+      tomiris(700, 704, 1, { t, mood: 'happy', armL: t > 3.6 && t < 5 ? 1.3 : .2 });
+      if (t > 3.6 && t < 5.4) box(610, 520, 24, 40, 6, '#555b70');
+      if (t >= 6) mom(lerp(1400, 1020, ease(seg(t, 6, 7))), 702, .95, { t, talk: speaking('Мама'), mood: t < 8.7 ? 'wow' : 'happy', armR: t > 11.2 ? 2.4 : .15 });
+      if (t >= 8.7 && t < 11) { star(470, 360, 16, 7, '#ffd23f'); star(700, 400, 14, 6, '#ffd23f'); }
+    } },
+
+  { name: 'Во дворе', dur: 26,
+    cues: [[.5, 4, 'Рассказчик', 'И вот они во дворе!'],
+      [4.5, 6.5, 'Дилшод', 'Лови мяч!'],
+      [7, 9.5, 'Мальчик', 'Поймал! Давай ещё!'],
+      [10, 12.5, 'Томирис', 'Мама, выше! Выше!'],
+      [12.8, 15, 'Мама', 'Держись крепче, доченька!'],
+      [15.5, 18, 'Девочка', 'Томирис, пойдём на горку!'],
+      [18.3, 20, 'Томирис', 'Пойдём!'],
+      [20.5, 26, 'Рассказчик', 'Дети бегали, прыгали, смеялись — и совсем забыли про экраны.']],
+    sfx: [[5, 'boing'], [8, 'boing']],
+    draw(t) {
+      playground(t, { sky: .3 });
+      if (t < 20.5) {
+        const ph = (t - 4.5) * 1.6, k = (Math.sin(ph - Math.PI / 2) + 1) / 2;
+        const bx = t < 4.5 ? 330 : lerp(330, 620, k), by = t < 4.5 ? 560 : 540 - Math.sin(Math.PI * k) * 140;
+        kid(280, 690, 1, { t, talk: speaking('Дилшод'), mood: 'happy', armR: 1.3 + (1 - k) * .6 });
+        kid(670, 690, 1, Object.assign({ t, talk: speaking('Мальчик'), mood: 'happy', armL: 1.3 + k * .6 }, BOY));
+        ballAt(bx, by, t);
+        const a = Math.sin(t * 2.2) * .45;
+        swing(940, 290, 210, a, (sx, sy) => tomiris(sx, sy + 70, 1, { t, mood: 'happy', squat: .6, armL: 2.9, armR: 2.9 }));
+        mom(1180, 702, .95, { t, talk: speaking('Мама'), armL: a > .2 ? 1.6 : 1.1 });
+        kid(480, 600 + (t > 15.5 ? 0 : 0), .8, Object.assign({ t, talk: speaking('Девочка'), mood: 'happy', armR: t > 15.5 && t < 18 ? 2.4 : .2 }, GIRL));
+      } else {
+        const s = t - 20.5;
+        [[0, 'kid', {}], [1, 'tom', {}], [2, 'kid', BOY], [3, 'kid', GIRL]].forEach(([i, who, look]) => {
+          const x = 640 + Math.sin(s * 1.4 + i * 1.6) * 420, y = 690 - Math.abs(Math.sin(s * 8 + i)) * 40;
+          if (who === 'tom') tomiris(x, y + 14, 1, { t, mood: 'happy', armL: 2.4, armR: 2.4 });
+          else kid(x, y, i === 3 ? .8 : 1, Object.assign({ t, mood: 'happy', armL: 2.4, armR: 2.4 }, look));
+        });
+        mom(1180, 702, .95, { t, mood: 'happy' });
+        confetti(t);
+      }
+    } },
+
+  { name: 'Домой', dur: 13,
+    cues: [[1, 3.5, 'Томирис', 'Сегодня было так весело!'],
+      [3.8, 6.5, 'Дилшод', 'Мама, давай завтра опять гулять!'],
+      [7, 13, 'Мама', 'Обязательно! Я так рада, что вы играли с ребятами, а не сидели в телефоне.']],
+    draw(t) {
+      street(t, 60);
+      ctx.fillStyle = 'rgba(255,150,80,.22)'; ctx.fillRect(0, 0, W, 520);
+      const b = i => Math.abs(Math.sin(t * 6 + i)) * 6;
+      mom(640, 702 - b(0), .95, { t, talk: speaking('Мама'), handL: [-120, -190], handR: [120, -190] });
+      kid(500, 700 - b(1), 1, { t, talk: speaking('Дилшод'), mood: 'happy', handR: [50, -140] });
+      tomiris(780, 712 - b(2), 1, { t, mood: 'happy', handL: [-55, -150] });
+    } },
+
+  { name: 'Моем руки', dur: 13,
+    cues: [[0, 3.6, 'Чистон', 'Нагулялись? Теперь — мыть руки с мылом!'],
+      [4, 9.4, 'Чистон', 'Запомните: мультики — немножко, а играть, бегать и дружить — много-много!'],
+      [9.8, 12.6, 'Дети', 'Запомнили!']],
+    sfx: [[9.8, 'fanfare']],
+    draw(t) {
+      bathroom();
+      chiston(640, 215, 1, { talk: speaking('Чистон'), t });
+      const wash = t >= 1 && t < 9.6, sc = wash ? Math.sin(t * 14) * 8 : 0;
+      kid(640, SY, 1.1, Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy' }, wash ? { handL: [-30 + sc, -176], handR: [30 - sc, -176] } : { armL: t > 9.8 ? 2.6 : .2 }));
+      sink();
+      if (wash) { ctx.fillStyle = 'rgba(120,200,255,.75)'; ctx.fillRect(633, SY - 184, 9, 498 - SY + 184); foam(640, SY - 176 * 1.1 + 4, seg(t, 1, 2) * (1 - seg(t, 9, 9.6)), t); }
+      tomiris(1010, 704, 1, Object.assign({ t, mood: 'happy' }, wash ? { handL: [-24 + sc, -190], handR: [24 - sc, -190] } : { armR: t > 9.8 ? 2.6 : .2 }));
+      if (wash) foam(1010, 704 - 190 * .8, seg(t, 1, 2) * (1 - seg(t, 9, 9.6)) * .6, t);
+      if (t > 9.8) confetti(t);
+    } },
+
+  { name: 'Конец', dur: 6,
+    cues: [[.8, 5.4, 'Рассказчик', 'Конец третьей серии. Играйте и дружите!']],
+    draw(t) { titleCard(t, 'Конец', 'третьей серии', 'Мультик — немножко, игры — много-много!'); } }
+];
+
+function mapK(k, v, a, b) {
+  for (let i = 1; i < k.length; i++) if (v <= k[i][a] || i === k.length - 1) { const p = (v - k[i - 1][a]) / ((k[i][a] - k[i - 1][a]) || 1); return k[i - 1][b] + p * (k[i][b] - k[i - 1][b]); }
+  return v;
+}
+// stretch scenes so every voiced line fits: cues and sfx move to real time, draw() still gets the original timeline
+SCENES.forEach((s, i) => {
+  const k = WARP[i]; if (!k) return;
+  const toReal = v => mapK(k, v, 0, 1);
+  s.knots = k; s.cues = s.cues.map(c => [toReal(c[0]), toReal(c[1]), c[2], c[3]]); s.sfx = (s.sfx || []).map(x => [toReal(x[0]), x[1]]); s.dur = k[k.length - 1][1];
+});
+let acc = 0;
+SCENES.forEach(s => { s.start = acc; acc += s.dur; s.sfx = s.sfx || []; });
+const TOTAL = acc;
+
+/* ---------- audio ---------- */
+let actx = null, master = null, musicGain = null;
+function ensureAudio() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!actx) {
+    actx = new AC(); master = actx.createGain(); master.gain.value = .5; master.connect(actx.destination);
+    musicGain = actx.createGain(); musicGain.gain.value = .16; musicGain.connect(master);
+  }
+  if (actx.state === 'suspended') actx.resume().catch(() => {});
+  return actx;
+}
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function tone(f, at, dur, type, vol, dest, f2) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, at);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dur);
+  g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + .015);
+  g.gain.exponentialRampToValueAtTime(.0005, at + dur);
+  o.connect(g); g.connect(dest || master); o.start(at); o.stop(at + dur + .05);
+}
+const MEL = [72, 76, 79, 76, 77, 81, 79, 0, 76, 79, 84, 79, 81, 79, 76, 0, 74, 77, 81, 77, 79, 77, 76, 74, 72, 76, 74, 71, 72, 0, 0, 0];
+const BASS = [48, 53, 48, 57, 50, 55, 55, 48];
+const BEAT = .42;
+let step = 0, nextAt = 0;
+setInterval(() => {
+  if (!actx || !playing || !musicOn) return;
+  while (nextAt < actx.currentTime + .25) {
+    const m = MEL[step % MEL.length];
+    if (m) tone(mtof(m), nextAt, BEAT * .9, 'triangle', .5, musicGain);
+    if (step % 2 === 0) tone(mtof(BASS[Math.floor(step / 4) % BASS.length]), nextAt, BEAT * 1.6, 'sine', .55, musicGain);
+    step++; nextAt += BEAT;
+  }
+}, 60);
+function sfx(name) {
+  if (!actx) return;
+  const t = actx.currentTime + .01;
+  if (name === 'ding') { tone(mtof(88), t, .5, 'sine', .5); tone(mtof(91), t + .12, .7, 'sine', .45); }
+  if (name === 'boing') tone(220, t, .35, 'square', .18, null, 660);
+  if (name === 'pop') tone(500, t, .12, 'sine', .4, null, 1200);
+  if (name === 'error') { tone(220, t, .2, 'square', .2); tone(180, t + .22, .3, 'square', .2); }
+  if (name === 'power') tone(200, t, .7, 'sine', .4, null, 900);
+  if (name === 'drop') tone(600, t, .25, 'triangle', .3, null, 150);
+  if (name === 'fanfare') [72, 76, 79, 84].forEach((m, i) => tone(mtof(m), t + i * .14, .5, 'triangle', .4));
+}
+
+/* ---------- voice ---------- */
+const PITCH = { 'Мама': 1.05, 'Вещи': 1.7, 'Дилшод': 1.45, 'Томирис': 1.85, 'Дети': 1.6, 'Тимур': 1.45, 'Лея': 1.9, 'Чистон': .85, 'Пиксель': 1.7, 'Хрум': .5, 'Кроссовки': 1.8, 'Рассказчик': 1, 'Песня': 1.3, 'Липучки': 2, 'Все': 1.3 };
+const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+let ruVoice = null;
+function pickVoice() {
+  if (!synth) return;
+  try { ruVoice = synth.getVoices().find(v => /^ru/i.test(v.lang)) || null; } catch (e) { ruVoice = null; }
+}
+if (synth) { pickVoice(); try { synth.onvoiceschanged = pickVoice; } catch (e) {} }
+function speak(text, who) {
+  if (!synth || !voiceOn) return;
+  if (!ruVoice) pickVoice();
+  if (!ruVoice) { statusEl.textContent = 'Не удалось загрузить озвучку. Смотрите с субтитрами.'; return; }
+  try {
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ru-RU'; if (ruVoice) u.voice = ruVoice;
+    u.pitch = Math.min(2, PITCH[who] || 1); u.rate = 1.12;
+    synth.speak(u);
+  } catch (e) {}
+}
+/* recorded voice clips (voice/c{scene}_{cue}.mp3); the browser voice is only a fallback */
+const clips = {};
+let clipsLoading = false, clipsFailed = 0, curSrc = null;
+function loadClips() {
+  if (clipsLoading || !actx) return;
+  clipsLoading = true;
+  SCENES.forEach((sc, si) => sc.cues.forEach((c, ci) => {
+    const key = si + '_' + ci;
+    fetch('voice/c' + key + '.mp3')
+      .then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(ab => new Promise((ok, bad) => actx.decodeAudioData(ab, ok, bad)))
+      .then(buf => { clips[key] = buf; })
+      .catch(() => { clips[key] = null; clipsFailed++; });
+  }));
+}
+function say(si, ci, offset = 0) {
+  if (!voiceOn) return;
+  const c = SCENES[si].cues[ci], buf = clips[si + '_' + ci];
+  stopClip();
+  if (buf && actx) {
+    if (offset >= buf.duration - .2) return;
+    const src = actx.createBufferSource(); src.buffer = buf;
+    const g = actx.createGain(); g.gain.value = 1.6; src.connect(g); g.connect(master);
+    src.start(0, offset); curSrc = src;
+  } else if (buf === null || buf === undefined) speak(c[3], c[2]);
+}
+function stopClip() { if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; } }
+function hush() { stopClip(); if (synth) try { synth.cancel(); } catch (e) {} }
+
+/* ---------- engine ---------- */
+let T = 0, playing = false, last = 0, voiceOn = true, musicOn = true, lastSubKey = '';
+const $ = id => document.getElementById(id);
+const subEl = $('sub'), whoEl = $('who'), lineEl = $('line'), seek = $('seek'), timeEl = $('time');
+const playBtn = $('play'), big = $('bigplay'), statusEl = $('status');
+seek.max = TOTAL.toFixed(1);
+const fmt = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+
+const chapters = $('chapters');
+SCENES.forEach((s, i) => {
+  const li = document.createElement('li'), b = document.createElement('button');
+  b.type = 'button'; b.innerHTML = `<span>${i + 1}. ${s.name}</span><span class="t">${fmt(s.start)}</span>`;
+  b.addEventListener('click', () => { hush(); T = s.start + .01; render(); if (!playing) setPlaying(true); });
+  li.appendChild(b); chapters.appendChild(li); s.btn = b;
+});
+
+function sceneAt(time) {
+  for (let i = SCENES.length - 1; i >= 0; i--) if (time >= SCENES[i].start) return SCENES[i];
+  return SCENES[0];
+}
+function resize() {
+  const r = cv.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2);
+  let w = r.width, h = r.height;
+  if (w / h > 16 / 9) w = h * 16 / 9; else h = w * 9 / 16;
+  cv.width = Math.max(320, Math.round(w * d)); cv.height = Math.max(180, Math.round(h * d));
+  render();
+}
+let activeBtn = null;
+function render() {
+  const sc = sceneAt(Math.min(T, TOTAL - .001)), t = Math.min(T, TOTAL - .001) - sc.start;
+  CUR = { sc, t };
+  ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.save(); sc.draw(sc.knots ? mapK(sc.knots, t, 1, 0) : t); ctx.restore();
+  ctx.globalAlpha = 1;
+  const fadeIn = sc.start > 0 ? 1 - seg(t, 0, .35) : 0, fadeOut = seg(t, sc.dur - .35, sc.dur);
+  const f = Math.max(fadeIn, fadeOut);
+  if (f > 0) { ctx.fillStyle = `rgba(6,18,22,${f})`; ctx.fillRect(0, 0, W, H); }
+  const c = sc.cues.find(c => t >= c[0] && t < c[1]);
+  if (window.__burnSubs && c) burnSub(c);
+  const key = c ? sc.name + c[0] : '';
+  if (key !== lastSubKey) {
+    lastSubKey = key;
+    if (c && !window.__burnSubs) { whoEl.textContent = c[2] + ':'; lineEl.textContent = c[3]; subEl.hidden = false; } else subEl.hidden = true;
+  }
+  seek.value = T.toFixed(1); timeEl.textContent = fmt(T) + ' / ' + fmt(TOTAL);
+  if (activeBtn !== sc.btn) { if (activeBtn) activeBtn.classList.remove('on'); sc.btn.classList.add('on'); activeBtn = sc.btn; }
+}
+function burnSub(c) {
+  ctx.font = `30px ${FONT}`;
+  const s = c[2] + ': ' + c[3], w = Math.min(ctx.measureText(s).width + 44, W - 80);
+  box(640 - w / 2, 640, w, 52, 14, 'rgba(8,22,28,.8)');
+  ctx.font = `30px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ffffff'; ctx.fillText(s, 640, 667, W - 100);
+}
+function triggers(a, b) {
+  SCENES.forEach(sc => {
+    const si = SCENES.indexOf(sc);
+    sc.cues.forEach((c, ci) => { const g = sc.start + c[0]; if (g > a && g <= b) say(si, ci); });
+    sc.sfx.forEach(x => { const g = sc.start + x[0]; if (g > a && g <= b) sfx(x[1]); });
+  });
+}
+function frame(ts) {
+  if (!playing) return;
+  const dt = Math.min(.1, (ts - last) / 1000); last = ts;
+  const prev = T; T = Math.min(TOTAL, T + dt);
+  triggers(prev, T);
+  render();
+  if (T >= TOTAL) { setPlaying(false); return; }
+  requestAnimationFrame(frame);
+}
+function setPlaying(on) {
+  playing = on;
+  playBtn.textContent = on ? 'Пауза' : (T >= TOTAL ? 'Ещё раз' : 'Смотреть');
+  big.hidden = on;
+  if (on) {
+    if (T >= TOTAL) T = 0;
+    if (ensureAudio()) nextAt = actx.currentTime + .05;
+    loadClips();
+    const sc = sceneAt(T), c = sc.cues.find(c => T - sc.start >= c[0] && T - sc.start < c[1]);
+    if (c) say(SCENES.indexOf(sc), sc.cues.indexOf(c), T - sc.start - c[0]);
+    last = performance.now(); requestAnimationFrame(frame);
+  } else hush();
+}
+playBtn.addEventListener('click', () => setPlaying(!playing));
+big.addEventListener('click', () => setPlaying(true));
+cv.addEventListener('click', () => setPlaying(!playing));
+$('restart').addEventListener('click', () => { hush(); T = 0; render(); setPlaying(true); });
+seek.addEventListener('input', () => { hush(); T = parseFloat(seek.value) || 0; render(); });
+$('voice').addEventListener('click', e => { voiceOn = !voiceOn; e.currentTarget.setAttribute('aria-pressed', voiceOn); e.currentTarget.textContent = 'Голос: ' + (voiceOn ? 'вкл' : 'выкл'); if (!voiceOn) { hush(); statusEl.textContent = ''; } });
+$('music').addEventListener('click', e => { musicOn = !musicOn; e.currentTarget.setAttribute('aria-pressed', musicOn); e.currentTarget.textContent = 'Музыка: ' + (musicOn ? 'вкл' : 'выкл'); if (musicOn && actx) nextAt = actx.currentTime + .05; });
+$('fs').addEventListener('click', () => {
+  const p = $('player');
+  try {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else if (p.requestFullscreen) p.requestFullscreen().catch(() => { statusEl.textContent = 'Полноэкранный режим здесь недоступен.'; });
+    else statusEl.textContent = 'Полноэкранный режим здесь недоступен.';
+  } catch (e) { statusEl.textContent = 'Полноэкранный режим здесь недоступен.'; }
+});
+document.addEventListener('fullscreenchange', () => setTimeout(resize, 60));
+window.addEventListener('resize', resize);
+window.__seek = time => { T = time; render(); };
+window.__total = TOTAL;
+window.__scenes = SCENES.map(s => ({ name: s.name, start: s.start, dur: s.dur, cues: s.cues, sfx: s.sfx }));
+resize();
+if (document.fonts && document.fonts.load) document.fonts.load(`40px Pangolin`).then(() => { lastSubKey = '-'; render(); }).catch(() => {});
+
+})();
+</script>
