@@ -1,30 +1,4 @@
 /* ---------- episode 3: Пойдём гулять! ---------- */
-function ballAt(x, y, t) { circ(x, y, 20, '#ffffff'); ctx.save(); ctx.beginPath(); ctx.arc(x, y, 20, 0, TAU); ctx.clip(); box(x - 22, y - 5 + Math.sin(t * 8) * 6, 44, 10, 0, '#ff5a5f'); ctx.restore(); }
-function playground(t, o) {
-  o = Object.assign({ sky: .2 }, o);
-  const g = ctx.createLinearGradient(0, 0, 0, 480); g.addColorStop(0, skyCol(o.sky)); g.addColorStop(1, '#e8f7ff');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 500);
-  circ(1120, 100, 44, o.sky > .6 ? '#ffb347' : '#ffe066');
-  [[90, 380, 70], [190, 400, 56], [1220, 390, 64]].forEach(p => { box(p[0] - 8, p[1], 16, 110, 4, '#8a5a3c'); circ(p[0], p[1], p[2], '#5fbf6a'); });
-  ell(400, 120, 80, 22, '#ffffff'); ell(450, 110, 56, 20, '#ffffff');
-  ctx.fillStyle = '#8fd16a'; ctx.fillRect(0, 490, W, 230);
-  ell(640, 640, 520, 60, '#a8dc84');
-  // slide
-  box(300, 330, 16, 220, 4, '#ff9f1c'); box(372, 330, 16, 220, 4, '#ff9f1c');
-  for (let y = 360; y < 540; y += 36) line(306, y, 382, y, '#ff9f1c', 6);
-  ctx.beginPath(); ctx.moveTo(380, 340); ctx.lineTo(560, 540); ctx.lineTo(530, 552); ctx.lineTo(372, 368); ctx.closePath(); ctx.fillStyle = '#ffd23f'; ctx.fill();
-  // swings frame
-  line(820, 290, 780, 560, '#3b8beb', 12); line(1060, 290, 1100, 560, '#3b8beb', 12); line(810, 290, 1070, 290, '#3b8beb', 14);
-  // sandbox
-  box(560, 560, 200, 60, 10, '#c98b55'); box(572, 566, 176, 40, 8, '#f3dca0');
-}
-function swing(px, py, L, a, rider) {
-  const sx = px + Math.sin(a) * L, sy = py + Math.cos(a) * L;
-  line(px - 28, py, sx - 28, sy, '#555', 4); line(px + 28, py, sx + 28, sy, '#555', 4);
-  if (rider) rider(sx, sy);
-  box(sx - 40, sy - 6, 80, 12, 4, '#ff5a5f');
-  return [sx, sy];
-}
 const BOY = { shirt: '#5fbf6a', pants: '#3a3f5c' }, GIRL = { girl: true, shirt: '#ffd23f' };
 
 const SCENES = [

@@ -190,4 +190,3 @@ const SCENES = [
     cues: [[.8, 5.4, 'Рассказчик', 'Конец пятой серии. Береги зубки — и копи монетки!']],
     draw(t) { titleCard(t, 'Конец', 'пятой серии', 'Береги зубки — копи монетки'); } }
 ];
-function ballAt(x, y, t) { circ(x, y, 20, '#ffffff'); ctx.save(); ctx.beginPath(); ctx.arc(x, y, 20, 0, TAU); ctx.clip(); box(x - 22, y - 5 + Math.sin(t * 8) * 6, 44, 10, 0, '#ff5a5f'); ctx.restore(); }

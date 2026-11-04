@@ -521,15 +521,16 @@ function mom(x, y, s, o) {
 }
 
 ROOM_BEDS = [[20, 270, '#7c5cff'], [310, 250, '#ff8fb1']];
-function sleepyHead(x, y, t, girl) {
+function sleepyHead(x, y, t, girl, awake) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(-.35);
   if (girl) { circ(-52, -22, 20, HAIR); circ(52, -22, 20, HAIR); }
   circ(0, 0, girl ? 44 : 50, SKIN);
   ctx.beginPath(); ctx.arc(0, -4, 52, Math.PI * 1.05, Math.PI * 1.95); ctx.lineTo(30, -32); ctx.lineTo(12, -24); ctx.lineTo(-8, -34); ctx.lineTo(-28, -24); ctx.closePath(); ctx.fillStyle = HAIR; ctx.fill();
-  [-18, 18].forEach(ex => { ctx.beginPath(); ctx.arc(ex, 2, 8, .15 * Math.PI, .85 * Math.PI); ctx.strokeStyle = '#2a1c16'; ctx.lineWidth = 3.5; ctx.stroke(); });
-  ell(0, 26, 6, 5 + Math.sin(t * 2) * 1.5, MOUTH);
+  if (awake) [-18, 18].forEach(ex => { ell(ex, 0, 8, 10, '#fff'); circ(ex + 2, 2, 5, '#2a1c16'); });
+  else [-18, 18].forEach(ex => { ctx.beginPath(); ctx.arc(ex, 2, 8, .15 * Math.PI, .85 * Math.PI); ctx.strokeStyle = '#2a1c16'; ctx.lineWidth = 3.5; ctx.stroke(); });
+  if (awake) { ctx.beginPath(); ctx.arc(0, 18, 12, .2 * Math.PI, .8 * Math.PI); ctx.strokeStyle = MOUTH; ctx.lineWidth = 4; ctx.stroke(); } else ell(0, 26, 6, 5 + Math.sin(t * 2) * 1.5, MOUTH);
   ctx.restore();
-  for (let i = 0; i < 3; i++) {
+  if (!awake) for (let i = 0; i < 3; i++) {
     const k = ((t * .5 + i / 3) % 1);
     ctx.globalAlpha = 1 - k; txt('z', x + 50 + k * 40, y - 60 - k * 90, 26 + i * 6, '#5b6fb5'); ctx.globalAlpha = 1;
   }
@@ -869,6 +870,94 @@ function livingRoom(o) {
 function sofaBack() { box(SOFA_X - 230, 420, 460, 150, 34, '#4fb3a9'); box(SOFA_X - 250, 470, 60, 150, 24, '#3f9a91'); box(SOFA_X + 190, 470, 60, 150, 24, '#3f9a91'); }
 function sofaFront() { box(SOFA_X - 200, 560, 400, 56, 18, '#5cc4b9'); box(SOFA_X - 200, 612, 400, 18, 6, '#3f9a91'); }
 
+/* ---------- season finale helpers (episodes 6-8) ---------- */
+function starChart(x, y, s, n, pop, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  box(-60, -70, 120, 150, 8, '#ffffff'); ctx.strokeStyle = '#c9d4de'; ctx.lineWidth = 3; rr(-60, -70, 120, 150, 8); ctx.stroke();
+  circ(0, -70, 7, '#ff5a5f');
+  txt('Звёздочки', 0, -50, 16, '#0e3a46');
+  for (let i = 0; i < 7; i++) {
+    const cx = -36 + (i % 3) * 36, cy = -20 + Math.floor(i / 3) * 36;
+    if (i < n) { const k = i === n - 1 && pop != null ? ease(clamp(pop)) : 1; star(cx, cy, 15 * k, 7 * k, '#ffd23f'); }
+    else { ctx.beginPath(); ctx.arc(cx, cy, 12, 0, TAU); ctx.strokeStyle = '#e3e9ef'; ctx.lineWidth = 3; ctx.stroke(); }
+  }
+  ctx.restore();
+}
+function fridgeChart(n, pop, t) { starChart(1200, 260, .9, n, pop, t); }
+function toyBox(x, y) { box(x - 70, y - 50, 140, 90, 10, '#3b8beb'); txt('ИГРУШКИ', x, y, 18, '#ffffff'); }
+function block(x, y, c) { box(x - 18, y - 36, 36, 36, 4, c); txt('А', x, y - 18, 20, '#ffffff'); }
+function flowerPot(x, y, grow, t, col) {
+  box(x - 30, y - 50, 60, 50, 8, '#d9822b'); box(x - 36, y - 56, 72, 14, 6, '#c8742a');
+  const h = 30 + grow * 70, sway = Math.sin(t * 2 + x) * 4 * grow;
+  line(x, y - 56, x + sway, y - 56 - h, '#38a169', 6);
+  ell(x - 16 + sway * .5, y - 56 - h * .5, 14, 7, '#5fbf6a'); ell(x + 16 + sway * .5, y - 56 - h * .6, 14, 7, '#5fbf6a');
+  const r = 6 + grow * 16, fx = x + sway, fy = y - 56 - h;
+  for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; circ(fx + Math.cos(a) * r, fy + Math.sin(a) * r, r * .7, col); }
+  circ(fx, fy, r * .6, '#ffd23f');
+}
+function wateringCan(x, y, tilt) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
+  box(-30, -30, 60, 50, 10, '#5fbf6a'); line(26, -10, 66, -40, '#5fbf6a', 10); ell(68, -42, 10, 6, '#38a169');
+  ctx.beginPath(); ctx.arc(0, -30, 22, Math.PI, TAU); ctx.strokeStyle = '#38a169'; ctx.lineWidth = 6; ctx.stroke();
+  ctx.restore();
+}
+function plate(x, y, k) { if (k <= 0) return; ctx.globalAlpha = Math.min(1, k); ell(x, y, 44, 11, '#ffffff'); ell(x, y, 30, 7, '#eef3f7'); ctx.globalAlpha = 1; }
+function spoonOnTable(x, y) { line(x - 22, y, x + 14, y, '#9fb6c9', 5); ell(x + 22, y, 9, 5, '#9fb6c9'); }
+function bathtub(t) {
+  box(100, 470, 480, 180, 46, '#ffffff'); box(120, 640, 30, 40, 8, '#c9d4de'); box(530, 640, 30, 40, 8, '#c9d4de');
+  ell(340, 484, 230, 22, '#9ad7f0');
+}
+function bubblesOn(x, y, w, t, n = 14) { for (let i = 0; i < n; i++) { const bx = x - w / 2 + (i * 53) % w, by = y + Math.sin(t * 2 + i) * 6 - (i % 3) * 14; circ(bx, by, 16 + (i % 4) * 6, 'rgba(255,255,255,.95)'); ctx.beginPath(); ctx.arc(bx, by, 16 + (i % 4) * 6, 0, TAU); ctx.strokeStyle = 'rgba(140,200,230,.6)'; ctx.lineWidth = 2; ctx.stroke(); } }
+function duck(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y + Math.sin(t * 3 + x) * 3); ctx.scale(s, s);
+  ell(0, 0, 30, 18, '#ffd23f'); circ(20, -20, 14, '#ffd23f'); ctx.beginPath(); ctx.moveTo(32, -20); ctx.lineTo(46, -16); ctx.lineTo(32, -12); ctx.closePath(); ctx.fillStyle = '#ff9f1c'; ctx.fill(); circ(24, -24, 3, '#1b2a41');
+  ctx.restore();
+}
+function nightWindow(t) {
+  box(912, 92, 206, 186, 6, '#1d2b5a'); circ(1060, 150, 26, '#fff4c2'); circ(1072, 142, 22, '#1d2b5a');
+  for (let i = 0; i < 7; i++) { const sx = 930 + (i * 37) % 180, sy = 110 + (i * 53) % 150; ctx.globalAlpha = .5 + .5 * Math.sin(t * 2 + i); star(sx, sy, 5, 2, '#ffffff'); ctx.globalAlpha = 1; }
+}
+function night(k) { if (k > 0) { ctx.fillStyle = `rgba(15,25,70,${k})`; ctx.fillRect(0, 0, W, H); } }
+function iceCream(x, y, s) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.beginPath(); ctx.moveTo(-16, -8); ctx.lineTo(16, -8); ctx.lineTo(0, 34); ctx.closePath(); ctx.fillStyle = '#e0a93b'; ctx.fill();
+  circ(0, -18, 17, '#ffd6e4'); circ(-4, -26, 4, '#ff7aa2');
+  ctx.restore();
+}
+function pond(t, face, talk) {
+  ell(170, 640, 190, 50, '#5bb6e8'); ell(150, 630, 120, 24, 'rgba(255,255,255,.25)');
+  duck(110, 630, .9, t); duck(220, 650, .7, t + 1); duck(260, 624, .5, t + 2);
+  if (face > 0) { ctx.globalAlpha = face; faceOf(170, 642, .42, talk, t); ctx.globalAlpha = 1; }
+}
+
+/* ---------- playground (episodes 3+) ---------- */
+function ballAt(x, y, t) { circ(x, y, 20, '#ffffff'); ctx.save(); ctx.beginPath(); ctx.arc(x, y, 20, 0, TAU); ctx.clip(); box(x - 22, y - 5 + Math.sin(t * 8) * 6, 44, 10, 0, '#ff5a5f'); ctx.restore(); }
+function playground(t, o) {
+  o = Object.assign({ sky: .2 }, o);
+  const g = ctx.createLinearGradient(0, 0, 0, 480); g.addColorStop(0, skyCol(o.sky)); g.addColorStop(1, '#e8f7ff');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 500);
+  circ(1120, 100, 44, o.sky > .6 ? '#ffb347' : '#ffe066');
+  [[90, 380, 70], [190, 400, 56], [1220, 390, 64]].forEach(p => { box(p[0] - 8, p[1], 16, 110, 4, '#8a5a3c'); circ(p[0], p[1], p[2], '#5fbf6a'); });
+  ell(400, 120, 80, 22, '#ffffff'); ell(450, 110, 56, 20, '#ffffff');
+  ctx.fillStyle = '#8fd16a'; ctx.fillRect(0, 490, W, 230);
+  ell(640, 640, 520, 60, '#a8dc84');
+  // slide
+  box(300, 330, 16, 220, 4, '#ff9f1c'); box(372, 330, 16, 220, 4, '#ff9f1c');
+  for (let y = 360; y < 540; y += 36) line(306, y, 382, y, '#ff9f1c', 6);
+  ctx.beginPath(); ctx.moveTo(380, 340); ctx.lineTo(560, 540); ctx.lineTo(530, 552); ctx.lineTo(372, 368); ctx.closePath(); ctx.fillStyle = '#ffd23f'; ctx.fill();
+  // swings frame
+  line(820, 290, 780, 560, '#3b8beb', 12); line(1060, 290, 1100, 560, '#3b8beb', 12); line(810, 290, 1070, 290, '#3b8beb', 14);
+  // sandbox
+  box(560, 560, 200, 60, 10, '#c98b55'); box(572, 566, 176, 40, 8, '#f3dca0');
+}
+function swing(px, py, L, a, rider) {
+  const sx = px + Math.sin(a) * L, sy = py + Math.cos(a) * L;
+  line(px - 28, py, sx - 28, sy, '#555', 4); line(px + 28, py, sx + 28, sy, '#555', 4);
+  if (rider) rider(sx, sy);
+  box(sx - 40, sy - 6, 80, 12, 4, '#ff5a5f');
+  return [sx, sy];
+}
+
 /* ---------- episode 5: Копилка ---------- */
 const TX = 480, TY = 640, TX2 = 650, TY2 = 630, PX = 330, KX = 760;
 function wallTV(state, t) {
@@ -1061,7 +1150,6 @@ const SCENES = [
     cues: [[.8, 5.4, 'Рассказчик', 'Конец пятой серии. Береги зубки — и копи монетки!']],
     draw(t) { titleCard(t, 'Конец', 'пятой серии', 'Береги зубки — копи монетки'); } }
 ];
-function ballAt(x, y, t) { circ(x, y, 20, '#ffffff'); ctx.save(); ctx.beginPath(); ctx.arc(x, y, 20, 0, TAU); ctx.clip(); box(x - 22, y - 5 + Math.sin(t * 8) * 6, 44, 10, 0, '#ff5a5f'); ctx.restore(); }
 
 function mapK(k, v, a, b) {
   for (let i = 1; i < k.length; i++) if (v <= k[i][a] || i === k.length - 1) { const p = (v - k[i - 1][a]) / ((k[i][a] - k[i - 1][a]) || 1); return k[i - 1][b] + p * (k[i][b] - k[i - 1][b]); }
