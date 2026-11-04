@@ -84,7 +84,22 @@ const SCENES = [
       if (t > 7) { const k = ease(seg(t, 7, 8.4)); starChart(640, 360, 1.6 * k + .01, 3, seg(t, 7.4, 8.2), t); }
     } },
 
-  { name: 'Конец', dur: 6,
+  { name: 'Сура Ясин', dur: 28, quiet: true, cues: [], clip: { file: 'audio/yasin.mp3', at: 1.4 },
+    draw(t) {
+      bedroom({ t });
+      nightWindow(t);
+      night(.55);
+      sleepyHead(95, 352, t, false); sleepyHead(385, 354, t + 1.3, true);
+      for (let i = 0; i < 14; i++) { const sx = 60 + (i * 97) % 1160, sy = 60 + (i * 61) % 260; ctx.globalAlpha = .35 + .35 * Math.sin(t * 1.2 + i); star(sx, sy, 6, 2.5, '#fff4c2'); ctx.globalAlpha = 1; }
+      const a = seg(t, .3, 1.4) * (1 - seg(t, 26.6, 28));
+      ctx.globalAlpha = a;
+      box(390, 470, 500, 140, 30, 'rgba(10,20,50,.72)');
+      txt('Сура «Ясин»', 640, 515, 44, '#ffd23f');
+      txt('аяты 1–4 · читает Мишари Рашид аль-Афаси', 640, 570, 24, '#cfd8ff');
+      ctx.globalAlpha = 1;
+    } },
+
+  { name: 'Конец', dur: 6, quiet: true,
     cues: [[.8, 5.4, 'Рассказчик', 'Конец седьмой серии. Сладких снов!']],
     draw(t) { titleCard(t, 'Конец', 'седьмой серии', 'Экраны спят — и мы спим'); } }
 ];

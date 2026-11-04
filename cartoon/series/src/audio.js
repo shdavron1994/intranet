@@ -14,7 +14,10 @@ function tone(f, at, dur, type, vol, f2) {
 }
 const MEL = [72,76,79,76,77,81,79,0,76,79,84,79,81,79,76,0,74,77,81,77,79,77,76,74,72,76,74,71,72,0,0,0];
 const BASS = [48,53,48,57,50,55,55,48], BEAT = .42, MV = .08;
+const QUIET = SC.filter(x => x.quiet).map(x => [x.start - .6, x.start + x.dur]);
+const quietAt = at => QUIET.some(q => at >= q[0] && at < q[1]);
 for (let step = 0, at = .05; at < TOTAL - 2; step++, at += BEAT) {
+  if (quietAt(at)) continue;
   const m = MEL[step % MEL.length]; if (m) tone(mtof(m), at, BEAT * .9, 'triangle', .5 * MV);
   if (step % 2 === 0) tone(mtof(BASS[Math.floor(step / 4) % BASS.length]), at, BEAT * 1.6, 'sine', .55 * MV);
 }

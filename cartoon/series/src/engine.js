@@ -39,6 +39,7 @@ const BEAT = .42;
 let step = 0, nextAt = 0;
 setInterval(() => {
   if (!actx || !playing || !musicOn) return;
+  if (CUR && CUR.sc.quiet) { nextAt = actx.currentTime + .05; return; } // no music under Quran recitation
   while (nextAt < actx.currentTime + .25) {
     const m = MEL[step % MEL.length];
     if (m) tone(mtof(m), nextAt, BEAT * .9, 'triangle', .5, musicGain);
@@ -93,6 +94,19 @@ function loadClips() {
       .then(buf => { clips[key] = buf; })
       .catch(() => { clips[key] = null; clipsFailed++; });
   }));
+  SCENES.forEach((sc, si) => { if (!sc.clip) return;
+    fetch(sc.clip.file).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+      .then(ab => new Promise((ok, bad) => actx.decodeAudioData(ab, ok, bad)))
+      .then(buf => { clips['clip' + si] = buf; }).catch(() => {});
+  });
+}
+function playSceneClip(si, offset = 0) {
+  const buf = clips['clip' + si];
+  stopClip();
+  if (!buf || !actx || offset >= buf.duration - .2) return;
+  const src = actx.createBufferSource(); src.buffer = buf;
+  const g = actx.createGain(); g.gain.value = 1.2; src.connect(g); g.connect(master);
+  src.start(0, Math.max(0, offset)); curSrc = src;
 }
 function say(si, ci, offset = 0) {
   if (!voiceOn) return;
@@ -167,7 +181,8 @@ function triggers(a, b) {
   SCENES.forEach(sc => {
     const si = SCENES.indexOf(sc);
     sc.cues.forEach((c, ci) => { const g = sc.start + c[0]; if (g > a && g <= b) say(si, ci); });
-    sc.sfx.forEach(x => { const g = sc.start + x[0]; if (g > a && g <= b) sfx(x[1]); });
+    if (!sc.quiet) sc.sfx.forEach(x => { const g = sc.start + x[0]; if (g > a && g <= b) sfx(x[1]); });
+    if (sc.clip) { const g = sc.start + sc.clip.at; if (g > a && g <= b) playSceneClip(si); }
   });
 }
 function frame(ts) {
@@ -211,6 +226,6 @@ document.addEventListener('fullscreenchange', () => setTimeout(resize, 60));
 window.addEventListener('resize', resize);
 window.__seek = time => { T = time; render(); };
 window.__total = TOTAL;
-window.__scenes = SCENES.map(s => ({ name: s.name, start: s.start, dur: s.dur, cues: s.cues, sfx: s.sfx }));
+window.__scenes = SCENES.map(s => ({ name: s.name, start: s.start, dur: s.dur, cues: s.cues, sfx: s.sfx, quiet: !!s.quiet, clip: s.clip || null }));
 resize();
 if (document.fonts && document.fonts.load) document.fonts.load(`40px Pangolin`).then(() => { lastSubKey = '-'; render(); }).catch(() => {});
