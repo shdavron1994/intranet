@@ -227,8 +227,11 @@ function titleCard(t, big, small, note) {
 }
 const fly = (a, b, k, h) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k) - Math.sin(Math.PI * k) * h, lerp(a[2] || 0, b[2] || 0, k)];
 
-const TPJ = '#ffc2d6', TDRESS = '#ff8fb1';
-function tomiris(x, y, s, o) { return kid(x, y, s * .8, Object.assign({ girl: true, shirt: TDRESS }, o, { talk: speaking('Томирис') })); }
+const TPJ = '#ffc2d6', TDRESS = '#e64980';
+function tomiris(x, y, s, o) {
+  const dressy = !(o && o.shirt && o.shirt !== TDRESS);
+  return kid(x, y, s * .8, Object.assign({ girl: true, shirt: TDRESS, dressy }, o, { talk: speaking('Томирис') }));
+}
 
 // both kids behind the sink: Dilshod left, Tomiris right on a little step
 const DXS = 555, TXS = 745, TYS = SY - 14, TSC = 1.1;
@@ -471,4 +474,92 @@ function swing(px, py, L, a, rider) {
   if (rider) rider(sx, sy);
   box(sx - 40, sy - 6, 80, 12, 4, '#ff5a5f');
   return [sx, sy];
+}
+
+/* ---------- park «Лимпопо» (episode 8) ---------- */
+function palm(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.beginPath(); ctx.moveTo(-14, 0); ctx.quadraticCurveTo(-30, -150, 6, -300); ctx.lineTo(22, -300); ctx.quadraticCurveTo(-10, -150, 14, 0); ctx.closePath(); ctx.fillStyle = '#a0643c'; ctx.fill();
+  for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + (i - 2.5) * .55 + Math.sin(t * 1.5 + i) * .05; ctx.save(); ctx.translate(14, -300); ctx.rotate(a); ell(70, 0, 80, 18, i % 2 ? '#2f9e44' : '#40c057'); ctx.restore(); }
+  circ(4, -296, 12, '#8a5a3c'); circ(24, -292, 12, '#8a5a3c');
+  ctx.restore();
+}
+function giraffe(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  const C = '#f4c542', S = '#c8742a';
+  [-50, -26, 26, 50].forEach(lx => box(lx - 8, -150, 16, 150, 6, C));
+  ell(0, -170, 80, 46, C);
+  ctx.save(); ctx.translate(50, -190); ctx.rotate(-.35 + Math.sin(t) * .04); box(-14, -230, 34, 240, 16, C);
+  [[0, -60], [4, -130], [-2, -190]].forEach(p => ell(p[0] + 2, p[1], 9, 12, S));
+  ell(14, -250, 34, 22, C); circ(-2, -276, 7, S); circ(22, -276, 7, S); line(-2, -270, -2, -282, S, 4); line(22, -270, 22, -282, S, 4);
+  circ(10, -256, 5, '#1b2a41'); ell(36, -246, 8, 5, S);
+  ctx.restore();
+  [[-40, -180], [10, -160], [40, -184], [-10, -194]].forEach(p => ell(p[0], p[1], 14, 10, S));
+  ctx.restore();
+}
+function elephant(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  const C = '#9aa5b1';
+  [-50, -20, 20, 50].forEach(lx => box(lx - 14, -80, 28, 80, 10, C));
+  ell(0, -110, 90, 64, C);
+  ell(70, -140, 40, 52, '#b8c2cc'); circ(100, -130, 44, C);
+  ctx.beginPath(); ctx.moveTo(130, -120); ctx.quadraticCurveTo(160, -60 + Math.sin(t * 2) * 10, 140, -30); ctx.strokeStyle = C; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.stroke();
+  circ(110, -142, 6, '#1b2a41'); line(-86, -110, -104, -80, C, 8);
+  ctx.restore();
+}
+function monkey(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y + Math.sin(t * 3) * 6); ctx.scale(s, s);
+  const C = '#8a5a3c';
+  ctx.beginPath(); ctx.arc(-26, 10, 30, 0, Math.PI); ctx.strokeStyle = C; ctx.lineWidth = 6; ctx.stroke();
+  ell(0, 10, 22, 28, C); circ(0, -30, 22, C); ell(0, -26, 16, 14, '#e3c39d'); circ(-22, -32, 8, '#e3c39d'); circ(22, -32, 8, '#e3c39d');
+  circ(-6, -32, 3, '#1b2a41'); circ(6, -32, 3, '#1b2a41');
+  line(-16, 0, -30, -40, C, 6);
+  ctx.restore();
+}
+function hippoInPond(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y + Math.sin(t * 1.5) * 3); ctx.scale(s, s);
+  ell(0, 0, 60, 30, '#b197fc'); ell(30, -10, 36, 26, '#c5b3ff'); circ(-10, -28, 9, '#b197fc'); circ(14, -32, 9, '#b197fc');
+  circ(-4, -18, 5, '#1b2a41'); circ(16, -20, 5, '#1b2a41'); circ(40, -6, 4, '#7950f2'); circ(54, -6, 4, '#7950f2');
+  ctx.restore();
+}
+function carousel(x, y, t, rider) {
+  const top = y - 300;
+  box(x - 8, top, 16, 300, 4, '#ffd23f');
+  ctx.beginPath(); ctx.moveTo(x - 190, top + 60); ctx.lineTo(x, top - 30); ctx.lineTo(x + 190, top + 60); ctx.closePath(); ctx.fillStyle = '#ff5a5f'; ctx.fill();
+  for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(x - 190 + i * 63, top + 60); ctx.lineTo(x - 190 + i * 63 + 32, top + 60); ctx.lineTo(x, top - 30); ctx.closePath(); ctx.fillStyle = '#ffffff'; ctx.fill(); }
+  box(x - 196, top + 56, 392, 22, 8, '#ffd23f');
+  ell(x, y, 200, 28, '#3b8beb'); ell(x, y - 8, 200, 24, '#74c0fc');
+  const horses = [0, 1, 2, 3].map(i => { const a = t * .9 + i * Math.PI / 2; return { a, x: x + Math.cos(a) * 160, z: Math.sin(a) }; }).sort((p, q) => p.z - q.z);
+  horses.forEach((h, i) => {
+    const hy = y - 90 - Math.sin(t * 3 + i) * 12;
+    line(h.x, top + 78, h.x, y - 10, '#c9d4de', 5);
+    ctx.save(); ctx.globalAlpha = h.z < 0 ? .7 : 1;
+    ell(h.x, hy, 40, 20, '#ffffff'); circ(h.x + 34, hy - 20, 16, '#ffffff'); line(h.x - 20, hy + 10, h.x - 26, hy + 40, '#ffffff', 6); line(h.x + 20, hy + 10, h.x + 26, hy + 40, '#ffffff', 6);
+    ell(h.x - 8, hy - 20, 18, 6, '#ff7aa2');
+    ctx.restore();
+    if (rider && h.z > .2 && i === horses.length - 1) rider(h.x, hy - 10);
+  });
+}
+function limpopo(t, o) {
+  o = Object.assign({ sky: .15, carousel: false, rider: null }, o);
+  const g = ctx.createLinearGradient(0, 0, 0, 480); g.addColorStop(0, skyCol(o.sky)); g.addColorStop(1, '#fff3d6');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 490);
+  circ(1110, 90, 44, o.sky > .6 ? '#ffb347' : '#ffe066');
+  ell(380, 120, 70, 20, '#ffffff'); ell(420, 110, 50, 18, '#ffffff');
+  ctx.fillStyle = '#e8d27a'; ctx.fillRect(0, 470, W, 250);
+  for (let i = 0; i < 14; i++) { const gx = (i * 97) % W; ell(gx, 560 + (i % 4) * 40, 40, 8, '#b5c46a'); }
+  // entrance arch
+  box(520, 180, 26, 300, 8, '#ff9f1c'); box(734, 180, 26, 300, 8, '#ff9f1c');
+  box(480, 150, 320, 70, 30, '#2f9e44'); txt('ЛИМПОПО', 640, 186, 44, '#ffd23f');
+  [[540, 150], [740, 150]].forEach(p => { circ(p[0], p[1], 14, '#ff5a5f'); });
+  palm(90, 520, .95, t); palm(1210, 500, .85, t);
+  elephant(250, 470, .9, t);
+  giraffe(1060, 480, .95, t);
+  monkey(1240, 230, .9, t);
+  if (o.carousel) carousel(940, 560, t, o.rider);
+}
+function hippoPond(t, face, talk) {
+  ell(170, 640, 190, 50, '#5bb6e8'); ell(150, 630, 120, 24, 'rgba(255,255,255,.25)');
+  hippoInPond(120, 636, .9, t);
+  if (face > 0) { ctx.globalAlpha = face; faceOf(250, 646, .36, talk, t); ctx.globalAlpha = 1; }
 }

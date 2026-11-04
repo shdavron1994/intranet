@@ -3,8 +3,8 @@ function holdCone(p, side) { const h = side === 'L' ? p.hl : p.hr; iceCream(h[0]
 
 const SCENES = [
   { name: 'Заставка', dur: 5,
-    cues: [[.8, 4.6, 'Рассказчик', 'Чистон. Серия восьмая: «Парк».']],
-    draw(t) { titleCard(t, 'Чистон', 'Серия 8. Парк', 'финал сезона'); } },
+    cues: [[.8, 4.6, 'Рассказчик', 'Чистон. Серия восьмая: «Парк Лимпопо».']],
+    draw(t) { titleCard(t, 'Чистон', 'Серия 8. Парк «Лимпопо»', 'финал сезона'); } },
 
   { name: 'Наша неделя', dur: 19,
     cues: [[.5, 6, 'Рассказчик', 'Всю неделю Дилшод и Томирис были молодцами.'],
@@ -24,7 +24,7 @@ const SCENES = [
     } },
 
   { name: 'Идём в парк', dur: 9,
-    cues: [[.5, 3.6, 'Папа', 'Как обещали — идём в парк!'],
+    cues: [[.5, 3.6, 'Папа', 'Как обещали — идём в парк «Лимпопо»!'],
       [4, 6.6, 'Дети', 'Ура! В парк!']],
     draw(t) {
       hallway();
@@ -36,23 +36,22 @@ const SCENES = [
     } },
 
   { name: 'В парке', dur: 26,
-    cues: [[.5, 4, 'Рассказчик', 'В парке было солнечно и весело.'],
+    cues: [[.5, 4, 'Рассказчик', 'В парке «Лимпопо» было солнечно и весело.'],
       [4.5, 6.6, 'Дилшод', 'Папа, лови!'],
       [7, 9, 'Папа', 'Поймал!'],
-      [9.6, 12.4, 'Томирис', 'Мама, смотри — уточки!'],
-      [12.8, 15.4, 'Мама', 'Какие красивые!'],
-      [16, 26, 'Рассказчик', 'Они катались на качелях, играли в мяч и смеялись все вместе.']],
+      [9.6, 12.4, 'Томирис', 'Мама, смотри — жираф!'],
+      [12.8, 15.4, 'Мама', 'Какой высокий! А вон — слон и бегемот!'],
+      [16, 26, 'Рассказчик', 'Томирис каталась на карусели, Дилшод играл с папой в мяч, и все смеялись вместе.']],
     sfx: [[5, 'boing'], [7.4, 'boing']],
     draw(t) {
-      playground(t, { sky: .15 });
-      pond(t, 0);
+      limpopo(t, { sky: .15, carousel: true, rider: t >= 16 ? (hx, hy) => tomiris(hx, hy + 60, .9, { t, mood: 'happy', squat: .6, armL: 2.6, armR: 2.6 }) : null });
+      hippoPond(t, 0);
       const ph = (t - 4.5) * 1.6, k = t < 4.5 ? 0 : (Math.sin(ph - Math.PI / 2) + 1) / 2;
       kid(470, 690, 1, { t, talk: speaking('Дилшод'), mood: 'happy', armR: 1.3 + (1 - k) * .6 });
       papa(760, 702, .9, { t, talk: speaking('Папа'), jacket: false, mood: 'happy', armL: 1.3 + k * .6 });
       ballAt(lerp(520, 700, k), 540 - Math.sin(Math.PI * k) * 150, t);
-      const a = Math.sin(t * 2.2) * .4;
-      if (t < 16) { tomiris(300, 704, 1, { t, mood: 'happy', look: [-1, .3], armL: t > 9.6 && t < 12.4 ? 1.4 : .2 }); mom(1170, 702, .95, { t, talk: speaking('Мама'), mood: t > 9.6 ? 'wow' : 'happy' }); swing(940, 290, 210, 0, null); }
-      else { swing(940, 290, 210, a, (sx, sy) => tomiris(sx, sy + 70, 1, { t, mood: 'happy', squat: .6, armL: 2.9, armR: 2.9 })); mom(1170, 702, .95, { t, mood: 'happy', armL: a > .2 ? 1.6 : 1.1 }); }
+            if (t < 16) tomiris(300, 704, 1, { t, mood: t > 9.6 ? 'wow' : 'happy', look: [1, -1], armR: t > 9.6 && t < 12.4 ? 2.4 : .2 });
+      mom(1170, 702, .95, { t, talk: speaking('Мама'), mood: t > 9.6 && t < 16 ? 'wow' : 'happy', armL: t > 12.8 && t < 15.4 ? 2.3 : .2 });
     } },
 
   { name: 'Мороженое', dur: 14,
@@ -60,8 +59,8 @@ const SCENES = [
       [4.5, 8.4, 'Дилшод', 'Немножко сладкого можно, а потом почистим зубки!'],
       [8.8, 13.6, 'Папа', 'Правильно! Вы всё-всё запомнили.']],
     draw(t) {
-      playground(t, { sky: .45 });
-      pond(t, 0);
+      limpopo(t, { sky: .45 });
+      hippoPond(t, 0);
       mom(780, 702, .95, { t, talk: speaking('Мама'), mood: 'happy' });
       papa(960, 702, .9, { t, talk: speaking('Папа'), jacket: false, mood: 'happy' });
       const has = t > 2;
@@ -76,14 +75,14 @@ const SCENES = [
       [10.4, 17, 'Чистон', 'Хорошие дела делают день радостным. До новых встреч, утренние герои!']],
     sfx: [[10.2, 'power']],
     draw(t) {
-      playground(t, { sky: .9 });
+      limpopo(t, { sky: .9 });
       ctx.fillStyle = 'rgba(255,140,70,.18)'; ctx.fillRect(0, 0, W, H);
-      pond(t, seg(t, 10, 11), speaking('Чистон'));
+      hippoPond(t, seg(t, 10, 11), speaking('Чистон'));
       mom(820, 702, .95, { t, mood: 'happy', handR: [90, -220] });
       papa(1010, 702, .9, { t, talk: speaking('Папа'), jacket: false, mood: 'happy', handL: [-90, -250] });
       kid(470, 690, 1, { t, talk: speaking('Дилшод'), mood: 'happy', armL: 2.6, armR: .9 });
       tomiris(640, 704, 1, { t, mood: 'happy', armL: .9, armR: 2.6 });
-      if (t > 10.4) { star(170, 560, 14, 6, '#ffd23f'); }
+      if (t > 10.4) { star(250, 580, 14, 6, '#ffd23f'); }
     } },
 
   { name: 'Конец сезона', dur: 11,

@@ -60,15 +60,20 @@ function kid(x, y, s, o) {
   const dh = o.dirtyHands == null ? o.dirty : o.dirtyHands;
   ctx.save(); ctx.translate(x, y); ctx.rotate(o.tilt); ctx.scale(s, s);
   ell(0, 0, 62, 11, 'rgba(0,0,0,.16)');
-  const legC = o.pants || (o.girl ? SKIN : '#2b3f73');
+  const legC = o.pants || (o.dressy ? '#ffffff' : o.girl ? SKIN : '#2b3f73');
   box(-34, -LL, 26, LL, 12, legC); box(8, -LL, 26, LL, 12, legC);
-  const shoe = o.girl ? '#ff7aa2' : '#ffffff';
+  const shoe = o.dressy ? '#d6336c' : o.girl ? '#ff7aa2' : '#ffffff';
   ell(-22, -6, 22, 10, shoe); ell(22, -6, 22, 10, shoe);
   ctx.translate(0, 100 - LL);
   if (o.girl) {
     ctx.beginPath(); ctx.moveTo(-34, -205); ctx.lineTo(34, -205); ctx.lineTo(64, -90);
     ctx.quadraticCurveTo(0, -78, -64, -90); ctx.closePath(); ctx.fillStyle = o.shirt; ctx.fill();
-    [[-25, -130], [18, -160], [30, -110], [-8, -105], [-14, -175]].forEach(p => circ(p[0], p[1], 6, 'rgba(255,255,255,.7)'));
+    if (o.dressy) {
+      // day dress: white collar, yellow belt, little flowers
+      ell(-14, -200, 18, 10, '#ffffff'); ell(14, -200, 18, 10, '#ffffff');
+      ctx.fillStyle = '#ffd23f'; ctx.fillRect(-42, -160, 84, 12); circ(0, -154, 9, '#ffd23f');
+      [[-28, -122], [22, -130], [36, -104], [-6, -100], [-40, -100], [8, -118]].forEach(p => { for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; circ(p[0] + Math.cos(a) * 4.5, p[1] + Math.sin(a) * 4.5, 3.4, '#ffffff'); } circ(p[0], p[1], 2.6, '#ffd23f'); });
+    } else [[-25, -130], [18, -160], [30, -110], [-8, -105], [-14, -175]].forEach(p => circ(p[0], p[1], 6, 'rgba(255,255,255,.7)'));
   } else {
     box(-52, -210, 104, 125, 30, o.shirt);
     if (o.pajama) { ctx.save(); rr(-52, -210, 104, 125, 30); ctx.clip(); for (let yy = -200; yy < -85; yy += 22) { ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(-52, yy, 104, 8); } ctx.restore(); } else {
