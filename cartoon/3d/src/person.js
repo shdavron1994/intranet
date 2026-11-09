@@ -189,7 +189,8 @@ export function posePerson(P, s) {
     const sh = P.arms[i], sgn = i ? 1 : -1;
     const sw = walk ? (i ? swing : -swing) * .45 : 0;
     sh.rotation.set(-(fwd ?? 0) - sw, 0, sgn * up);
-    sh.userData.el.rotation.x = -(.25 + (up > 1.2 ? 0 : .25) + (fwd ? .2 : 0)) + Math.sin(t * 1.3 + i) * .03;
+    const elb = i ? s.elbowR : s.elbowL;
+    sh.userData.el.rotation.x = elb != null ? -elb : -(.25 + (up > 1.2 ? 0 : .25) + (fwd ? .2 : 0)) + Math.sin(t * 1.3 + i) * .03;
   });
   const talkNod = s.talk ? Math.sin(t * 6.5) * .05 : 0;
   P.head.rotation.set((s.nod || 0) + talkNod + Math.sin(t * 1.3) * .025, (s.turn || 0) + Math.sin(t * .8) * .06, (s.tilt || 0) + (s.talk ? Math.sin(t * 3.1) * .04 : 0));

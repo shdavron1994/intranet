@@ -22,6 +22,8 @@ CAST = {
     'Вещи': [('kseniya', 'x-high', 'fast'), ('xenia', 'x-high', 'fast')],
     'Дети': [('xenia', 'x-high', 'medium'), ('kseniya', 'x-high', 'medium')],
     'Песня': [('xenia', 'x-high', 'medium'), ('kseniya', 'x-high', 'medium')],
+    'Мальчик': [('eugene', 'x-high', 'medium')], 'Девочка': [('kseniya', 'x-high', 'medium')],
+    'Ведущий': [('kseniya', 'medium', 'medium')], 'Липучки': [('xenia', 'x-high', 'fast')], 'Кроссовки': [('kseniya', 'x-high', 'fast')],
     'Все': [('xenia', 'x-high', 'medium'), ('kseniya', 'x-high', 'medium'), ('baya', 'medium', 'medium'), ('aidar', 'medium', 'medium')],
 }
 

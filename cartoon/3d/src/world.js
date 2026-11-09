@@ -131,6 +131,7 @@ export function makeBedroom() {
   g.add(at(rbox(10, .12, .06, '#ffffff', .02), 0, .06, -2.97));
   const right = new THREE.Mesh(new THREE.PlaneGeometry(8, 3.2), wm); right.rotation.y = -Math.PI / 2; right.position.set(5, 1.6, 1); right.receiveShadow = true; g.add(right);
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(10, 8), mat('#fbfdff')); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, 3.2, 1); g.add(ceil);
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(10, 3.2), wm); front.rotation.y = Math.PI; front.position.set(0, 1.6, 4.9); front.receiveShadow = true; g.add(front);
   // window with sky
   const sky = canvasTex(256, 256); { const c = sky.g; const gr = c.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#7cc8ff'); gr.addColorStop(1, '#d8f1ff'); c.fillStyle = gr; c.fillRect(0, 0, 256, 256); c.fillStyle = '#ffe066'; c.beginPath(); c.arc(180, 70, 30, 0, 7); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.ellipse(80, 160, 50, 18, 0, 0, 7); c.fill(); c.fillStyle = '#6fcf7a'; c.beginPath(); c.arc(60, 260, 60, 0, 7); c.fill(); }
   const win = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.3), new THREE.MeshBasicMaterial({ map: sky.t })); win.position.set(1.6, 1.75, -2.98); g.add(win);
