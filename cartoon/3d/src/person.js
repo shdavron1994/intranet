@@ -92,9 +92,8 @@ export function makePerson(o) {
   const head = put(new THREE.Group(), 0, T + d.neck + R * .82, 0); torso.add(head);
   torso.add(put(cap(R * .28, d.neck, SK), 0, T + d.neck * .3, 0));
   const skull = sph(R, SK, 56); if (adult) skull.scale.set(.96, 1.12, .98); else skull.scale.set(1.04, .97, 1); head.add(skull);
-  [-1, 1].forEach(s => { const ch = sph(R * .34, SK, 24); put(ch, s * R * .47, -R * .33, R * .46); head.add(ch); const ear = sph(R * .2, SK, 16); ear.scale.set(.6, 1, .8); put(ear, s * R * 1.0, 0, 0); head.add(ear); });
+  [-1, 1].forEach(s => { const ear = sph(R * .2, SK, 16); ear.scale.set(.6, 1, .8); put(ear, s * R * 1.0, 0, 0); head.add(ear); });
   const blush = plain('#ff8fa3', { transparent: true, opacity: .32, roughness: .9 });
-  [-1, 1].forEach(s => { const b = M(new THREE.CircleGeometry(R * .16, 20), blush, false); put(b, s * R * .56, -R * .3, R * .9); b.lookAt(s * R * 1.6, -R * .5, R * 3); head.add(b); });
   const nose = sph(R * (adult ? .11 : .09), SK, 16); put(nose, 0, -R * .12, R * .99); head.add(nose);
 
   // eyes with iris, pupil, two highlights and a lid
