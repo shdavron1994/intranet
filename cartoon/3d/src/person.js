@@ -6,7 +6,14 @@ const cache = {};
 function skinMat(c) { return cache['s' + c] || (cache['s' + c] = new THREE.MeshPhysicalMaterial({ color: c, roughness: .55, sheen: .6, sheenColor: new THREE.Color('#ffb8a0'), sheenRoughness: .6 })); }
 function cloth(c, map) { const k = 'c' + c + (map ? map.uuid : ''); return cache[k] || (cache[k] = new THREE.MeshStandardMaterial({ color: map ? '#ffffff' : c, map: map || null, roughness: .88 })); }
 function plain(c, o = {}) { const k = 'p' + c + JSON.stringify(o); return cache[k] || (cache[k] = new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: .5 }, o))); }
-function hairMat(c) { return cache['h' + c] || (cache['h' + c] = new THREE.MeshPhysicalMaterial({ color: c, roughness: .45, sheen: .5, sheenColor: new THREE.Color('#8a5a3c') })); }
+function hairTex(c) {
+  // fine combed strands so hair reads as hair, not plastic
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64; const g = cv.getContext('2d');
+  g.fillStyle = c; g.fillRect(0, 0, 256, 64);
+  for (let i = 0; i < 90; i++) { const x = (i * 37) % 256; g.strokeStyle = i % 3 ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.10)'; g.lineWidth = 1 + (i % 2); g.beginPath(); g.moveTo(x, 0); g.lineTo(x + Math.sin(i) * 6, 64); g.stroke(); }
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 1); return t;
+}
+function hairMat(c) { return cache['h' + c] || (cache['h' + c] = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: hairTex(c), roughness: .78, sheen: .25, sheenColor: new THREE.Color('#6b4a33') })); }
 function M(geo, m, cast = true) { const x = new THREE.Mesh(geo, m); x.castShadow = cast; x.receiveShadow = true; return x; }
 const sph = (r, m, s = 32) => M(new THREE.SphereGeometry(r, s, Math.round(s * .75)), m);
 const cap = (r, l, m) => M(new THREE.CapsuleGeometry(r, l, 8, 20), m);
@@ -128,11 +135,11 @@ export function makePerson(o) {
     capM.scale.set(1, .95, 1);
     for (let i = 0; i < 26; i++) { const a = i * 2.399, rr = Math.sqrt((i + .5) / 26); const x = Math.cos(a) * rr * .85, z = Math.sin(a) * rr * .85 - .05; const y = Math.sqrt(Math.max(0, 1 - x * x - z * z)) * .95 + .05;
       const sp = M(new THREE.ConeGeometry(R * .12, R * .17, 8), HM); put(sp, x * R * .99, y * R * .99, z * R * .99); sp.lookAt(x * R * 3, y * R * 3 + R, z * R * 3); sp.rotateX(Math.PI / 2); head.add(sp); }
-    const fr = sph(R * .6, HM, 32); fr.scale.set(1.3, .3, .5); put(fr, R * .02, R * .7, R * .6); fr.rotation.x = .25; head.add(fr);
+    for (let i = 0; i < 8; i++) { const x = (i - 3.5) * .12; const st = cap(R * .055, R * .2, HM); put(st, x * R, R * (.66 - Math.abs(x) * .35), R * (.8 - Math.abs(x) * .25)); st.rotation.set(-.9, 0, -x * .6); head.add(st); }
   } else if (o.style === 'bob') {
     // short bob with a side-swept fringe
     const bob = M(new THREE.SphereGeometry(R * 1.08, 48, 24, 0, Math.PI * 2, 0, Math.PI * .64), HM); bob.rotation.x = -.85; put(bob, 0, -R * .02, -R * .08); bob.scale.set(1.04, 1, 1.02); head.add(bob);
-    const fr = sph(R * .7, HM, 32); fr.scale.set(1.25, .36, .55); put(fr, R * .12, R * .66, R * .58); fr.rotation.z = -.28; head.add(fr);
+    for (let i = 0; i < 10; i++) { const x = (i - 4.5) * .11; const st = cap(R * .065, R * .32, HM); put(st, x * R + R * .05, R * (.6 - Math.abs(x) * .3), R * (.82 - Math.abs(x) * .28)); st.rotation.set(-.75, 0, -.55 - x * .3); head.add(st); }
     [-1, 1].forEach(s => { const side = sph(R * .42, HM, 24); side.scale.set(.55, 1.05, .9); put(side, s * R * .92, -R * .15, R * .05); head.add(side); });
   } else if (o.style === 'ponytail') {
     // sleek hair pulled back into a low ponytail
@@ -141,7 +148,7 @@ export function makePerson(o) {
     const tail = cap(R * .2, R * 1.4, HM); put(tail, 0, -R * 1.0, -R * 1.02); tail.rotation.x = .1; head.add(tail); const tip = sph(R * .22, HM, 16); put(tip, 0, -R * 1.8, -R * .98); head.add(tip);
   } else if (o.style === 'short') {
     capM.scale.set(1.02, 1.06, 1.02);
-    const quiff = sph(R * .55, HM, 24); quiff.scale.set(1.4, .45, .8); put(quiff, 0, R * .78, R * .45); head.add(quiff);
+    for (let i = 0; i < 9; i++) { const x = (i - 4) * .12; const st = cap(R * .07, R * .24, HM); put(st, x * R, R * (.8 - Math.abs(x) * .3), R * (.6 - Math.abs(x) * .2)); st.rotation.set(-1.2, 0, -x * .5); head.add(st); }
   } else if (o.kind === 'boy' || o.kind === 'papa') {
     const tufts = [[-.45, .78, .5, .34], [-.12, .9, .52, .36], [.22, .86, .5, .35], [.5, .7, .42, .3], [-.65, .55, .25, .3], [.66, .5, .2, .28], [0, .98, .1, .38], [-.3, .9, -.2, .36], [.3, .9, -.25, .36]];
     tufts.forEach(([x, y, z, r]) => { const tf = sph(R * r, HM, 20); tf.scale.set(1.1, .7, 1); put(tf, x * R, y * R, z * R); head.add(tf); });
