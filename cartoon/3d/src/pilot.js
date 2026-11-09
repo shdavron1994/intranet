@@ -1,6 +1,7 @@
 // Pilot: the first minute of episode 1 in 3D.
 import * as THREE from 'three';
-import { W, H, seg, ease, lerp, clamp, makeRenderer, makePerson, makeTablet, makeChiston, makeBedroom, sneaker, sock, toyCar, backpack, sphere, at, camAt, mat } from './world.js';
+import { makeDilshod, makeTomiris, makeMom } from './cast.js';
+import { W, H, seg, ease, lerp, clamp, makeRenderer, makeTablet, makeChiston, makeBedroom, sneaker, sock, toyCar, backpack, sphere, at, camAt, mat } from './world.js';
 
 const canvas3d = document.getElementById('gl');
 const renderer = makeRenderer(canvas3d);
@@ -14,9 +15,9 @@ Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 5, bottom: -3 }); su
 const winLight = new THREE.SpotLight('#ffe8b0', 0, 12, .7, .6); winLight.position.set(1.6, 2.4, -2.6); winLight.target.position.set(0, 0, .6); winLight.castShadow = true; winLight.shadow.mapSize.set(1024, 1024); scene.add(winLight, winLight.target);
 
 const room = makeBedroom(); scene.add(room.group);
-const D = makePerson({ kind: 'boy', shirt: '#9fc3ff', pants: '#9fc3ff', pajama: true, blinkOff: 0 });
-const T = makePerson({ kind: 'girl', shirt: '#ffc2d6', pants: '#ffc2d6', pajama: true, scale: .86, blinkOff: 1.3 });
-const M = makePerson({ kind: 'mom', shirt: '#8e6cd8', hair: '#5a3420', shoes: '#5b3b8c', apron: false, blinkOff: .7 });
+const D = makeDilshod({ shirt: '#9fc3ff', pants: '#9fc3ff', pajama: true });
+const T = makeTomiris({ shirt: '#ffc2d6', pants: '#ffc2d6', pajama: true, flowers: false, collar: false, belt: false, shoes: '#ff9fbd' });
+const M = makeMom();
 scene.add(D.root, T.root, M.root);
 const pix = makeTablet(); scene.add(pix.root);
 const mirror = makeChiston(); mirror.root.scale.setScalar(.45); mirror.root.position.set(-2.55, 1.95, -2.95); scene.add(mirror.root);

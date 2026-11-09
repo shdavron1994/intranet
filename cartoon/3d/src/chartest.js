@@ -1,0 +1,21 @@
+import * as THREE from 'three';
+import { W, H, makeRenderer, camAt } from './world.js';
+import { makeDilshod, makeTomiris, makeMom, makePapa } from './cast.js';
+const r = makeRenderer(document.getElementById('gl')); const out = document.getElementById('out'), cx = out.getContext('2d');
+const sc = new THREE.Scene(); sc.background = new THREE.Color('#dfeefb');
+const cam = new THREE.PerspectiveCamera(30, W / H, .05, 50);
+sc.add(new THREE.HemisphereLight('#eef6ff', '#d9a46c', .9));
+const sun = new THREE.DirectionalLight('#fff1d6', 2.2); sun.position.set(2, 4, 3); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sc.add(sun);
+const rim = new THREE.DirectionalLight('#bfe0ff', 1.2); rim.position.set(-3, 2, -2); sc.add(rim);
+const fl = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: '#e3b07a' })); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; sc.add(fl);
+const D = makeDilshod(), T = makeTomiris(), Mo = makeMom(), Pa = makePapa();
+Pa.root.position.set(-1.25, 0, -.3); D.root.position.set(-.42, 0, .1); T.root.position.set(.35, 0, .15); Mo.root.position.set(1.15, 0, -.3);
+sc.add(D.root, T.root, Mo.root, Pa.root);
+const shots = [[[0, 1.25, 4.6], [0, .95, 0]], [[-.42, 1.02, 1.05], [-.42, .99, 0]], [[.35, .9, .95], [.35, .87, 0]], [[1.15, 1.65, 1.2], [1.15, 1.6, -.3]], [[-1.25, 1.75, 1.2], [-1.25, 1.68, -.3]], [[2.4, 1.3, 2.6], [.2, .9, 0]]];
+window.frameAt = (t, q = .9) => {
+  const k = Math.floor(t);
+  [D, T, Mo, Pa].forEach((P, i) => P.set({ t: t + i, talk: false, mood: 'happy', turn: 0 }));
+  camAt(cam, 0, [[0, ...shots[k]]], 0);
+  r.render(sc, cam); cx.drawImage(document.getElementById('gl'), 0, 0); return out.toDataURL('image/jpeg', q);
+};
+window.__total = 6; window.__scenes = []; window.ready = true;

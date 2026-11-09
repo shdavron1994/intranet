@@ -25,6 +25,13 @@ function dots(base, dot) {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 2); return t;
 }
 
+function geoPattern() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 256; const g = c.getContext('2d');
+  g.fillStyle = '#fbf7f4'; g.fillRect(0, 0, 256, 256);
+  [['#f0c9b8', 0], ['#c9ccd6', 80], ['#e7b9b0', 160]].forEach(([col, y]) => { g.fillStyle = col; g.beginPath(); g.moveTo(0, y); g.lineTo(256, y + 40); g.lineTo(256, y + 70); g.lineTo(0, y + 30); g.fill(); });
+  g.strokeStyle = '#7a7a86'; g.lineWidth = 4; g.beginPath(); for (let i = 0; i < 9; i++) g.lineTo(150 + (i % 2) * 14, i * 30); g.stroke();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 1); return t;
+}
 const DIMS = {
   kid: { R: .27, hipY: .4, thigh: .12, shin: .12, legR: .058, torso: .34, sh: .155, armU: .11, armF: .1, armR: .045, neck: .05 },
   adult: { R: .23, hipY: .84, thigh: .35, shin: .33, legR: .075, torso: .58, sh: .23, armU: .25, armF: .23, armR: .065, neck: .05 }
@@ -35,7 +42,7 @@ export function makePerson(o) {
   const adult = o.kind === 'mom' || o.kind === 'papa', girl = o.kind === 'girl' || o.kind === 'mom';
   const d = DIMS[adult ? 'adult' : 'kid'], R = d.R;
   const SK = skinMat(o.skin);
-  const shirtMap = o.pajama ? stripes(o.shirt, '#ffffff') : (o.flowers ? dots(o.shirt, '#ffffff') : null);
+  const shirtMap = o.pajama ? stripes(o.shirt, '#ffffff') : o.flowers ? dots(o.shirt, '#ffffff') : o.geo ? geoPattern() : null;
   const SH = cloth(o.shirt, shirtMap), PA = cloth(o.pants, o.pajama ? shirtMap : null);
   const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
   const hips = put(new THREE.Group(), 0, d.hipY, 0); body.add(hips);
@@ -64,6 +71,7 @@ export function makePerson(o) {
   if (o.apron) { const a = M(new THREE.CylinderGeometry(R * 1.2, R * 1.75, T * .9, 32, 1, true, -.9, 1.8), plain('#ffffff', { side: THREE.DoubleSide, roughness: .9 })); put(a, 0, T * .1, .01); torso.add(a); }
   if (o.jacket) [-1, 1].forEach(s => { const j = M(new THREE.CylinderGeometry(R * 1.28, R * 1.12, T * .95, 24, 1, true, s > 0 ? .35 : Math.PI + .35, Math.PI - .7), plain(o.jacket, { side: THREE.DoubleSide, roughness: .8 })); put(j, 0, T * .5, 0); torso.add(j); });
   if (o.tie) { const ti = M(new THREE.ConeGeometry(R * .14, T * .5, 4), plain('#3b8beb')); ti.rotation.x = Math.PI; put(ti, 0, T * .62, R * 1.22); torso.add(ti); }
+  if (o.polo) { const pc = M(new THREE.CylinderGeometry(R * .62, R * .9, T * .12, 32, 1, true), plain(o.polo, { side: THREE.DoubleSide })); put(pc, 0, T * .95, 0); torso.add(pc); const pl = M(new THREE.BoxGeometry(R * .2, T * .3, R * .05), plain(o.polo)); put(pl, 0, T * .78, R * 1.18); torso.add(pl); }
   if (o.logo) { const l = sph(R * .16, plain('#ffd23f'), 16); l.scale.set(1, 1, .35); put(l, 0, T * .55, R * .66); torso.add(l); }
 
   // arms: shoulder -> elbow -> hand (mitten with a thumb)
@@ -83,7 +91,7 @@ export function makePerson(o) {
   // head
   const head = put(new THREE.Group(), 0, T + d.neck + R * .82, 0); torso.add(head);
   torso.add(put(cap(R * .28, d.neck, SK), 0, T + d.neck * .3, 0));
-  const skull = sph(R, SK, 56); skull.scale.set(1.04, .97, 1); head.add(skull);
+  const skull = sph(R, SK, 56); if (adult) skull.scale.set(.96, 1.12, .98); else skull.scale.set(1.04, .97, 1); head.add(skull);
   [-1, 1].forEach(s => { const ch = sph(R * .34, SK, 24); put(ch, s * R * .47, -R * .33, R * .46); head.add(ch); const ear = sph(R * .2, SK, 16); ear.scale.set(.6, 1, .8); put(ear, s * R * 1.0, 0, 0); head.add(ear); });
   const blush = plain('#ff8fa3', { transparent: true, opacity: .32, roughness: .9 });
   [-1, 1].forEach(s => { const b = M(new THREE.CircleGeometry(R * .16, 20), blush, false); put(b, s * R * .56, -R * .3, R * .9); b.lookAt(s * R * 1.6, -R * .5, R * 3); head.add(b); });
@@ -103,11 +111,11 @@ export function makePerson(o) {
     if (girl) { lash = M(new THREE.TorusGeometry(R * .2, R * .022, 6, 20, Math.PI * .8), plain('#1b120c')); lash.rotation.z = Math.PI * .1; put(lash, 0, R * .04, R * .1); g.add(lash); }
     g.userData = { iris, pupil, h1, h2, lid, lash }; return g;
   });
-  const brows = [-1, 1].map(s => { const b = M(new THREE.TorusGeometry(R * .16, R * .028, 8, 18, Math.PI * .55), hairMat(o.hair)); b.rotation.z = Math.PI * .22; put(b, s * R * .36, R * .3, R * .9); b.userData.base = b.position.y; head.add(b); return b; });
+  const brows = [-1, 1].map(s => { const b = M(new THREE.TorusGeometry(R * .16, R * .028 * (o.browW || 1), 8, 18, Math.PI * .55), hairMat(o.brow || o.hair)); b.rotation.z = Math.PI * .22; put(b, s * R * .36, R * .3, R * .9); b.userData.base = b.position.y; head.add(b); return b; });
 
   // mouth: a smile line when closed, an open mouth with teeth and tongue when talking
   const mouth = put(new THREE.Group(), 0, -R * .43, R * .9); mouth.rotation.x = -.35; head.add(mouth);
-  const smile = M(new THREE.TorusGeometry(R * .17, R * .03, 8, 24, Math.PI), plain('#8a3030')); smile.rotation.z = Math.PI; mouth.add(smile);
+  const smile = M(new THREE.TorusGeometry(R * .17, R * .03 * (o.lips ? 1.6 : 1), 8, 24, Math.PI), plain(o.lips || '#8a3030')); smile.rotation.z = Math.PI; mouth.add(smile);
   const open = new THREE.Group(); mouth.add(open);
   const cavity = sph(R * .2, plain('#5a1a1a', { roughness: .8 }), 20); cavity.scale.set(1, .6, .3); open.add(cavity);
   const teeth = put(M(new THREE.BoxGeometry(R * .22, R * .05, R * .05), plain('#ffffff')), 0, R * .085, R * .03); open.add(teeth);
@@ -116,10 +124,33 @@ export function makePerson(o) {
   // hair
   const HM = hairMat(o.hair);
   const capM = M(new THREE.SphereGeometry(R * 1.06, 48, 24, 0, Math.PI * 2, 0, Math.PI * .5), HM); capM.rotation.x = -.42; put(capM, 0, R * .04, -R * .03); head.add(capM);
-  if (o.kind === 'boy' || o.kind === 'papa') {
+  if (o.style === 'spiky') {
+    // short crew cut with a little fringe
+    capM.scale.set(1, .95, 1);
+    for (let i = 0; i < 26; i++) { const a = i * 2.399, rr = Math.sqrt((i + .5) / 26); const x = Math.cos(a) * rr * .85, z = Math.sin(a) * rr * .85 - .05; const y = Math.sqrt(Math.max(0, 1 - x * x - z * z)) * .95 + .05;
+      const sp = M(new THREE.ConeGeometry(R * .12, R * .17, 8), HM); put(sp, x * R * .99, y * R * .99, z * R * .99); sp.lookAt(x * R * 3, y * R * 3 + R, z * R * 3); sp.rotateX(Math.PI / 2); head.add(sp); }
+    const fr = sph(R * .6, HM, 32); fr.scale.set(1.3, .3, .5); put(fr, R * .02, R * .7, R * .6); fr.rotation.x = .25; head.add(fr);
+  } else if (o.style === 'bob') {
+    // short bob with a side-swept fringe
+    const bob = M(new THREE.SphereGeometry(R * 1.08, 48, 24, 0, Math.PI * 2, 0, Math.PI * .64), HM); bob.rotation.x = -.85; put(bob, 0, -R * .02, -R * .08); bob.scale.set(1.04, 1, 1.02); head.add(bob);
+    const fr = sph(R * .7, HM, 32); fr.scale.set(1.25, .36, .55); put(fr, R * .12, R * .66, R * .58); fr.rotation.z = -.28; head.add(fr);
+    [-1, 1].forEach(s => { const side = sph(R * .42, HM, 24); side.scale.set(.55, 1.05, .9); put(side, s * R * .92, -R * .15, R * .05); head.add(side); });
+  } else if (o.style === 'ponytail') {
+    // sleek hair pulled back into a low ponytail
+    capM.scale.set(1.01, 1.02, 1.03);
+    const tie = M(new THREE.TorusGeometry(R * .14, R * .05, 8, 20), HM); put(tie, 0, -R * .2, -R * .98); head.add(tie);
+    const tail = cap(R * .2, R * 1.4, HM); put(tail, 0, -R * 1.0, -R * 1.02); tail.rotation.x = .1; head.add(tail); const tip = sph(R * .22, HM, 16); put(tip, 0, -R * 1.8, -R * .98); head.add(tip);
+  } else if (o.style === 'short') {
+    capM.scale.set(1.02, 1.06, 1.02);
+    const quiff = sph(R * .55, HM, 24); quiff.scale.set(1.4, .45, .8); put(quiff, 0, R * .78, R * .45); head.add(quiff);
+  } else if (o.kind === 'boy' || o.kind === 'papa') {
     const tufts = [[-.45, .78, .5, .34], [-.12, .9, .52, .36], [.22, .86, .5, .35], [.5, .7, .42, .3], [-.65, .55, .25, .3], [.66, .5, .2, .28], [0, .98, .1, .38], [-.3, .9, -.2, .36], [.3, .9, -.25, .36]];
     tufts.forEach(([x, y, z, r]) => { const tf = sph(R * r, HM, 20); tf.scale.set(1.1, .7, 1); put(tf, x * R, y * R, z * R); head.add(tf); });
-    if (o.kind === 'papa') { const st = sph(R * .62, plain('#3b2418', { transparent: true, opacity: .35 }), 24); st.scale.set(1.15, .55, .7); put(st, 0, -R * .55, R * .38); head.add(st); }
+  }
+  if (o.stubble) { const st = sph(R * .66, plain('#2a1d14', { transparent: true, opacity: .28 }), 24); st.scale.set(1.12, .62, .72); put(st, 0, -R * .52, R * .36); head.add(st); const mu = sph(R * .2, plain('#2a1d14', { transparent: true, opacity: .45 }), 16); mu.scale.set(1.6, .35, .5); put(mu, 0, -R * .3, R * .92); head.add(mu); }
+  if (o.earrings) [-1, 1].forEach(s => head.add(put(sph(R * .05, plain('#e6b800', { metalness: .9, roughness: .25 }), 12), s * R * 1.0, -R * .22, R * .05)));
+  if (o.style || o.kind === 'boy' || o.kind === 'papa') {
+    // hair already built above
   } else {
     const bang = sph(R * .72, HM, 32); bang.scale.set(1.25, .38, .6); put(bang, 0, R * .7, R * .55); head.add(bang);
     if (o.kind === 'girl') [-1, 1].forEach(s => { const pt = sph(R * .38, HM, 24); pt.scale.set(.9, 1.15, .9); put(pt, s * R * 1.12, R * .1, -R * .1); head.add(pt); const tie = M(new THREE.TorusGeometry(R * .14, R * .05, 8, 20), plain('#ff4f8b')); tie.rotation.y = Math.PI / 2; put(tie, s * R * .98, R * .38, -R * .06); head.add(tie); const bow = sph(R * .13, plain('#ff4f8b'), 14); bow.scale.set(1.7, .8, .8); put(bow, s * R * .9, R * .55, R * .05); head.add(bow); });
@@ -166,7 +197,7 @@ export function posePerson(P, s) {
     u.lid.rotation.x = blink ? .5 : (s.mood === 'bored' ? -.45 : s.mood === 'sad' ? -1.25 : -1.7);
     [u.iris, u.pupil].forEach((m, k) => { m.position.x = look[0] * P.R * .07; m.position.y = -P.R * .015 + look[1] * P.R * .06; });
     u.h1.visible = u.h2.visible = !blink; if (u.lash) u.lash.visible = !blink;
-    e.scale.setScalar(big);
+    e.scale.setScalar(big * (adult ? .78 : 1));
   });
   P.brows.forEach((b, i) => {
     b.position.y = b.userData.base + (s.mood === 'wow' ? P.R * .08 : s.mood === 'sad' ? -P.R * .02 : 0);
