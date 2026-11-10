@@ -7,7 +7,7 @@ import { bowl, spoon, phone, drawToonFace } from './sets2.js';
 
 const K = makeKit(['kitchen', 'living']);
 const { D, T, Ma, P, scene } = K, kit = K.kitchen, S = kit.seats, L = K.living;
-const ph = K.hold(D, phone()); ph.rotation.set(-1.2, 0, 0); ph.position.set(0, -.02, .05);
+const ph = K.holdBoth(D, phone());
 const sp = [K.hold(D, spoon()), K.hold(T, spoon()), K.hold(P, spoon()), K.hold(Ma, spoon())]; sp.forEach(s => { s.rotation.set(-1.4, 0, 0); s.position.set(0, -.02, .05); });
 const bowls = [bowl(), bowl(), bowl(), bowl()]; bowls.forEach(b => scene.add(b));
 const BOWL_AT = [[-.42, -1.05], [.42, -1.05], [-.75, -.7], [.75, -.7]];

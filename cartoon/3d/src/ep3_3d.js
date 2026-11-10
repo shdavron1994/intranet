@@ -8,7 +8,7 @@ import { foam } from './sets.js';
 
 const K = makeKit(['living', 'yard', 'bathroom', 'friends']);
 const { D, T, M, Boy, Girl, scene } = K, L = K.living, Y = K.yard;
-const ph = K.hold(D, phone()); ph.rotation.set(-1.2, 0, 0); ph.position.set(0, -.02, .05);
+const ph = K.holdBoth(D, phone());
 const remote = K.hold(T, rbox(.04, .14, .02, '#2d3142', .01)); remote.rotation.set(-1.3, 0, 0);
 const bl = ball(); scene.add(bl);
 const foams = [foam(), foam()]; K.hold(D, foams[0]); K.hold(T, foams[1]);

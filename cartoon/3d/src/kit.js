@@ -66,6 +66,22 @@ export function makeKit(want = []) {
   };
   K.cam = (t, keys, drift = 1) => camAt(cam, t, keys, drift);
   K.hold = (P, obj, hand = 1) => { P.arms[hand].userData.hand.add(obj); return obj; };
+  // held in both hands in front of the chest, screen turned to the face; synced right before each render
+  const both = [], vA = new THREE.Vector3(), vB = new THREE.Vector3(), vH = new THREE.Vector3();
+  K.holdBoth = (P, obj, fwd = .05) => { scene.add(obj); both.push([P, obj, fwd]); return obj; };
+  const render0 = renderer.render.bind(renderer);
+  renderer.render = (sc, c) => {
+    scene.updateMatrixWorld(true);
+    both.forEach(([P, obj, fwd]) => {
+      const show = obj.visible && P.root.visible; if (!show) return;
+      // in front of the chest, below the face, so the face stays visible
+      P.head.getWorldPosition(vH); const R = P.R * (P.o.scale || 1), ry = P.root.rotation.y;
+      obj.position.set(vH.x + Math.sin(ry) * R * 1.35, vH.y - R * 1.35, vH.z + Math.cos(ry) * R * 1.35);
+      obj.lookAt(vH.x, vH.y + R * .2, vH.z);
+    });
+    both.forEach(([P, obj]) => { if (!P.root.visible) obj.visible = false; });
+    render0(sc, c);
+  };
   // 2D explainer screens: draw with the 2D library onto #cv, then use it full-screen or on a 3D TV
   K.draw2D = fn => { window.setCur(state.CUR); fn(); return document.getElementById('cv'); };
   K.tv2D = (tv, fn) => tv.set(g => g.drawImage(K.draw2D(fn), 0, 0, 640, 360));

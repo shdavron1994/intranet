@@ -7,8 +7,8 @@ import { plate, spoon, block, drawToonFace } from './sets2.js';
 
 const K = makeKit(['living', 'kitchen']);
 const { D, T, Ma, P, scene } = K, L = K.living, kit = K.kitchen;
-const tab = K.hold(D, rbox(.26, .18, .015, '#2d3142', .02)); tab.rotation.set(-1.1, 0, 0); tab.position.set(.08, -.02, .08);
-const tabScr = at(new THREE.Mesh(new THREE.PlaneGeometry(.22, .14), new THREE.MeshStandardMaterial({ color: '#7fe3ff', emissive: '#7fe3ff', emissiveIntensity: .8 })), 0, 0, .009); tab.add(tabScr);
+const tab = K.holdBoth(D, rbox(.3, .21, .02, '#2d3142', .02));
+const tabScr = at(new THREE.Mesh(new THREE.PlaneGeometry(.27, .18), new THREE.MeshStandardMaterial({ color: '#7fe3ff', emissive: '#7fe3ff', emissiveIntensity: .8 })), 0, 0, .0105); tab.add(tabScr);
 const can = new THREE.Group(); can.add(at(cyl(.07, .08, .14, '#3b8beb', 16), 0, 0, 0)); const spout = at(cyl(.012, .02, .18, '#3b8beb', 8), .1, .04, 0); spout.rotation.z = -1; can.add(spout); K.hold(T, can, 1); can.position.set(0, -.08, .05);
 const drops = []; for (let i = 0; i < 8; i++) { const d = at(new THREE.Mesh(new THREE.SphereGeometry(.012, 8, 6), new THREE.MeshStandardMaterial({ color: '#8fd3ff' })), 0, 0, 0); scene.add(d); drops.push(d); }
 // mess in the living room

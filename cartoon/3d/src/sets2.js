@@ -93,7 +93,13 @@ export function bowl(color = '#ffffff') {
 export function plate() { return at(cyl(.15, .12, .02, '#ffffff', 32), 0, .01, 0); }
 export function spoon() { const g = new THREE.Group(); g.add(at(rbox(.015, .005, .14, '#c9d4de', .002), 0, 0, 0)); const s = at(sphere(.025, '#c9d4de', 12), 0, 0, .08); s.scale.y = .3; g.add(s); return g; }
 export function cup(color = '#ffd23f') { return at(cyl(.045, .04, .1, color, 20), 0, .05, 0); }
-export function phone() { const g = new THREE.Group(); g.add(rbox(.08, .15, .012, '#1f2430', .01)); const s = at(new THREE.Mesh(new THREE.PlaneGeometry(.07, .13), mat('#7fe3ff', { emissive: '#7fe3ff', emissiveIntensity: .9 })), 0, 0, .007); g.add(s); g.userData.screen = s; return g; }
+export function phone() {
+  // big enough to read in a wide shot: orange case, bright game on the screen
+  const g = new THREE.Group(); g.add(rbox(.13, .22, .018, '#ff7a1a', .02));
+  const t = canvasTex(128, 224), c = t.g; const gr = c.createLinearGradient(0, 0, 0, 224); gr.addColorStop(0, '#5fd0ff'); gr.addColorStop(1, '#7c5cff'); c.fillStyle = gr; c.fillRect(0, 0, 128, 224);
+  ['#ffd23f', '#ff5a5f', '#5dff9a', '#ffffff'].forEach((col, i) => { c.fillStyle = col; c.beginPath(); c.arc(30 + (i % 2) * 64, 60 + i * 38, 16, 0, 7); c.fill(); }); c.fillStyle = '#ffffff'; c.fillRect(20, 196, 88, 10);
+  const s = at(new THREE.Mesh(new THREE.PlaneGeometry(.115, .2), new THREE.MeshStandardMaterial({ map: t.t, emissive: '#ffffff', emissiveMap: t.t, emissiveIntensity: .9 })), 0, 0, .0101); g.add(s); g.userData.screen = s; return g;
+}
 export function ball(a = '#ff5a5f', b = '#ffffff') { return new THREE.Mesh(new THREE.SphereGeometry(.13, 24, 18), texMat((g, w, h) => { for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? a : b; g.fillRect(i * w / 6, 0, w / 6, h); } }, 256, 128, [1, 1], { roughness: .4 })); }
 export function block(color) { return rbox(.12, .12, .12, color, .02); }
 export function coin() { const c = cyl(.05, .05, .012, mat('#ffd23f', { metalness: .7, roughness: .25 }), 24); c.rotation.x = Math.PI / 2; return c; }
