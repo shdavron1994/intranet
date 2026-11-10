@@ -149,7 +149,7 @@ const SCENES = [
       T.set(Object.assign({ t, sit: true, talk: speaking('Томирис'), mood: 'happy' }, K.eat(T, up2)));
       if (t < 9.6) K.cam(t, [[0, [-.9, 1.35, .9], [-.2, 1.0, -1.45]], [9.6, [.9, 1.35, .9], [.2, 1.0, -1.45]]]);
       else if (t < 14.2) shot(t, 'kids');
-      else shot(t, 'mom');
+      else K.cam(t, [[14.2, [.3, 1.4, -1.25], [1.5, 1.45, -.25]]]);
     },
     overlay(cx, t) { if (t < 9.6) checklist(cx, 'Правила завтрака', ['Сидим ровно', 'Едим не спеша', 'Хорошо жуём', 'Прожевал — потом говори'], Math.min(4, Math.floor(seg(t, .3, 7.5) * 4) + 1), t > 8 ? 4 : 0, 830, 60); } },
 
