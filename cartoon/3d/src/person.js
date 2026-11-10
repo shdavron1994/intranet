@@ -177,8 +177,8 @@ export function posePerson(P, s) {
   // legs with knee bend on the back swing
   P.legs.forEach((hip, i) => {
     const ph = i ? -swing : swing;
-    hip.rotation.x = -ph * .55 - (s.crouch || 0);
-    hip.userData.knee.rotation.x = Math.max(0, ph) * (walk ? .9 : 0) + (s.crouch || 0) * 1.8;
+    hip.rotation.x = s.sit ? -1.5 + Math.sin(t * 2 + i * 2) * .06 * (s.swingLegs || 0) : -ph * .55 - (s.crouch || 0);
+    hip.userData.knee.rotation.x = s.sit ? 1.45 + Math.sin(t * 5 + i * 3) * .25 * (s.swingLegs || 0) : Math.max(0, ph) * (walk ? .9 : 0) + (s.crouch || 0) * 1.8;
   });
   const breathe = Math.sin(t * 2.1) * .012;
   P.body.position.y = (s.bob ?? Math.abs(Math.cos(walk)) * (walk ? .035 : 0)) + (s.jump || 0) - (s.crouch || 0) * .12;
@@ -196,7 +196,7 @@ export function posePerson(P, s) {
   P.head.rotation.set((s.nod || 0) + talkNod + Math.sin(t * 1.3) * .025, (s.turn || 0) + Math.sin(t * .8) * .06, (s.tilt || 0) + (s.talk ? Math.sin(t * 3.1) * .04 : 0));
   P.body.rotation.z = s.lean || 0;
   // eyes and lids
-  const blink = s.sleep || ((t + (P.o.blinkOff || 0)) % 3.4) < .12;
+  const blink = s.sleep || s.closed || ((t + (P.o.blinkOff || 0)) % 3.4) < .12;
   const look = s.look || [0, 0];
   const big = s.mood === 'wow' ? 1.12 : 1;
   P.eyes.forEach(e => {
