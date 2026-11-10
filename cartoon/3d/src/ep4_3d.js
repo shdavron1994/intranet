@@ -23,7 +23,7 @@ function kitchen(t, o = {}) {
   bowls.forEach((b, i) => { b.visible = i < (o.bowls ?? 2); b.position.set(BOWL_AT[i][0], .78, BOWL_AT[i][1]); b.userData.food.scale.setScalar(o.food ?? 1); });
   ph.visible = !!o.phone; sp.forEach((s, i) => s.visible = !!o.spoons && i < (o.bowls ?? 2));
 }
-const C = { wide: [[0, 1.6, 3.4], [0, .95, -1.2]], kids: [[0, 1.22, .75], [0, 1.05, -1.45]], kettle: [[.85, 1.2, -1.55], [1.25, 1.1, -2.6]], tvkids: [[-2.4, 1.3, -.4], [0, 1.0, -1.45]], papa: [[.6, 1.55, 1.8], [-.6, 1.5, 2.6]] };
+const C = { wide: [[0, 1.6, 3.4], [0, .95, -1.2]], kids: [[0, 1.22, .75], [0, 1.05, -1.45]], kettle: [[.45, 1.2, -1.55], [.85, 1.1, -2.6]], tvkids: [[-2.4, 1.3, -.4], [0, 1.0, -1.45]], papa: [[.6, 1.55, 1.8], [-.6, 1.5, 2.6]] };
 const shot = (t, a, b, t0 = 0, t1 = 8) => K.cam(t, [[t0, ...C[a]], [t1, ...C[b || a]]]);
 // living room: the whole family on the sofa watching «Мама, папа и малыш»
 const SOFA = { P: { x: -.85, z: 1.3, ry: Math.PI, y: .55 }, D: { x: -.28, z: 1.3, ry: Math.PI, y: .55 }, T: { x: .28, z: 1.3, ry: Math.PI, y: .55 }, M: { x: .85, z: 1.3, ry: Math.PI, y: .55 } };
@@ -109,9 +109,10 @@ const SCENES = [
     sfx: [[.6, 'boing']],
     update(t) {
       kitchen(t, { kettle: 1 }); K.cast(D, T, Ma, P); K.fov(40);
-      const wD = K.walk(D, [-.42, -.6], [-.75, .95], 0, 1.8, t, Math.PI), wT = K.walk(T, [.42, -.6], [-.35, 1.0], .2, 2, t, Math.PI);
+            // kids go AROUND the table (behind it and past the end chairs) to papa
       D.root.position.y = T.root.position.y = 0;
-      const hug = t > 1.8;
+      const wD = K.path(D, [[-.42, -1.95], [-1.85, -1.7], [-1.85, .4], [-.8, .95]], .1, 2.4, t, Math.PI), wT = K.path(T, [[.42, -1.95], [1.85, -1.7], [1.85, .4], [0, 1.25], [-.35, 1.05]], .2, 2.8, t, Math.PI);
+      const hug = t > 2.6;
       K.place(P, -.6, 1.4, Math.PI); P.set({ t, talk: speaking('Папа'), mood: 'happy', crouch: hug ? .45 : 0, armLx: hug ? 1.3 : .2, armRx: hug ? 1.3 : .2, elbowL: hug ? 1.3 : .3, elbowR: hug ? 1.3 : .3 });
       D.set({ t, walk: wD, talk: speaking('Дилшод'), mood: 'happy', armLx: hug ? 1.4 : .2, armRx: hug ? 1.4 : .2, elbowL: .6, elbowR: .6 });
       T.set({ t, walk: wT, talk: speaking('Томирис'), mood: 'happy', armL: hug ? 2.4 : .15, armR: hug ? 2.4 : .15 });

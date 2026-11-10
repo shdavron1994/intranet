@@ -25,7 +25,7 @@ function kitchen(t, o = {}) {
   bowls.forEach((b, i) => { b.position.set(BOWL_AT[i][0], .78, BOWL_AT[i][1]); b.userData.food.scale.setScalar(o.food ?? .3); });
   K.cast(D, T, Ma, P); K.sit(D, S.D); K.sit(T, S.T); K.sit(P, S.P); K.sit(Ma, S.M);
 }
-const C = { wide: [[0, 1.6, 3.4], [0, .95, -1.2]], kids: [[0, 1.22, .75], [0, 1.05, -1.45]], kettle: [[.85, 1.2, -1.55], [1.25, 1.1, -2.6]], papa: [[.4, 1.3, .2], [-1.25, 1.35, -.7]], tv: [[-2.6, 1.4, .8], [-4.9, 1.6, -.9]] };
+const C = { wide: [[0, 1.6, 3.4], [0, .95, -1.2]], kids: [[0, 1.22, .75], [0, 1.05, -1.45]], kettle: [[.45, 1.2, -1.55], [.85, 1.1, -2.6]], papa: [[.4, 1.3, .2], [-1.25, 1.35, -.7]], tv: [[-2.6, 1.4, .8], [-4.9, 1.6, -.9]] };
 const shot = (t, a, b, t0 = 0, t1 = 8) => K.cam(t, [[t0, ...C[a]], [t1, ...C[b || a]]]);
 const sugarTV = t => (g, w, h) => g.drawImage(K.draw2D(() => sugarShow(t)), 0, 0, w, h);
 

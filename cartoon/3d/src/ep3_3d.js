@@ -44,7 +44,7 @@ const SCENES = [
       L.door.rotation.y = -Math.PI / 2 + seg(t, 0, .8) * 1.4 * (1 - seg(t, 10, 11));
       const wD = K.walk(D, [5.6, 2.6], [3.6, 2.2], .4, 2.4, t, -Math.PI / 2 + .3), wT = K.walk(T, [5.8, 3.0], [3.7, 3.0], .8, 2.8, t, -Math.PI / 2 - .3), wM = K.walk(M, [5.8, 2.4], [4.2, 3.6], 1.2, 3.2, t, -Math.PI / 2 - .5);
       D.set({ t, walk: wD, talk: speaking('Дилшод'), mood: 'happy' }); T.set({ t, walk: wT, talk: speaking('Томирис'), mood: 'happy' }); M.set({ t, walk: wM, talk: speaking('Мама'), armL: t > 3.2 && t < 4.6 ? 1.1 : .12 });
-      if (t > 7.6) { const w2 = K.walk(D, [3.6, 2.2], [-.6, 1.0], 8, 11, t), w3 = K.walk(T, [3.7, 3.0], [.4, 1.0], 8.2, 11.2, t); D.set({ t, walk: w2, mood: 'happy' }); T.set({ t, walk: w3, mood: 'happy' }); }
+      if (t > 7.6) { const w2 = K.path(D, [[3.6, 2.2], [2.0, .5], [-.6, .6]], 8, 11, t), w3 = K.path(T, [[3.7, 3.0], [2.2, .7], [.4, .6]], 8.2, 11.2, t); D.set({ t, walk: w2, mood: 'happy' }); T.set({ t, walk: w3, mood: 'happy' }); }
       K.fov(40); K.cam(t, [[0, [1.2, 1.5, -.6], [4.6, 1, 2.6]], [7.6, [1.6, 1.45, -.2], [3.9, 1, 2.8]], [12, [2.4, 1.7, -1.5], [.6, .9, 1.4]]]);
     } },
 

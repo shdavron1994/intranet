@@ -145,11 +145,16 @@ export function makeKitchen() {
   g.add(at(rbox(1.7, .01, .8, '#ffffff', .005), 0, .775, -.7));
   const seats = {};
   [['D', -.42, -1.45, 0, true], ['T', .42, -1.45, 0, true], ['M', 1.25, -.7, -Math.PI / 2, false], ['P', -1.25, -.7, Math.PI / 2, false]].forEach(([k, x, z, ry, kid]) => { const c = chair(kid); c.position.set(x, 0, z); c.rotation.y = ry; g.add(c); seats[k] = { x, z, ry, y: c.userData.seat, chair: c }; });
-  const kettle = makeKettle(); kettle.root.position.set(1.25, .95, -2.6); kettle.root.rotation.y = -.25; g.add(kettle.root);
+  // kitchen sink with a tap on the counter
+  g.add(at(rbox(.55, .03, .4, '#9fb0bf', .02), 1.75, .94, -2.62), at(rbox(.48, .02, .33, '#7f93a6', .01), 1.75, .93, -2.62));
+  g.add(at(cyl(.025, .03, .2, '#c9d4de', 12), 1.75, 1.04, -2.86), at(rbox(.04, .035, .16, '#c9d4de', .015), 1.75, 1.13, -2.79));
+  const water = at(cyl(.014, .014, .17, mat('#8fd3ff', { transparent: true, opacity: .7 }), 10), 1.75, 1.04, -2.72); water.visible = false; g.add(water);
+  g.add(at(rbox(.5, .24, .32, '#3b8beb', .04), 1.75, .12, -2.1)); // step stool at the sink
+  const kettle = makeKettle(); kettle.root.position.set(.85, .95, -2.6); kettle.root.rotation.y = -.25; g.add(kettle.root);
   const tv = makeTV(1.2, .68); tv.root.position.set(-4.95, 1.75, -.9); tv.root.rotation.y = Math.PI / 2; g.add(tv.root);
   const lamp = new THREE.PointLight('#fff1d6', 0, 9); lamp.position.set(0, 2.9, -.5); lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); g.add(lamp);
   g.add(at(cyl(.3, .3, .06, '#ffe8a3', 24), 0, 3.15, -.7));
-  return { group: g, win, kettle, tv, chart, seats, lamp, pot };
+  return { group: g, win, kettle, tv, chart, seats, lamp, pot, water };
 }
 
 /* ---------- living room: TV on the back wall, sofa facing it, window behind the sofa, door on the right ---------- */

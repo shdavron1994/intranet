@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { seg, ease, lerp, sneaker, backpack } from './world.js';
 import { startEpisode, speaking, checklist } from './eng3d.js';
 import { makeKit } from './kit.js';
-import { bowl, spoon, phone, drawToonFace } from './sets2.js';
+import { bowl, spoon, phone, cup, drawToonFace } from './sets2.js';
 
 const K = makeKit(['kitchen', 'living', 'street']);
 const { D, T, Ma, scene } = K, kit = K.kitchen, S = kit.seats;
@@ -11,15 +11,16 @@ const ph = K.holdBoth(D, phone());
 const spD = K.hold(D, spoon()), spT = K.hold(T, spoon()); [spD, spT].forEach(s => { s.rotation.set(-1.4, 0, 0); s.position.set(0, -.02, .05); });
 const bD = bowl(), bT = bowl(), bD2 = bowl(), bT2 = bowl(); scene.add(bD, bT);
 K.hold(Ma, bD2, 0); K.hold(Ma, bT2, 1); [bD2, bT2].forEach(b => b.position.set(0, -.06, .06));
+const rinseCup = K.hold(D, cup('#4cc3ff')); rinseCup.position.set(0, -.02, .05);
 const momPhone = K.hold(Ma, phone(), 0); momPhone.rotation.set(-1.4, 0, 0);
 const shoes = [sneaker(), sneaker()], bag = backpack(); shoes.forEach(s => scene.add(s)); scene.add(bag);
 
 const CAM = {
   wide: [[0, 1.6, 3.4], [0, .95, -1.2]], kids: [[0, 1.22, .75], [0, 1.05, -1.45]], dil: [[-.32, 1.15, .1], [-.42, 1.08, -1.45]],
-  tom: [[.36, 1.1, .1], [.42, 1.0, -1.45]], kettle: [[.85, 1.2, -1.55], [1.25, 1.1, -2.6]], mom: [[.9, 1.55, .4], [2.4, 1.4, -1.9]]
+  tom: [[.36, 1.1, .1], [.42, 1.0, -1.45]], kettle: [[.45, 1.2, -1.55], [.85, 1.1, -2.6]], mom: [[.9, 1.55, .4], [2.4, 1.4, -1.9]]
 };
 const shot = (t, a, b, t0 = 0, t1 = 6) => K.cam(t, [[t0, ...CAM[a]], [t1, ...CAM[b || a]]]);
-function props(o = {}) { ph.visible = !!o.phone; [spD, spT].forEach(s => s.visible = !!o.spoon); bD.visible = bT.visible = !!o.bowls; bD2.visible = bT2.visible = !!o.carry; momPhone.visible = !!o.momPhone; shoes.forEach(s => s.visible = false); bag.visible = false; }
+function props(o = {}) { ph.visible = !!o.phone; [spD, spT].forEach(s => s.visible = !!o.spoon); bD.visible = bT.visible = !!o.bowls; rinseCup.visible = !!o.cup; kit.water.visible = !!o.water; bD2.visible = bT2.visible = !!o.carry; momPhone.visible = !!o.momPhone; shoes.forEach(s => s.visible = false); bag.visible = false; }
 function table(t, o = {}) {
   K.env('kitchen'); K.cast(D, T, Ma); kit.tv.set(null);
   K.sit(D, S.D); K.sit(T, S.T);
@@ -33,7 +34,7 @@ const stir = t => ({ armRx: .9 + Math.sin(t * 4) * .2, elbowR: 1.1, armLx: .6, e
 const SCENES = [
   { name: 'Заставка', dur: 5, title: ['Чистон', 'Серия 2. Завтрак'],
     cues: [[.8, 4.6, 'Рассказчик', 'Чистон. Серия вторая: «Завтрак».']],
-    update(t) { table(t, { kettle: seg(t, 1, 2.5) }); props(); K.cast(); K.fov(40); K.cam(t, [[0, [-1.5, 1.8, 3.6], [0, 1, -2]], [5, [.4, 1.3, -.6], [1.25, 1.1, -2.6]]], .4); } },
+    update(t) { table(t, { kettle: seg(t, 1, 2.5) }); props(); K.cast(); K.fov(40); K.cam(t, [[0, [-1.5, 1.8, 3.6], [0, 1, -2]], [5, [.4, 1.3, -.6], [.85, 1.1, -2.6]]], .4); } },
 
   { name: 'Телефон за столом', dur: 13,
     cues: [[1, 4.6, 'Мама', 'Дилшод, убери телефон. За столом не смотрят.'],
@@ -161,19 +162,24 @@ const SCENES = [
     sfx: [[15, 'ding']],
     update(t) {
       table(t, { kettle: 1, food: 0 }); K.fov(38);
-      momAt(1.5, -.25, -2.3, { mood: 'happy' }, t);
+      momAt(2.7, -.5, -2.0, { mood: 'happy' }, t);
       props({ bowls: true });
       T.set({ t, sit: true, talk: speaking('Томирис'), mood: 'happy', armL: t > 3 ? 2.4 + Math.sin(t * 6) * .3 : .15 });
       if (t < 3) { D.set({ t, sit: true, talk: speaking('Дилшод'), mood: 'happy' }); shot(t, 'kids'); return; }
-      // Dilshod gets down and carries his bowl to the counter, then washes his hands
-      const w = K.walk(D, [-.42, -.2], [1.75, -2.05], 3.4, 6.4, t, Math.PI);
-      D.root.position.y = t < 3.4 ? lerp(S.D.y - .4, 0, seg(t, 3, 3.4)) : 0;
-      const wash = t >= 11 && t < 15.6, sc = Math.sin(t * 14) * .2;
-      bD.visible = t < 3.4 || t > 6.4; if (t >= 3.4 && t <= 6.4) { bD.visible = true; bD.position.set(D.root.position.x, .62, D.root.position.z + (D.root.rotation.y > 2 ? -.15 : .15)); } else if (t > 6.4) bD.position.set(1.55, .95, -2.5);
-      D.set(Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy', walk: w }, wash ? { armLx: 1.3 + sc, elbowL: .9, armRx: 1.3 - sc, elbowR: .9 } : t < 6.4 ? { armLx: 1.1, elbowL: .7, armRx: 1.1, elbowR: .7 } : { turn: t > 7 && t < 9.4 ? -.8 : 0 }));
-      if (t < 7) K.cam(t, [[3, ...CAM.wide], [7, [1.2, 1.4, .2], [1.6, .9, -2.2]]]);
+      // Dilshod slides off his chair backwards and walks BEHIND the table, along the counter, to the kitchen sink
+      let w = 0;
+      if (t < 3.5) { const k = seg(t, 3, 3.5); K.place(D, -.42, lerp(S.D.z, -1.95, k), 0, lerp(S.D.y - .4, 0, k)); }
+      else { w = K.path(D, [[-.42, -1.95], [1.75, -2.05]], 3.6, 6.2, t, Math.PI); D.root.position.y = t > 6.2 ? .24 * seg(t, 6.2, 6.5) : 0; }
+      const wash = t >= 10.8 && t < 13.2, rinse = t >= 13.2 && t < 15.6, spit = t >= 14.5 && t < 15.3, sc = Math.sin(t * 14) * .2;
+      props({ bowls: true, cup: rinse, water: wash || (t >= 13.2 && t < 13.6) || spit });
+      if (t >= 3.5 && t <= 6.2) bD.position.set(D.root.position.x + .12, .66, D.root.position.z + .12); else if (t > 6.2) bD.position.set(2.2, .95, -2.5);
+      D.set(Object.assign({ t, talk: speaking('Дилшод'), mood: 'happy', walk: w },
+        wash ? { armLx: 1.3 + sc, elbowL: .9, armRx: 1.3 - sc, elbowR: .9, nod: .3 }
+        : rinse ? (spit ? { nod: .6, crouch: .15, armRx: .8, elbowR: 1.0, closed: true } : { armRx: 1.6, elbowR: 2.3, armR: .1, nod: -.2 })
+        : t >= 3.5 && t < 6.2 ? { armLx: 1.1, elbowL: .7, armRx: 1.1, elbowR: .7 } : t >= 6.2 ? { turn: t > 7 && t < 10.6 ? (t > 9.6 ? .9 : -.9) : 0 } : {}));
+      if (t < 6.2) K.cam(t, [[3, ...CAM.wide], [6.2, [.6, 1.5, .6], [1.2, .9, -2.0]]]);
       else if (t < 9.6) shot(t, 'kettle');
-      else K.cam(t, [[9.6, [1.0, 1.3, -.9], [1.7, .9, -2.2]], [16, [.8, 1.35, -.6], [1.7, .9, -2.2]]]);
+      else { K.fov(64); K.cam(t, [[9.6, [1.72, 1.36, -2.95], [1.75, .97, -1.95]], [16, [1.78, 1.34, -2.95], [1.75, .97, -1.95]]], .3); }
     } },
 
   { name: 'В садик', dur: 20,

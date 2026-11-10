@@ -64,6 +64,15 @@ export function makeKit(want = []) {
     const moving = t > t0 && t < t1; P.root.rotation.y = moving ? Math.atan2(to[0] - from[0], to[1] - from[1]) : (face ?? P.root.rotation.y);
     return moving ? (t - t0) * 9 : 0;
   };
+  // walk along a route of points (to go around furniture), evenly in distance
+  K.path = (P, pts, t0, t1, t, face) => {
+    const L = [0]; for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    const d = seg(t, t0, t1) * L[L.length - 1]; let i = 1; while (i < pts.length - 1 && d > L[i]) i++;
+    const a = pts[i - 1], b = pts[i], k = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1);
+    P.root.position.set(lerp(a[0], b[0], k), P.root.position.y, lerp(a[1], b[1], k));
+    const moving = t > t0 && t < t1; P.root.rotation.y = moving ? Math.atan2(b[0] - a[0], b[1] - a[1]) : (face ?? P.root.rotation.y);
+    return moving ? (t - t0) * 9 : 0;
+  };
   K.cam = (t, keys, drift = 1) => camAt(cam, t, keys, drift);
   K.hold = (P, obj, hand = 1) => { P.arms[hand].userData.hand.add(obj); return obj; };
   // held in both hands in front of the chest, screen turned to the face; synced right before each render
