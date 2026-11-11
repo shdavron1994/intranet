@@ -44,6 +44,77 @@ const DIMS = {
   adult: { R: .23, hipY: .84, thigh: .35, shin: .33, legR: .075, torso: .58, sh: .23, armU: .25, armF: .23, armR: .065, neck: .05 }
 };
 
+
+/* ---------- painted face (like the approved drawing): drawn on a canvas wrapped over the front of the head ---------- */
+const PH0 = Math.PI / 2 - .95, PHL = 1.9, TH0 = Math.PI / 2 - .8, THL = 1.6;
+function makeFace(skullR, o, adult, girl) {
+  const S = 512, c = document.createElement('canvas'); c.width = c.height = S; const g = c.getContext('2d');
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const geo = new THREE.SphereGeometry(skullR * 1.006, 64, 48, PH0, PHL, TH0, THL);
+  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: .55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  mesh.renderOrder = 2;
+  // (x, y) on the unit head (x right, y up) -> canvas pixels
+  const P = (x, y) => { const lat = Math.asin(Math.max(-1, Math.min(1, y))), lon = Math.asin(Math.max(-1, Math.min(1, x / Math.cos(lat)))); return [(lon + .95) / PHL * S, (.8 - lat) / THL * S]; };
+  const px = S / PHL; // pixels per radian ~ per unit near the centre
+  const ink = '#2a1810', brow = o.brow || o.hair || '#1b120c';
+  let key = '';
+  function draw(st) {
+    const k = [st.blink, st.look[0].toFixed(2), st.look[1].toFixed(2), st.mood, st.mouth.toFixed(2), st.sleep].join('|'); if (k === key) return; key = k;
+    g.clearRect(0, 0, S, S);
+    const eyeX = adult ? .33 : .35, eyeY = adult ? .06 : .02, ew = (adult ? .15 : .175) * px, eh = (adult ? .105 : .14) * px;
+    const wow = st.mood === 'wow', sad = st.mood === 'sad', angry = st.mood === 'angry';
+    [-1, 1].forEach(sd => {
+      const [cx, cy] = P(sd * eyeX, eyeY);
+      g.save(); g.translate(cx, cy);
+      if (st.blink || st.sleep) {
+        g.strokeStyle = ink; g.lineWidth = .028 * px; g.lineCap = 'round'; g.beginPath(); g.arc(0, -eh * .2, ew * .95, .15 * Math.PI, .85 * Math.PI); g.stroke();
+        if (girl) { g.lineWidth = .016 * px; [-.6, 0, .6].forEach(a => { g.beginPath(); g.moveTo(Math.cos(Math.PI / 2 + a * .5) * ew * .9, eh * .6); g.lineTo(Math.cos(Math.PI / 2 + a * .5) * ew * 1.2, eh * .95); g.stroke(); }); }
+      } else {
+        const h = eh * (wow ? 1.15 : st.mood === 'bored' ? .7 : 1);
+        // almond-shaped white
+        g.beginPath(); g.moveTo(-ew, 0); g.bezierCurveTo(-ew * .6, -h * 1.15, ew * .6, -h * 1.15, ew, -h * .1); g.bezierCurveTo(ew * .6, h * 1.0, -ew * .6, h * 1.0, -ew, 0); g.closePath();
+        g.fillStyle = '#fbf6f1'; g.fill(); g.save(); g.clip();
+        const ix = st.look[0] * ew * .35, iy = -st.look[1] * h * .25 + h * .05, ir = h * .88;
+        const gr = g.createRadialGradient(ix, iy - ir * .3, ir * .1, ix, iy, ir); gr.addColorStop(0, '#8a5a35'); gr.addColorStop(.6, o.eye || '#4a2c18'); gr.addColorStop(1, '#1e120a');
+        g.fillStyle = gr; g.beginPath(); g.arc(ix, iy, ir, 0, 7); g.fill();
+        g.fillStyle = '#0c0705'; g.beginPath(); g.arc(ix, iy, ir * .48, 0, 7); g.fill();
+        g.fillStyle = '#ffffff'; g.beginPath(); g.arc(ix + ir * .35, iy - ir * .38, ir * .26, 0, 7); g.fill(); g.beginPath(); g.arc(ix - ir * .35, iy + ir * .35, ir * .12, 0, 7); g.fill();
+        g.fillStyle = 'rgba(80,40,20,.18)'; g.fillRect(-ew, -h * 1.2, ew * 2, h * .45); // soft lid shadow
+        g.restore();
+        // upper lash line, thicker at the outer corner; a thin lower line
+        g.strokeStyle = ink; g.lineCap = 'round'; g.lineWidth = (girl ? .03 : .022) * px;
+        g.beginPath(); g.moveTo(-ew * 1.02, .02 * px); g.bezierCurveTo(-ew * .6, -h * 1.17, ew * .6, -h * 1.17, ew * 1.04, -h * .14); g.stroke();
+        if (girl || adult) { g.beginPath(); g.moveTo(sd * ew * .95, -h * .2); g.lineTo(sd * ew * 1.25, -h * .55); g.stroke(); }
+        g.lineWidth = .008 * px; g.strokeStyle = 'rgba(42,24,16,.55)'; g.beginPath(); g.moveTo(-ew * .7, h * .6); g.quadraticCurveTo(0, h * 1.0, ew * .8, h * .55); g.stroke();
+      }
+      g.restore();
+      // brow: a thin tapered arch
+      const [bx, by] = P(sd * eyeX * 1.02, eyeY + (adult ? .2 : .24) + (wow ? .05 : 0));
+      g.save(); g.translate(bx, by); g.scale(sd, 1); g.rotate(sad ? .25 : angry ? -.3 : 0);
+      g.fillStyle = brow; g.beginPath(); g.moveTo(-ew * .95, ew * .1); g.quadraticCurveTo(-ew * .1, -ew * (adult ? .42 : .35), ew * 1.0, -ew * .02); g.quadraticCurveTo(-ew * .1, -ew * (adult ? .26 : .22), -ew * .95, ew * .2); g.fill(); g.restore();
+    });
+    // nose: soft shading under a tiny button
+    { const [nx, ny] = P(0, -.17); g.fillStyle = 'rgba(150,80,50,.28)'; g.beginPath(); g.ellipse(nx, ny, .07 * px, .025 * px, 0, 0, 7); g.fill(); }
+    // mouth
+    const [mx, my] = P(0, adult ? -.44 : -.4), mw = (adult ? .16 : .15) * px, lip = o.lips || (girl ? '#c76d6d' : '#b5655c');
+    const m = st.mouth;
+    if (m > .03 || wow) {
+      const oh = (wow && m < .05 ? .5 : m) * .13 * px + .02 * px;
+      g.fillStyle = '#5b1d1f'; g.beginPath(); g.moveTo(mx - mw, my - oh * .2); g.quadraticCurveTo(mx, my - oh * .55, mx + mw, my - oh * .2); g.quadraticCurveTo(mx + mw * .6, my + oh * 1.1, mx, my + oh * 1.15); g.quadraticCurveTo(mx - mw * .6, my + oh * 1.1, mx - mw, my - oh * .2); g.fill();
+      g.save(); g.clip(); g.fillStyle = '#ffffff'; g.fillRect(mx - mw, my - oh * .6, mw * 2, oh * .42); g.fillStyle = '#e8737f'; g.beginPath(); g.ellipse(mx, my + oh * 1.0, mw * .55, oh * .45, 0, 0, 7); g.fill(); g.restore();
+      g.strokeStyle = lip; g.lineWidth = .02 * px; g.stroke();
+    } else if (sad) {
+      g.strokeStyle = lip; g.lineWidth = .025 * px; g.lineCap = 'round'; g.beginPath(); g.moveTo(mx - mw * .7, my + .03 * px); g.quadraticCurveTo(mx, my - .03 * px, mx + mw * .7, my + .03 * px); g.stroke();
+    } else {
+      // closed gentle smile with a soft lower lip
+      g.strokeStyle = '#7a3a33'; g.lineWidth = .02 * px; g.lineCap = 'round'; g.beginPath(); g.moveTo(mx - mw, my - .015 * px); g.quadraticCurveTo(mx, my + .06 * px, mx + mw, my - .015 * px); g.stroke();
+      g.fillStyle = girl || adult ? lip : 'rgba(181,101,92,.55)'; g.globalAlpha = girl ? .8 : .45; g.beginPath(); g.ellipse(mx, my + .045 * px, mw * .45, .02 * px, 0, 0, 7); g.fill(); g.globalAlpha = 1;
+    }
+    tex.needsUpdate = true;
+  }
+  return { mesh, draw };
+}
+
 export function makePerson(o) {
   o = Object.assign({ kind: 'boy', shirt: '#3b8beb', pants: '#2b3f73', shoes: '#ffffff', skin: '#f1c09a', hair: '#3b2418', scale: 1, pajama: false, eye: '#5a3a22' }, o);
   const adult = o.kind === 'mom' || o.kind === 'papa', girl = o.kind === 'girl' || o.kind === 'mom';
@@ -155,7 +226,7 @@ export function makePerson(o) {
     // soft rounded mop with a full fringe over the forehead (Dilshod in the drawing)
     capM.scale.set(1.06, 1.04, 1.05);
     const crown = sph(R * 1.0, HM, 40); crown.scale.set(1.06, .72, 1.02); put(crown, 0, R * .38, -R * .05); head.add(crown);
-    for (let i = 0; i < 11; i++) { const x = (i - 5) * .1; const st = cap(R * .08, R * .26, HM); put(st, x * R, R * (.56 - Math.abs(x) * .28), R * (.86 - Math.abs(x) * .3)); st.rotation.set(-.35, 0, -x * .5); head.add(st); }
+    for (let i = 0; i < 11; i++) { const x = (i - 5) * .1; const st = cap(R * .08, R * .26, HM); put(st, x * R, R * (.64 - Math.abs(x) * .26), R * (.8 - Math.abs(x) * .3)); st.rotation.set(-.6, 0, -x * .5); head.add(st); }
     [-1, 1].forEach(s => { const side = sph(R * .34, HM, 20); side.scale.set(.45, .9, .9); put(side, s * R * .95, R * .12, -R * .05); head.add(side); });
   } else if (o.style === 'long') {
     // long loose hair with a middle part, framing the face and falling over the shoulders (mama in the drawing)
@@ -186,7 +257,10 @@ export function makePerson(o) {
   }
 
   root.scale.setScalar(o.scale);
-  const P = { root, body, hips, torso, head, legs, arms, eyes, brows, mouth, smile, open, o, R };
+  // painted face replaces the geometric eyes, brows and mouth
+  const face = makeFace(R, o, adult, girl); skull.add(face.mesh);
+  eyes.forEach(e => e.visible = false); brows.forEach(b => b.visible = false); mouth.visible = false; nose.scale.multiplyScalar(.8);
+  const P = { root, body, hips, torso, head, legs, arms, eyes, brows, mouth, smile, open, o, R, face };
   P.set = s => posePerson(P, s);
   P.set({});
   return P;
@@ -217,6 +291,12 @@ export function posePerson(P, s) {
   const talkNod = s.talk ? Math.sin(t * 6.5) * .05 : 0;
   P.head.rotation.set((s.nod || 0) + talkNod + Math.sin(t * 1.3) * .025, (s.turn || 0) + Math.sin(t * .8) * .06, (s.tilt || 0) + (s.talk ? Math.sin(t * 3.1) * .04 : 0));
   P.body.rotation.z = s.lean || 0;
+  if (P.face) {
+    const blink = !!(s.sleep || s.closed || ((t + (P.o.blinkOff || 0)) % 3.4) < .12);
+    const talk = typeof s.talk === 'number' ? s.talk : s.talk ? .35 + Math.abs(Math.sin(t * 15)) * .6 : 0;
+    P.face.draw({ blink, look: s.look || [0, 0], mood: s.mood || 'happy', mouth: s.sleep ? .15 : talk, sleep: !!s.sleep });
+    return;
+  }
   // eyes and lids
   const blink = s.sleep || s.closed || ((t + (P.o.blinkOff || 0)) % 3.4) < .12;
   const look = s.look || [0, 0];
