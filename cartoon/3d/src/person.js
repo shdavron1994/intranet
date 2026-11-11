@@ -98,30 +98,35 @@ export function makePerson(o) {
   // head
   const head = put(new THREE.Group(), 0, T + d.neck + R * .82, 0); torso.add(head);
   torso.add(put(cap(R * .28, d.neck, SK), 0, T + d.neck * .3, 0));
-  const skull = sph(R, SK, 56); if (adult) skull.scale.set(.96, 1.12, .98); else skull.scale.set(1.04, .97, 1); head.add(skull);
-  [-1, 1].forEach(s => { const ear = sph(R * .2, SK, 16); ear.scale.set(.6, 1, .8); put(ear, s * R * 1.0, 0, 0); head.add(ear); });
+  const skull = sph(R, SK, 56); if (adult) skull.scale.set(.93, 1.1, .97); else skull.scale.set(1.02, .98, 1); head.add(skull);
+  // soft jaw and chin, narrower than the cranium (as in the approved drawing)
+  const jaw = sph(R * .78, SK, 40); jaw.scale.set(adult ? .94 : .98, .8, .9); put(jaw, 0, -R * (adult ? .42 : .3), R * .12); head.add(jaw);
+  [-1, 1].forEach(s => { const ear = sph(R * .16, SK, 16); ear.scale.set(.55, 1, .8); put(ear, s * R * (adult ? .92 : .99), -R * .02, 0); head.add(ear); });
   const blush = plain('#ff8fa3', { transparent: true, opacity: .32, roughness: .9 });
-  const nose = sph(R * (adult ? .11 : .09), SK, 16); put(nose, 0, -R * .12, R * .99); head.add(nose);
+  const nose = sph(R * (adult ? .095 : .075), SK, 16); nose.scale.set(1, .85, .9); put(nose, 0, -R * .14, R * .98); head.add(nose);
+  if (adult) { const bridge = cap(R * .045, R * .16, SK); put(bridge, 0, -R * .02, R * .96); bridge.rotation.x = -.25; head.add(bridge); }
 
   // eyes with iris, pupil, two highlights and a lid
   const eyes = [-1, 1].map(s => {
     const g = put(new THREE.Group(), s * R * .36, R * .03, R * .82); head.add(g);
     g.rotation.y = s * .28;
-    const white = sph(R * .23, plain('#ffffff', { roughness: .15 }), 32); white.scale.set(1, 1.12, .62); g.add(white);
-    const iris = put(sph(R * .155, plain(o.eye, { roughness: .2 }), 24), 0, -R * .015, R * .1); iris.scale.set(1, 1.1, .45); g.add(iris);
-    const pupil = put(sph(R * .085, plain('#120a06', { roughness: .1 }), 16), 0, -R * .015, R * .145); pupil.scale.set(1, 1.1, .4); g.add(pupil);
+    const white = sph(R * .22, plain('#fbf8f4', { roughness: .15 }), 32); white.scale.set(1.08, 1.0, .6); g.add(white);
+    const iris = put(sph(R * .165, plain(o.eye, { roughness: .2 }), 24), 0, -R * .01, R * .1); iris.scale.set(1, 1.08, .45); g.add(iris);
+    const pupil = put(sph(R * .09, plain('#0d0704', { roughness: .1 }), 16), 0, -R * .01, R * .145); pupil.scale.set(1, 1.08, .4); g.add(pupil);
     const h1 = put(sph(R * .045, plain('#ffffff', { emissive: '#ffffff', emissiveIntensity: .6 }), 10), R * .06, R * .07, R * .18); g.add(h1);
     const h2 = put(sph(R * .022, plain('#ffffff', { emissive: '#ffffff', emissiveIntensity: .6 }), 8), -R * .05, -R * .06, R * .18); g.add(h2);
     const lid = M(new THREE.SphereGeometry(R * .245, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2), SK); lid.scale.set(1.03, 1.14, .66); g.add(lid);
-    let lash = null;
-    if (girl) { lash = M(new THREE.TorusGeometry(R * .2, R * .022, 6, 20, Math.PI * .8), plain('#1b120c')); lash.rotation.z = Math.PI * .1; put(lash, 0, R * .04, R * .1); g.add(lash); }
+    // dark upper lash line on every face; thicker for girls
+    const lash = M(new THREE.TorusGeometry(R * .215, R * (girl ? .03 : .02), 6, 24, Math.PI * .85), plain('#1b120c')); lash.rotation.z = Math.PI * .075; lash.scale.set(1.05, .95, 1); put(lash, 0, R * .01, R * .1); g.add(lash);
+    if (girl) { const flick = cap(R * .018, R * .06, plain('#1b120c')); put(flick, s * R * .2, R * .1, R * .08); flick.rotation.z = -s * .9; g.add(flick); }
     g.userData = { iris, pupil, h1, h2, lid, lash }; return g;
   });
-  const brows = [-1, 1].map(s => { const b = M(new THREE.TorusGeometry(R * .16, R * .028 * (o.browW || 1), 8, 18, Math.PI * .55), hairMat(o.brow || o.hair)); b.rotation.z = Math.PI * .22; put(b, s * R * .36, R * .3, R * .9); b.userData.base = b.position.y; head.add(b); return b; });
+  const brows = [-1, 1].map(s => { const b = M(new THREE.TorusGeometry(R * .17, R * .036 * (o.browW || 1), 8, 18, Math.PI * .55), plain(o.brow || o.hair, { roughness: .9 })); b.rotation.z = Math.PI * .22; put(b, s * R * .36, R * .27, R * .9); b.userData.base = b.position.y; head.add(b); return b; });
 
   // mouth: a smile line when closed, an open mouth with teeth and tongue when talking
   const mouth = put(new THREE.Group(), 0, -R * .43, R * .9); mouth.rotation.x = -.35; head.add(mouth);
-  const smile = M(new THREE.TorusGeometry(R * .17, R * .03 * (o.lips ? 1.6 : 1), 8, 24, Math.PI), plain(o.lips || '#8a3030')); smile.rotation.z = Math.PI; mouth.add(smile);
+  const smile = M(new THREE.TorusGeometry(R * .15, R * .022 * (o.lips ? 1.5 : 1), 8, 24, Math.PI), plain(o.lips || '#a8504a')); smile.rotation.z = Math.PI; mouth.add(smile);
+  const lowLip = sph(R * .07, plain(o.lips || '#c97b72', { roughness: .5 }), 12); lowLip.scale.set(1.5, .3, .35); put(lowLip, 0, -R * .115, R * .0); lowLip.visible = !!o.lips; mouth.add(lowLip);
   const open = new THREE.Group(); mouth.add(open);
   const cavity = sph(R * .2, plain('#5a1a1a', { roughness: .8 }), 20); cavity.scale.set(1, .6, .3); open.add(cavity);
   const teeth = put(M(new THREE.BoxGeometry(R * .22, R * .05, R * .05), plain('#ffffff')), 0, R * .085, R * .03); open.add(teeth);
@@ -146,14 +151,31 @@ export function makePerson(o) {
     capM.scale.set(1.01, 1.02, 1.03);
     const tie = M(new THREE.TorusGeometry(R * .14, R * .05, 8, 20), HM); put(tie, 0, -R * .2, -R * .98); head.add(tie);
     const tail = cap(R * .2, R * 1.4, HM); put(tail, 0, -R * 1.0, -R * 1.02); tail.rotation.x = .1; head.add(tail); const tip = sph(R * .22, HM, 16); put(tip, 0, -R * 1.8, -R * .98); head.add(tip);
+  } else if (o.style === 'mop') {
+    // soft rounded mop with a full fringe over the forehead (Dilshod in the drawing)
+    capM.scale.set(1.06, 1.04, 1.05);
+    const crown = sph(R * 1.0, HM, 40); crown.scale.set(1.06, .72, 1.02); put(crown, 0, R * .38, -R * .05); head.add(crown);
+    for (let i = 0; i < 11; i++) { const x = (i - 5) * .1; const st = cap(R * .08, R * .26, HM); put(st, x * R, R * (.56 - Math.abs(x) * .28), R * (.86 - Math.abs(x) * .3)); st.rotation.set(-.35, 0, -x * .5); head.add(st); }
+    [-1, 1].forEach(s => { const side = sph(R * .34, HM, 20); side.scale.set(.45, .9, .9); put(side, s * R * .95, R * .12, -R * .05); head.add(side); });
+  } else if (o.style === 'long') {
+    // long loose hair with a middle part, framing the face and falling over the shoulders (mama in the drawing)
+    capM.scale.set(1.04, 1.06, 1.05);
+    [-1, 1].forEach(s => {
+      const frame = sph(R * .5, HM, 28); frame.scale.set(.55, 1.3, .9); put(frame, s * R * .8, R * .25, R * .32); frame.rotation.z = s * .25; head.add(frame);
+      const lock = cap(R * .3, R * 1.5, HM); put(lock, s * R * .95, -R * .95, R * .05); lock.rotation.z = s * .12; head.add(lock);
+      const tip = sph(R * .32, HM, 18); tip.scale.set(1, .8, .9); put(tip, s * R * 1.0, -R * 1.8, R * .12); head.add(tip);
+    });
+    const back = sph(R * 1.0, HM, 36); back.scale.set(1.08, 1.9, .7); put(back, 0, -R * .7, -R * .45); head.add(back);
   } else if (o.style === 'short') {
     capM.scale.set(1.02, 1.06, 1.02);
-    for (let i = 0; i < 9; i++) { const x = (i - 4) * .12; const st = cap(R * .07, R * .24, HM); put(st, x * R, R * (.8 - Math.abs(x) * .3), R * (.6 - Math.abs(x) * .2)); st.rotation.set(-1.2, 0, -x * .5); head.add(st); }
+    // swept-up quiff on top and short sides (papa in the drawing)
+    const quiff = sph(R * .72, HM, 32); quiff.scale.set(1.05, .42, 1.0); put(quiff, 0, R * .74, R * .12); quiff.rotation.x = -.3; head.add(quiff);
+    for (let i = 0; i < 9; i++) { const x = (i - 4) * .12; const st = cap(R * .08, R * .26, HM); put(st, x * R, R * (.88 - Math.abs(x) * .3), R * (.62 - Math.abs(x) * .2)); st.rotation.set(-1.45, 0, -x * .5); head.add(st); }
   } else if (o.kind === 'boy' || o.kind === 'papa') {
     const tufts = [[-.45, .78, .5, .34], [-.12, .9, .52, .36], [.22, .86, .5, .35], [.5, .7, .42, .3], [-.65, .55, .25, .3], [.66, .5, .2, .28], [0, .98, .1, .38], [-.3, .9, -.2, .36], [.3, .9, -.25, .36]];
     tufts.forEach(([x, y, z, r]) => { const tf = sph(R * r, HM, 20); tf.scale.set(1.1, .7, 1); put(tf, x * R, y * R, z * R); head.add(tf); });
   }
-  if (o.stubble) { const st = sph(R * .66, plain('#2a1d14', { transparent: true, opacity: .28 }), 24); st.scale.set(1.12, .62, .72); put(st, 0, -R * .52, R * .36); head.add(st); const mu = sph(R * .2, plain('#2a1d14', { transparent: true, opacity: .45 }), 16); mu.scale.set(1.6, .35, .5); put(mu, 0, -R * .3, R * .92); head.add(mu); }
+  if (o.stubble) { const st = sph(R * .66, plain('#2a1d14', { transparent: true, opacity: .5 }), 24); st.scale.set(1.12, .62, .72); put(st, 0, -R * .52, R * .36); head.add(st); const mu = sph(R * .2, plain('#2a1d14', { transparent: true, opacity: .45 }), 16); mu.scale.set(1.6, .35, .5); put(mu, 0, -R * .3, R * .92); head.add(mu); }
   if (o.earrings) [-1, 1].forEach(s => head.add(put(sph(R * .05, plain('#e6b800', { metalness: .9, roughness: .25 }), 12), s * R * 1.0, -R * .22, R * .05)));
   if (o.style || o.kind === 'boy' || o.kind === 'papa') {
     // hair already built above
@@ -204,7 +226,7 @@ export function posePerson(P, s) {
     u.lid.rotation.x = blink ? .5 : (s.mood === 'bored' ? -.45 : s.mood === 'sad' ? -1.25 : -1.7);
     [u.iris, u.pupil].forEach((m, k) => { m.position.x = look[0] * P.R * .07; m.position.y = -P.R * .015 + look[1] * P.R * .06; });
     u.h1.visible = u.h2.visible = !blink; if (u.lash) u.lash.visible = !blink;
-    e.scale.setScalar(big * (adult ? .78 : 1));
+    e.scale.setScalar(big * (adult ? .7 : .84));
   });
   P.brows.forEach((b, i) => {
     b.position.y = b.userData.base + (s.mood === 'wow' ? P.R * .08 : s.mood === 'sad' ? -P.R * .02 : 0);
@@ -213,8 +235,8 @@ export function posePerson(P, s) {
   // mouth
   const talking = !!s.talk, wow = s.mood === 'wow' && !talking;
   P.smile.visible = !talking && !wow && !s.sleep;
-  P.smile.scale.set(s.mood === 'sad' ? .8 : 1, s.mood === 'sad' ? -.6 : 1, 1);
-  P.open.visible = talking || wow || s.sleep;
+  P.smile.scale.set(s.mood === 'sad' ? 1.1 : 1.45, s.mood === 'sad' ? -.4 : .55, 1);
+  P.open.visible = !!(talking || wow || s.sleep);
   // lip sync: a number is the voice loudness at this frame (0..1); true falls back to a generic flap
   const amt = typeof s.talk === 'number' ? .12 + s.talk * .88 : talking ? .35 + Math.abs(Math.sin(t * 15)) * .65 * (.6 + .4 * Math.abs(Math.sin(t * 4.3))) : wow ? .8 : .25;
   P.open.scale.set(wow ? .65 : s.sleep ? .45 : 1, amt, 1);

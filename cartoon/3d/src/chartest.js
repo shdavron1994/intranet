@@ -10,7 +10,7 @@ const rim = new THREE.DirectionalLight('#bfe0ff', 1.2); rim.position.set(-3, 2, 
 const fl = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: '#e3b07a' })); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; sc.add(fl);
 const D = makeDilshod(), T = makeTomiris(), Mo = makeMom(), Pa = makePapa();
 Pa.root.position.set(-1.25, 0, -.3); D.root.position.set(-.42, 0, .1); T.root.position.set(.35, 0, .15); Mo.root.position.set(1.15, 0, -.3);
-sc.add(D.root, T.root, Mo.root, Pa.root);
+sc.add(D.root, T.root, Mo.root, Pa.root); window.__D = D;
 const shots = [[[0, 1.25, 4.6], [0, .95, 0]], [[-.42, 1.02, 1.05], [-.42, .99, 0]], [[.35, .9, .95], [.35, .87, 0]], [[1.15, 1.65, 1.2], [1.15, 1.6, -.3]], [[-1.25, 1.75, 1.2], [-1.25, 1.68, -.3]], [[2.4, 1.3, 2.6], [.2, .9, 0]]];
 window.frameAt = (t, q = .9) => {
   const k = Math.floor(t);
