@@ -7,6 +7,7 @@ rm -f warp3d_$n.json
 node shots3d.js ep${n}_3d.html cq$n 0 > /dev/null
 rm -rf v3d_$n; $S/silero_venv/bin/python make_silero.py $S/silero/v5_1_ru.pt cq${n}_cues.json v3d_$n 2>/dev/null | tail -1
 python3 warp3d.py cq${n}_cues.json v3d_$n/voice_manifest.json warp3d_$n.json
+$S/silero_venv/bin/python env3d.py v3d_$n/voice_manifest.json v3d_$n env3d_$n.json
 node shots3d.js ep${n}_3d.html cw$n 0 > /dev/null
 node export3d.js ep${n}_3d.html video3d_$n.mp4 24 $port | tail -1
 node ../series/audio.js cw${n}_cues.json music3d_$n.wav

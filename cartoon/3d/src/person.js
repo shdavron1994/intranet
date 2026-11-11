@@ -215,6 +215,7 @@ export function posePerson(P, s) {
   P.smile.visible = !talking && !wow && !s.sleep;
   P.smile.scale.set(s.mood === 'sad' ? .8 : 1, s.mood === 'sad' ? -.6 : 1, 1);
   P.open.visible = talking || wow || s.sleep;
-  const amt = talking ? .35 + Math.abs(Math.sin(t * 15)) * .65 * (.6 + .4 * Math.abs(Math.sin(t * 4.3))) : wow ? .8 : .25;
+  // lip sync: a number is the voice loudness at this frame (0..1); true falls back to a generic flap
+  const amt = typeof s.talk === 'number' ? .12 + s.talk * .88 : talking ? .35 + Math.abs(Math.sin(t * 15)) * .65 * (.6 + .4 * Math.abs(Math.sin(t * 4.3))) : wow ? .8 : .25;
   P.open.scale.set(wow ? .65 : s.sleep ? .45 : 1, amt, 1);
 }

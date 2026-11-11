@@ -67,7 +67,7 @@ function drawMirrorFace(f, s) {
   [[180, 240], [332, 240]].forEach(([x, y]) => { g.beginPath(); g.ellipse(x, y, 26, eh / 2, 0, 0, Math.PI * 2); g.fill(); });
   g.lineWidth = 12; g.lineCap = 'round'; g.strokeStyle = INK;
   g.beginPath(); g.moveTo(150, 170); g.lineTo(210, 160); g.stroke(); g.beginPath(); g.moveTo(302, 160); g.lineTo(362, 170); g.stroke();
-  if (s.talk) { g.beginPath(); g.ellipse(256, 390, 52, 14 + Math.abs(Math.sin(t * 15)) * 40, 0, 0, Math.PI * 2); g.fill(); }
+  if (s.talk) { const a = typeof s.talk === 'number' ? s.talk : Math.abs(Math.sin(t * 15)); g.beginPath(); g.ellipse(256, 390, 52, 8 + a * 46, 0, 0, Math.PI * 2); g.fill(); }
   else { g.beginPath(); g.arc(256, 340, 80, .2 * Math.PI, .8 * Math.PI); g.stroke(); }
   g.fillStyle = 'rgba(255,120,160,.45)'; [[110, 350], [402, 350]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 26, 0, Math.PI * 2); g.fill(); });
   g.globalAlpha = 1;
@@ -92,7 +92,7 @@ export function makeTablet() {
     else {
       [88, 168].forEach(x => { g.beginPath(); g.ellipse(x, 170, 20, 28, 0, 0, Math.PI * 2); g.fill(); });
       if (s.mood === 'angry') { g.beginPath(); g.moveTo(60, 118); g.lineTo(110, 135); g.stroke(); g.beginPath(); g.moveTo(196, 118); g.lineTo(146, 135); g.stroke(); }
-      if (s.talk) { g.beginPath(); g.ellipse(128, 260, 34, 10 + Math.abs(Math.sin(t * 16)) * 26, 0, 0, Math.PI * 2); g.fill(); }
+      if (s.talk) { const a = typeof s.talk === 'number' ? s.talk : Math.abs(Math.sin(t * 16)); g.beginPath(); g.ellipse(128, 260, 34, 6 + a * 30, 0, 0, Math.PI * 2); g.fill(); }
       else { g.beginPath(); if (s.mood === 'angry') g.arc(128, 290, 36, 1.2 * Math.PI, 1.8 * Math.PI); else g.arc(128, 230, 40, .2 * Math.PI, .8 * Math.PI); g.stroke(); }
       if (s.error) { g.fillStyle = '#d62839'; g.font = 'bold 34px sans-serif'; g.textAlign = 'center'; g.fillText('ОШИБКА', 128, 60); g.textAlign = 'left'; }
     }

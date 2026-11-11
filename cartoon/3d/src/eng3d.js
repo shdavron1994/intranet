@@ -4,13 +4,18 @@ import { W, H, seg, ease } from './world.js';
 export const FONT = '"Pangolin","Nunito","DejaVu Sans",sans-serif';
 export const state = { CUR: null };
 const KIDS = ['Дилшод', 'Томирис'];
+// lip sync: loudness envelopes of every voiced line, 24 values per second, keyed "scene_cue"
+export const ENV = { data: null };
+function loud(C, ci, c) {
+  const e = ENV.data && ENV.data[C.si + '_' + ci]; if (!e) return true;
+  const i = Math.floor((C.t - c[0]) * 24); return i >= 0 && i < e.length ? e[i] : 0;
+}
 export function speaking(name) {
   const C = state.CUR; if (!C) return false;
-  const c = C.sc.cues.find(c => C.t >= c[0] && C.t < c[1]); if (!c) return false;
-  if (c[2] === name) return true;
-  if ((c[2] === 'Дети' || c[2] === 'Песня') && KIDS.includes(name)) return true;
-  if (c[2] === 'Все' && (KIDS.includes(name) || name === 'Мама' || name === 'Папа' || name === 'Чистон')) return true;
-  return false;
+  const ci = C.sc.cues.findIndex(c => C.t >= c[0] && C.t < c[1]); if (ci < 0) return false;
+  const c = C.sc.cues[ci];
+  const mine = c[2] === name || ((c[2] === 'Дети' || c[2] === 'Песня') && KIDS.includes(name)) || (c[2] === 'Все' && (KIDS.includes(name) || name === 'Мама' || name === 'Папа' || name === 'Чистон'));
+  return mine ? loud(C, ci, c) : false;
 }
 function mapK(k, v, a, b) {
   for (let i = 1; i < k.length; i++) if (v <= k[i][a] || i === k.length - 1) { const p = (v - k[i - 1][a]) / ((k[i][a] - k[i - 1][a]) || 1); return k[i - 1][b] + p * (k[i][b] - k[i - 1][b]); }
@@ -62,6 +67,7 @@ export async function startEpisode(SCENES, { scene, cam, renderer, gl, warpUrl }
   const comp = document.getElementById('out'), cx = comp.getContext('2d');
   let WARP = {};
   if (warpUrl) try { const r = await fetch(warpUrl); if (r.ok) WARP = await r.json(); } catch (e) {}
+  if (warpUrl) try { const r = await fetch(warpUrl.replace('warp3d_', 'env3d_')); if (r.ok) ENV.data = await r.json(); } catch (e) {}
   SCENES.forEach((s, i) => {
     s.sfx = s.sfx || [];
     const k = WARP[i]; if (!k) return;
@@ -95,7 +101,7 @@ export async function startEpisode(SCENES, { scene, cam, renderer, gl, warpUrl }
   window.__scenes = SCENES.map(s => ({ name: s.name, start: s.start, dur: s.dur, cues: s.cues, sfx: s.sfx, quiet: !!s.quiet, clip: s.clip || null }));
   window.frameAt = (time, q = .9) => {
     const sc = sceneAt(Math.min(time, TOTAL - .001)), t = Math.min(time, TOTAL - .001) - sc.start;
-    state.CUR = { sc, t };
+    state.CUR = { sc, t, si: SCENES.indexOf(sc) };
     const to = sc.knots ? mapK(sc.knots, t, 1, 0) : t;
     sc.update(to, t);
     renderer.render(scene, cam);

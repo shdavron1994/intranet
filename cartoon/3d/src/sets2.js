@@ -44,7 +44,7 @@ export function drawToonFace(g, w, h, s, bg = ['#e2fdff', '#8fe6f5']) {
   g.save(); g.translate(cx, cy); g.scale(k, k); g.fillStyle = INK; g.strokeStyle = INK; g.lineCap = 'round';
   [-76, 76].forEach(x => { g.beginPath(); g.ellipse(x, -40, 26, blink ? 3 : 35, 0, 0, TAU); g.fill(); });
   g.lineWidth = 12; g.beginPath(); g.moveTo(-106, -110); g.lineTo(-46, -120); g.stroke(); g.beginPath(); g.moveTo(46, -120); g.lineTo(106, -110); g.stroke();
-  if (s.talk) { g.beginPath(); g.ellipse(0, 90, 52, 14 + Math.abs(Math.sin(t * 15)) * 40, 0, 0, TAU); g.fill(); }
+  if (s.talk) { const a = typeof s.talk === 'number' ? s.talk : Math.abs(Math.sin(t * 15)); g.beginPath(); g.ellipse(0, 90, 52, 8 + a * 46, 0, 0, TAU); g.fill(); }
   else { g.beginPath(); g.arc(0, 50, 80, .2 * Math.PI, .8 * Math.PI); g.stroke(); }
   g.fillStyle = 'rgba(255,120,160,.45)'; [-146, 146].forEach(x => { g.beginPath(); g.arc(x, 60, 26, 0, TAU); g.fill(); });
   g.restore();
