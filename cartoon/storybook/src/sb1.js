@@ -29,7 +29,7 @@ function chiston(cx, x, y, r, t, on = 1) {
 }
 const STEPS = ['Почистить зубы', 'Умыться', 'Сделать зарядку', 'Вещи — по местам', 'Одеться — и завтракать'];
 
-// frame plan per scene (p1 family, p2 mama wakes, p3 tablet & mess, p4 things run, p5 exercise, p6 teeth at the sink)
+// frame plan per scene (p1 family, p2 mama wakes, p3 tablet & mess, p4 things run, p5 exercise, p6 teeth at the sink, p7 face washing)
 const PLAN = {
   'Заставка': t => kb('p1', t, 5, [1.0, .5, .5], [1.12, .5, .45]),
   'Мама будит': t => kb('p2', t, 14.5, [1.25, .55, .45], [1.0, .5, .5]),
@@ -37,7 +37,7 @@ const PLAN = {
   'Вещи сбегают': t => kb('p4', t, 13, [1.3, .4, .55], [1.0, .5, .5]),
   'Чистон в зеркале': t => kb('p6', t, 16, [1.0, .5, .5], [1.08, .5, .45]),
   'Шаг 1 · Зубы': t => kb('p6', t, 16, [1.15, .5, .4], [1.45, .5, .38]),
-  'Шаг 2 · Умыться': t => kb('p6', t, 12, [1.45, .3, .45], [1.45, .72, .45]),
+  'Шаг 2 · Умыться': t => kb('p7', t, 12, [1.0, .5, .5], [1.25, .5, .45]),
   'Шаг 3 · Зарядка': t => kb('p5', t, 18, [1.0, .5, .5], [1.2, .35, .55]),
   'Шаг 4 · Порядок': t => two(t, 18, ['p3', [1.2, .75, .5], [1.0, .5, .5]], ['p1', [1.0, .5, .5], [1.1, .5, .5]], 12),
   'Шаг 5 · Одеться': t => kb('p2', t, 16, [1.0, .5, .5], [1.15, .62, .4]),
@@ -54,7 +54,7 @@ const OVER = {
 };
 
 (async () => {
-  await Promise.all(['p1', 'p2', 'p3', 'p4', 'p5', 'p6'].map(load));
+  await Promise.all(['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7'].map(load));
   const src = await (await fetch('./cq1_cues.json')).json();
   const SCENES = src.map(s => ({ name: s.name, dur: s.dur, cues: s.cues, sfx: s.sfx, quiet: s.quiet, clip: s.clip || undefined, title: TITLES[s.name],
     update(to) { (PLAN[s.name] || PLAN['Заставка'])(to); },
