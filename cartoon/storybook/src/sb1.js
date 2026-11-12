@@ -10,9 +10,24 @@ const IMG = {}; const load = n => new Promise(r => { const i = new Image(); i.on
 function kb(name, t, dur, a, b) {
   const im = IMG[name], k = ease(seg(t, 0, dur));
   const z = lerp(a[0], b[0], k), cx = lerp(a[1], b[1], k), cy = lerp(a[2], b[2], k);
-  const sw = im.width / z, sh = im.height / z;
-  const sx = Math.max(0, Math.min(im.width - sw, cx * im.width - sw / 2)), sy = Math.max(0, Math.min(im.height - sh, cy * im.height - sh / 2));
-  g.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+  // gentle "alive" motion: the picture breathes and sways a little, as if filmed by a hand-held camera
+  const zz = z * (1.04 + Math.sin(t * 1.3) * .006);
+  const sw = im.width / zz, sh = im.height / zz;
+  const bx = cx + Math.sin(t * .7) * .004, by = cy + Math.sin(t * .9 + 1) * .004;
+  const sx = Math.max(0, Math.min(im.width - sw, bx * im.width - sw / 2)), sy = Math.max(0, Math.min(im.height - sh, by * im.height - sh / 2));
+  g.save(); g.translate(W / 2, H / 2); g.rotate(Math.sin(t * .5) * .003); g.translate(-W / 2, -H / 2);
+  g.drawImage(im, sx, sy, sw, sh, -4, -4, W + 8, H + 8); g.restore();
+}
+// living light: floating dust motes in the sunbeam, a slow warm light sweep and a soft vignette
+const MOTES = Array.from({ length: 40 }, (_, i) => ({ x: (i * 97.3) % 1, y: (i * 61.7) % 1, r: 1.2 + (i % 4) * .9, s: .02 + (i % 5) * .008, p: i * 1.7 }));
+function life(T) {
+  g.save(); g.globalCompositeOperation = 'screen';
+  const lx = W * (.55 + Math.sin(T * .15) * .25), gr = g.createRadialGradient(lx, H * .2, 0, lx, H * .2, W * .6);
+  gr.addColorStop(0, 'rgba(255,214,150,.16)'); gr.addColorStop(1, 'rgba(255,214,150,0)'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  MOTES.forEach(m => { const x = ((m.x + Math.sin(T * .3 + m.p) * .03) % 1) * W, y = ((m.y - T * m.s) % 1 + 1) % 1 * H, a = .25 + .25 * Math.sin(T * 1.5 + m.p);
+    g.fillStyle = `rgba(255,240,200,${a})`; g.beginPath(); g.arc(x, y, m.r, 0, 7); g.fill(); });
+  g.restore();
+  const v = g.createRadialGradient(W / 2, H / 2, H * .45, W / 2, H / 2, W * .75); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(20,10,0,.28)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
 }
 // two frames inside one scene with a soft cross-fade
 function two(t, dur, A, B, at) {
@@ -57,7 +72,7 @@ const OVER = {
   await Promise.all(['p1', 'p2', 'p3', 'p6', 'p7', 'p8', 'p9', 'p10'].map(load));
   const src = await (await fetch('./cq1_cues.json')).json();
   const SCENES = src.map(s => ({ name: s.name, dur: s.dur, cues: s.cues, sfx: s.sfx, quiet: s.quiet, clip: s.clip || undefined, title: TITLES[s.name],
-    update(to) { (PLAN[s.name] || PLAN['Заставка'])(to); },
+    update(to, t) { (PLAN[s.name] || PLAN['Заставка'])(to); life((this.start || 0) + t); },
     overlay: OVER[s.name] ? (cx, to, t) => OVER[s.name](cx, to, t) : undefined }));
   startEpisode(SCENES, { scene: null, cam: null, renderer: { render() {} }, gl, warpUrl: './warp3d_1.json' });
 })();
