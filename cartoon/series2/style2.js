@@ -83,6 +83,7 @@ function head2(cx, cy, r, o, kind) {
     hairPath([[cx - r * 1.04, cy + r * .05], [cx - r * 1.15, cy - r * .9], [cx - r * .5, cy - r * 1.25], [cx + r * .1, cy - r * 1.2], [cx + r * .8, cy - r * 1.18], [cx + r * 1.15, cy - r * .8], [cx + r * 1.04, cy + r * .05],
       [cx + r * .98, cy - r * .3], [cx + r * .85, cy - r * .45], [cx + r * .6, cy - r * .42], [cx + r * .3, cy - r * .5], [cx, cy - r * .38], [cx - r * .2, cy - r * .48], [cx - r * .5, cy - r * .42], [cx - r * .8, cy - r * .5], [cx - r * .98, cy - r * .3], [cx - r * 1.04, cy + r * .05]]);
     hairFill(cx, cy - r * .6, r, hc); sheen(cx, cy - r * .2, r);
+    ctx.fillStyle = hc; for (let i = 0; i < 7; i++) { const x = cx - r * .72 + i * r * .24, y = cy - r * .5 + Math.abs(i - 3) * r * .03; ctx.beginPath(); ctx.moveTo(x - r * .13, y - r * .1); ctx.quadraticCurveTo(x + r * .02, y + r * .02, x + r * .05, y + r * .2); ctx.quadraticCurveTo(x + r * .08, y + r * .02, x + r * .13, y - r * .1); ctx.fill(); }
   } else if (kind === 'girl') {
     hairPath([[cx - r * 1.08, cy + r * .4], [cx - r * 1.2, cy - r * .9], [cx - r * .4, cy - r * 1.22], [cx + r * .2, cy - r * 1.2], [cx + r * .9, cy - r * 1.15], [cx + r * 1.2, cy - r * .7], [cx + r * 1.08, cy + r * .4],
       [cx + r * .95, cy - r * .1], [cx + r * .8, cy - r * .4], [cx + r * .5, cy - r * .45], [cx + r * .2, cy - r * .5], [cx - r * .1, cy - r * .38], [cx - r * .35, cy - r * .5], [cx - r * .7, cy - r * .5], [cx - r * .9, cy - r * .15], [cx - r * 1.08, cy + r * .4]]);
@@ -137,7 +138,7 @@ function kid(x, y, s, o) {
     ctx.save(); ctx.translate(0, -150); ctx.scale(o.badge, o.badge);
     circ(0, 0, 20, '#ffd23f'); star(0, 0, 13, 6, '#ff7a1a'); ctx.restore();
   }
-  head2(0, -268, 64, o, o.girl ? 'girl' : 'boy');
+  head2(0, -254, 50, o, o.girl ? 'girl' : 'boy');
   // dirt
   if (o.dirty > 0) {
     ctx.globalAlpha = o.dirty;
