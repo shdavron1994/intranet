@@ -101,6 +101,35 @@ function head2(cx, cy, r, o, kind) {
   }
 }
 
+
+/* ---------- bodies and clothes with volume ---------- */
+function shadeHex(h, k) { const n = parseInt(h.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255, f = v => Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k))); return `rgb(${f(r)},${f(g)},${f(b)})`; }
+function cloth(x0, x1, col) { const g = ctx.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, shadeHex(col, .18)); g.addColorStop(.45, col); g.addColorStop(1, shadeHex(col, -.22)); return g; }
+function outline(w) { ctx.strokeStyle = 'rgba(60,30,20,.28)'; ctx.lineWidth = w || 2.5; ctx.stroke(); }
+function arm(a, b, sleeve) {
+  // tapered arm: sleeve to the elbow-ish, skin forearm, mitten hand with a thumb
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]), len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  ctx.save(); ctx.translate(a[0], a[1]); ctx.rotate(ang);
+  const sk = ctx.createLinearGradient(0, -9, 0, 9); sk.addColorStop(0, '#f8d6bd'); sk.addColorStop(1, '#dfa784');
+  ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(len, -7); ctx.lineTo(len, 7); ctx.lineTo(0, 9); ctx.closePath(); ctx.fillStyle = sk; ctx.fill();
+  const sl = len * .48, sg = ctx.createLinearGradient(0, -14, 0, 14); sg.addColorStop(0, shadeHex(sleeve, .15)); sg.addColorStop(1, shadeHex(sleeve, -.25));
+  ctx.beginPath(); ctx.moveTo(-4, -15); ctx.quadraticCurveTo(sl * .5, -16, sl, -12); ctx.lineTo(sl, 12); ctx.quadraticCurveTo(sl * .5, 16, -4, 15); ctx.closePath(); ctx.fillStyle = sg; ctx.fill(); outline(2);
+  ctx.fillStyle = shadeHex(sleeve, -.3); ctx.fillRect(sl - 4, -12, 4, 24);
+  ctx.restore();
+  // hand
+  const hg = ctx.createRadialGradient(b[0] - 4, b[1] - 4, 2, b[0], b[1], 15); hg.addColorStop(0, '#f8d6bd'); hg.addColorStop(1, '#dea583');
+  ctx.beginPath(); ctx.arc(b[0], b[1], 13, 0, TAU); ctx.fillStyle = hg; ctx.fill(); outline(1.8);
+  ctx.beginPath(); ctx.ellipse(b[0] + Math.cos(ang + 1.7) * 11, b[1] + Math.sin(ang + 1.7) * 11, 5, 7, ang, 0, TAU); ctx.fillStyle = '#efc0a0'; ctx.fill();
+}
+function legs2(LL, col, shoe, slippers) {
+  [-1, 1].forEach(s => {
+    const x = s * 21, g = ctx.createLinearGradient(x - 13, 0, x + 13, 0); g.addColorStop(0, shadeHex(col, .15)); g.addColorStop(1, shadeHex(col, -.2));
+    ctx.beginPath(); ctx.moveTo(x - 14, -LL); ctx.lineTo(x + 14, -LL); ctx.lineTo(x + 11, -8); ctx.lineTo(x - 11, -8); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); outline(2);
+    ctx.beginPath(); ctx.ellipse(x + s * 3, -7, slippers ? 20 : 22, slippers ? 8 : 10, 0, Math.PI, TAU); ctx.lineTo(x + s * 3 + 22, -2); ctx.lineTo(x + s * 3 - 22, -2); ctx.closePath(); ctx.fillStyle = shoe; ctx.fill(); outline(2);
+    ctx.fillStyle = slippers ? '#ffffff' : 'rgba(255,255,255,.9)'; ctx.fillRect(x + s * 3 - 21, -4, 42, 4);
+    if (slippers) circ(x + s * 3, -12, 5, '#ffffff');
+  });
+}
 function kid(x, y, s, o) {
   o = Object.assign({ girl: false, dirty: 0, dirtyHands: null, mood: 'happy', talk: false, armL: .2, armR: .2,
     handL: null, handR: null, shirt: '#3b8beb', hold: null, brushTo: null, glasses: false, badge: 0, t: 0,
@@ -109,27 +138,47 @@ function kid(x, y, s, o) {
   const dh = o.dirtyHands == null ? o.dirty : o.dirtyHands;
   ctx.save(); ctx.translate(x, y); ctx.rotate(o.tilt); ctx.scale(s, s);
   ell(0, 0, 62, 11, 'rgba(0,0,0,.16)');
-  const legC = o.pants || (o.dressy ? '#ffffff' : o.girl ? SKIN : '#2b3f73');
-  box(-34, -LL, 26, LL, 12, legC); box(8, -LL, 26, LL, 12, legC);
-  const shoe = o.dressy ? '#d6336c' : o.girl ? '#ff7aa2' : '#ffffff';
-  ell(-22, -6, 22, 10, shoe); ell(22, -6, 22, 10, shoe);
+  const gown = o.girl && !o.dressy;
+  legs2(LL, o.pants || (o.dressy ? '#ffffff' : gown ? '#f3c6a0' : o.pajama ? o.shirt : '#2b3f73'), o.dressy ? '#d6336c' : gown ? '#ff9fbd' : o.pajama ? '#5a7bd6' : '#ffffff', gown || o.pajama);
   ctx.translate(0, 100 - LL);
   if (o.girl) {
-    ctx.beginPath(); ctx.moveTo(-34, -205); ctx.lineTo(34, -205); ctx.lineTo(64, -90);
-    ctx.quadraticCurveTo(0, -78, -64, -90); ctx.closePath(); ctx.fillStyle = o.shirt; ctx.fill();
+    const bottom = gown ? -38 : -88, flare = gown ? 70 : 64;
+    ctx.beginPath(); ctx.moveTo(-30, -208); ctx.quadraticCurveTo(-40, -200, -38, -186); ctx.lineTo(-flare, bottom);
+    ctx.quadraticCurveTo(0, bottom + 12, flare, bottom); ctx.lineTo(38, -186); ctx.quadraticCurveTo(40, -200, 30, -208); ctx.closePath();
+    ctx.fillStyle = cloth(-flare, flare, o.shirt); ctx.fill(); outline();
+    ctx.save(); ctx.clip();
     if (o.dressy) {
-      // day dress: white collar, yellow belt, little flowers
-      ell(-14, -200, 18, 10, '#ffffff'); ell(14, -200, 18, 10, '#ffffff');
-      ctx.fillStyle = '#ffd23f'; ctx.fillRect(-42, -160, 84, 12); circ(0, -154, 9, '#ffd23f');
-      [[-28, -122], [22, -130], [36, -104], [-6, -100], [-40, -100], [8, -118]].forEach(p => { for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; circ(p[0] + Math.cos(a) * 4.5, p[1] + Math.sin(a) * 4.5, 3.4, '#ffffff'); } circ(p[0], p[1], 2.6, '#ffd23f'); });
-    } else [[-25, -130], [18, -160], [30, -110], [-8, -105], [-14, -175]].forEach(p => circ(p[0], p[1], 6, 'rgba(255,255,255,.7)'));
-  } else {
-    box(-52, -210, 104, 125, 30, o.shirt);
-    if (o.pajama) { ctx.save(); rr(-52, -210, 104, 125, 30); ctx.clip(); for (let yy = -200; yy < -85; yy += 22) { ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(-52, yy, 104, 8); } ctx.restore(); } else {
-    const rows = ['.X.X.', 'XXXXX', '.XXX.', '..X..'];
-    ctx.fillStyle = '#ffd23f';
-    rows.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === 'X') ctx.fillRect(-18 + i * 7, -178 + j * 7, 7, 7); }));
+      ctx.fillStyle = '#ffd23f'; ctx.fillRect(-46, -160, 92, 11); circ(0, -154, 8, '#ffcf2a');
+      [[-28, -122], [22, -130], [36, -104], [-6, -100], [-40, -100], [8, -118], [-18, -140], [44, -125]].forEach(p => { for (let k = 0; k < 5; k++) { const a = k / 5 * TAU; circ(p[0] + Math.cos(a) * 4.5, p[1] + Math.sin(a) * 4.5, 3.4, '#ffffff'); } circ(p[0], p[1], 2.6, '#ffd23f'); });
+      ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 3; [-30, -10, 10, 30].forEach(x => { ctx.beginPath(); ctx.moveTo(x * .6, -148); ctx.lineTo(x * 1.4, -90); ctx.stroke(); });
+    } else {
+      // nightgown: little hearts and stars, soft folds, lace hem
+      for (let k = 0; k < 24; k++) { const row = Math.floor(k / 4), px = -48 + (k % 4) * 32 + (row % 2) * 16, py = -186 + row * 26; if (k % 2) star(px, py, 6, 2.6, 'rgba(255,255,255,.85)'); else { ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(px - 2.5, py, 3, 0, TAU); ctx.arc(px + 2.5, py, 3, 0, TAU); ctx.moveTo(px - 5.5, py + 1); ctx.lineTo(px, py + 7); ctx.lineTo(px + 5.5, py + 1); ctx.fill(); } }
+      ctx.strokeStyle = 'rgba(0,0,0,.07)'; ctx.lineWidth = 3; [-36, -12, 12, 36].forEach(x => { ctx.beginPath(); ctx.moveTo(x * .5, -170); ctx.lineTo(x * 1.5, -45); ctx.stroke(); });
     }
+    ctx.restore();
+    if (gown) for (let k = -6; k <= 6; k++) circ(k * 11, bottom + 4 - Math.abs(k) * .4, 6, '#ffffff');
+    // round collar with a bow
+    ell(-13, -203, 17, 8, '#ffffff'); ell(13, -203, 17, 8, '#ffffff');
+    if (gown) { ell(-7, -196, 7, 4, '#ff7aa2'); ell(7, -196, 7, 4, '#ff7aa2'); circ(0, -196, 3, '#ff4f8b'); }
+    // puff sleeves
+    [-1, 1].forEach(s => { ctx.beginPath(); ctx.ellipse(s * 40, -192, 17, 14, 0, 0, TAU); ctx.fillStyle = cloth(s * 40 - 17, s * 40 + 17, o.shirt); ctx.fill(); outline(2); });
+  } else {
+    ctx.beginPath(); ctx.moveTo(-34, -212); ctx.quadraticCurveTo(-56, -208, -56, -186); ctx.lineTo(-52, -92); ctx.quadraticCurveTo(0, -84, 52, -92); ctx.lineTo(56, -186); ctx.quadraticCurveTo(56, -208, 34, -212); ctx.closePath();
+    ctx.fillStyle = cloth(-56, 56, o.shirt); ctx.fill(); outline();
+    ctx.save(); ctx.clip();
+    if (o.pajama) {
+      for (let yy = -206; yy < -85; yy += 22) { ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(-60, yy, 120, 8); }
+      line(0, -204, 0, -92, 'rgba(40,60,120,.35)', 3); [-180, -152, -124].forEach(by => circ(5, by, 3.5, '#ffffff'));
+    } else {
+      const rows = ['.X.X.', 'XXXXX', '.XXX.', '..X..'];
+      ctx.fillStyle = '#ffd23f'; rows.forEach((r, j) => [...r].forEach((ch, k) => { if (ch === 'X') ctx.fillRect(-18 + k * 7, -178 + j * 7, 7, 7); }));
+    }
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(-60, -100, 120, 10);
+    ctx.restore();
+    // collar
+    if (o.pajama) { [-1, 1].forEach(s => { ctx.beginPath(); ctx.moveTo(s * 2, -210); ctx.lineTo(s * 26, -210); ctx.lineTo(s * 12, -190); ctx.closePath(); ctx.fillStyle = shadeHex(o.shirt, .25); ctx.fill(); outline(1.5); }); }
+    else { ctx.beginPath(); ctx.ellipse(0, -211, 20, 8, 0, 0, Math.PI); ctx.fillStyle = shadeHex(o.shirt, -.25); ctx.fill(); }
   }
   const hl = o.handL || [-46 - Math.sin(o.armL) * 86, -192 + Math.cos(o.armL) * 86];
   const hr = o.handR || [46 + Math.sin(o.armR) * 86, -192 + Math.cos(o.armR) * 86];
@@ -166,14 +215,19 @@ function mom(x, y, s, o) {
   o = Object.assign({ talk: false, t: 0, armL: .15, armR: .15, handL: null, handR: null, apron: false, hold: null, mood: 'happy' }, o);
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   ell(0, 0, 72, 12, 'rgba(0,0,0,.16)');
-  box(-30, -122, 22, 122, 10, SKIN); box(8, -122, 22, 122, 10, SKIN);
-  ell(-20, -6, 22, 9, '#5b3b8c'); ell(20, -6, 22, 9, '#5b3b8c');
-  ctx.beginPath(); ctx.moveTo(-40, -300); ctx.lineTo(40, -300); ctx.lineTo(80, -104);
-  ctx.quadraticCurveTo(0, -90, -80, -104); ctx.closePath(); ctx.fillStyle = DRESS; ctx.fill();
-  if (o.apron) { box(-42, -252, 84, 142, 18, '#ffffff'); box(-22, -196, 44, 30, 8, '#ffd6e4'); }
+  legs2(122, '#f3c6a0', '#8a5a6a', false);
+  // long soft skirt
+  ctx.beginPath(); ctx.moveTo(-42, -205); ctx.lineTo(-74, -100); ctx.quadraticCurveTo(0, -88, 74, -100); ctx.lineTo(42, -205); ctx.closePath(); ctx.fillStyle = cloth(-74, 74, '#9b7bb5'); ctx.fill(); outline();
+  ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 3; [-30, 0, 30].forEach(x => { ctx.beginPath(); ctx.moveTo(x * .6, -195); ctx.lineTo(x * 1.6, -98); ctx.stroke(); });
+  // cream knit sweater
+  ctx.beginPath(); ctx.moveTo(-34, -302); ctx.quadraticCurveTo(-58, -298, -56, -272); ctx.lineTo(-50, -196); ctx.quadraticCurveTo(0, -186, 50, -196); ctx.lineTo(56, -272); ctx.quadraticCurveTo(58, -298, 34, -302); ctx.closePath();
+  ctx.fillStyle = cloth(-56, 56, '#f3e9dc'); ctx.fill(); outline();
+  ctx.save(); ctx.clip(); ctx.strokeStyle = 'rgba(150,120,90,.18)'; ctx.lineWidth = 2; for (let x = -50; x <= 50; x += 12) { ctx.beginPath(); ctx.moveTo(x, -296); ctx.lineTo(x, -196); ctx.stroke(); } ctx.fillStyle = 'rgba(150,120,90,.15)'; ctx.fillRect(-60, -206, 120, 10); ctx.restore();
+  ctx.beginPath(); ctx.ellipse(0, -300, 22, 9, 0, 0, Math.PI); ctx.fillStyle = '#e2d3c0'; ctx.fill();
+  if (o.apron) { box(-42, -262, 84, 152, 18, '#ffffff'); box(-22, -196, 44, 30, 8, '#ffd6e4'); }
   const hl = o.handL || [-38 - Math.sin(o.armL) * 100, -288 + Math.cos(o.armL) * 100];
   const hr = o.handR || [38 + Math.sin(o.armR) * 100, -288 + Math.cos(o.armR) * 100];
-  arm([-38, -288], hl, DRESS); arm([38, -288], hr, DRESS);
+  arm([-38, -288], hl, '#f3e9dc'); arm([38, -288], hr, '#f3e9dc');
   if (o.hold === 'bowl') { const bx = (hl[0] + hr[0]) / 2, by = (hl[1] + hr[1]) / 2 - 8; ell(bx, by - 6, 46, 12, '#f3e2b8'); ctx.beginPath(); ctx.ellipse(bx, by - 4, 50, 34, 0, 0, Math.PI); ctx.fillStyle = '#ff9f1c'; ctx.fill(); }
   if (o.hold === 'spoon') { line(hr[0], hr[1], hr[0] - 10, hr[1] - 70, '#a0643c', 8); ell(hr[0] - 12, hr[1] - 78, 10, 14, '#a0643c'); circ(hr[0], hr[1], 14, SKIN); }
   box(-12, -322, 24, 30, 8, SKIN);
@@ -185,11 +239,12 @@ function papa(x, y, s, o) {
   o = Object.assign({ talk: false, t: 0, armL: .15, armR: .15, handL: null, handR: null, bag: false, mood: 'happy', jacket: false }, o);
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   ell(0, 0, 76, 12, 'rgba(0,0,0,.16)');
-  box(-36, -150, 30, 150, 12, '#3a3f5c'); box(6, -150, 30, 150, 12, '#3a3f5c');
-  ell(-22, -6, 26, 10, '#2d2a26'); ell(24, -6, 26, 10, '#2d2a26');
-  box(-58, -330, 116, 196, 30, '#2f3b52');
-  if (o.jacket) { box(-58, -330, 46, 196, 24, '#5a6b7d'); box(12, -330, 46, 196, 24, '#5a6b7d'); }
-  ellipse_collar: { ctx.beginPath(); ctx.ellipse(0, -326, 24, 9, 0, 0, Math.PI); ctx.fillStyle = '#26314a'; ctx.fill(); }
+  [-1, 1].forEach(sd => { const x = sd * 21; ctx.beginPath(); ctx.moveTo(x - 16, -150); ctx.lineTo(x + 16, -150); ctx.lineTo(x + 13, -8); ctx.lineTo(x - 13, -8); ctx.closePath(); ctx.fillStyle = cloth(x - 16, x + 16, '#3d4256'); ctx.fill(); outline(2);
+    ctx.beginPath(); ctx.ellipse(x + sd * 4, -7, 26, 10, 0, Math.PI, TAU); ctx.lineTo(x + sd * 4 + 26, -2); ctx.lineTo(x + sd * 4 - 26, -2); ctx.closePath(); ctx.fillStyle = '#2d2a26'; ctx.fill(); });
+  ctx.beginPath(); ctx.moveTo(-38, -332); ctx.quadraticCurveTo(-62, -328, -60, -300); ctx.lineTo(-56, -140); ctx.quadraticCurveTo(0, -130, 56, -140); ctx.lineTo(60, -300); ctx.quadraticCurveTo(62, -328, 38, -332); ctx.closePath();
+  ctx.fillStyle = cloth(-60, 60, '#2f3b52'); ctx.fill(); outline();
+  ctx.save(); ctx.clip(); ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 2; for (let x = -54; x <= 54; x += 12) { ctx.beginPath(); ctx.moveTo(x, -326); ctx.lineTo(x, -140); ctx.stroke(); } ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(-64, -152, 128, 12); ctx.restore();
+  ctx.beginPath(); ctx.ellipse(0, -328, 24, 10, 0, 0, Math.PI); ctx.fillStyle = '#e9eef5'; ctx.fill();
   const sl = o.jacket ? '#5a6b7d' : '#2f3b52';
   const hl = o.handL || [-50 - Math.sin(o.armL) * 110, -314 + Math.cos(o.armL) * 110];
   const hr = o.handR || [50 + Math.sin(o.armR) * 110, -314 + Math.cos(o.armR) * 110];
