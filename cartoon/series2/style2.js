@@ -182,15 +182,15 @@ function mom(x, y, s, o) {
   return { hl: [x + hl[0] * s, y + hl[1] * s], hr: [x + hr[0] * s, y + hr[1] * s] };
 }
 function papa(x, y, s, o) {
-  o = Object.assign({ talk: false, t: 0, armL: .15, armR: .15, handL: null, handR: null, bag: false, mood: 'happy', jacket: true }, o);
+  o = Object.assign({ talk: false, t: 0, armL: .15, armR: .15, handL: null, handR: null, bag: false, mood: 'happy', jacket: false }, o);
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   ell(0, 0, 76, 12, 'rgba(0,0,0,.16)');
   box(-36, -150, 30, 150, 12, '#3a3f5c'); box(6, -150, 30, 150, 12, '#3a3f5c');
   ell(-22, -6, 26, 10, '#2d2a26'); ell(24, -6, 26, 10, '#2d2a26');
-  box(-58, -330, 116, 196, 30, '#e9eef5');
+  box(-58, -330, 116, 196, 30, '#2f3b52');
   if (o.jacket) { box(-58, -330, 46, 196, 24, '#5a6b7d'); box(12, -330, 46, 196, 24, '#5a6b7d'); }
-  ctx.beginPath(); ctx.moveTo(-8, -326); ctx.lineTo(8, -326); ctx.lineTo(12, -250); ctx.lineTo(0, -236); ctx.lineTo(-12, -250); ctx.closePath(); ctx.fillStyle = '#3b8beb'; ctx.fill();
-  const sl = o.jacket ? '#5a6b7d' : '#e9eef5';
+  ellipse_collar: { ctx.beginPath(); ctx.ellipse(0, -326, 24, 9, 0, 0, Math.PI); ctx.fillStyle = '#26314a'; ctx.fill(); }
+  const sl = o.jacket ? '#5a6b7d' : '#2f3b52';
   const hl = o.handL || [-50 - Math.sin(o.armL) * 110, -314 + Math.cos(o.armL) * 110];
   const hr = o.handR || [50 + Math.sin(o.armR) * 110, -314 + Math.cos(o.armR) * 110];
   arm([-50, -314], hl, sl); arm([50, -314], hr, sl);
@@ -199,4 +199,32 @@ function papa(x, y, s, o) {
   head2(0, -394, 60, o, 'papa');
   ctx.restore();
   return { hl: [x + hl[0] * s, y + hl[1] * s], hr: [x + hr[0] * s, y + hr[1] * s] };
+}
+
+/* ---------- lip sync from Silero loudness envelopes ---------- */
+function speaking(name) {
+  if (!CUR) return false;
+  const ci = CUR.sc.cues.findIndex(c => CUR.t >= c[0] && CUR.t < c[1]); if (ci < 0) return false;
+  const c = CUR.sc.cues[ci], kids = ['Дилшод', 'Томирис', 'Тимур'];
+  const mine = c[2] === name || ((c[2] === 'Дети' || c[2] === 'Песня') && kids.includes(name)) || (c[2] === 'Все' && [...kids, 'Мама', 'Папа', 'Чистон'].includes(name));
+  if (!mine) return false;
+  const e = typeof ENV2 !== 'undefined' && ENV2[SCENES.indexOf(CUR.sc) + '_' + ci]; if (!e) return true;
+  const i = Math.floor((CUR.t - c[0]) * 24); return i >= 0 && i < e.length ? Math.max(.001, e[i]) : .001;
+}
+/* ---------- gentle camera: slow push-in / pull-out per scene with a little drift ---------- */
+function camera2(sc, t) {
+  const i = SCENES.indexOf(sc); if (i <= 0 || i === SCENES.length - 1) return;
+  const k = ease(seg(t, 0, sc.dur)), z = 1 + .08 * (i % 2 ? k : 1 - k) + .012 * Math.sin(t * .8);
+  const fx = 640 + (((i * 137) % 5) - 2) * 70, fy = 330 + Math.sin(t * .5) * 8;
+  ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy);
+}
+/* ---------- sleeping heads on the pillow in the new style ---------- */
+function sleepyHead(x, y, t, girl, awake) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-.35);
+  head2(0, 0, girl ? 40 : 44, { t, closed: !awake, mood: awake ? 'happy' : 'sleepy', talk: awake ? speaking(girl ? 'Томирис' : 'Дилшод') : 0 }, girl ? 'girl' : 'boy');
+  ctx.restore();
+  if (!awake) for (let i = 0; i < 3; i++) {
+    const k = ((t * .5 + i / 3) % 1);
+    ctx.globalAlpha = 1 - k; txt('z', x + 50 + k * 40, y - 60 - k * 90, 26 + i * 6, '#5b6fb5'); ctx.globalAlpha = 1;
+  }
 }
