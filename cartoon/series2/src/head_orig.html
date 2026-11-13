@@ -1,0 +1,114 @@
+<title>Чистон. Перезагрузка</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pangolin&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: one column, the player is the hero; controls, chapters and notes stack under it. Single deliberate look: deep bathroom-tile teal with soap-yellow. */
+:root{
+  --bg:#0e3a46;
+  --panel:#134b59;
+  --line:#2b6c79;
+  --fg:#f2fbfa;
+  --muted:#a7cdd2;
+  --soap:#ffd23f;
+  --ink:#0b2d36;
+  --display:"Pangolin","Comic Sans MS","Chalkboard SE",cursive;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1040px;margin:0 auto;display:grid;gap:20px;
+  padding-block:28px 56px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px))}
+header{display:grid;gap:6px}
+.eyebrow{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.1rem,5.5vw,3.4rem);line-height:1.05;margin:0;text-wrap:balance;color:var(--soap)}
+.lead{margin:0;color:var(--muted);max-width:65ch}
+.player{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.player canvas{display:block;width:100%;height:100%;object-fit:contain}
+.player:fullscreen{border-radius:0;aspect-ratio:auto;width:100vw;height:100vh}
+.sub{position:absolute;left:50%;bottom:4.5%;transform:translateX(-50%);max-width:88%;width:max-content;
+  background:rgba(8,22,28,.78);color:#fff;padding:.35em .9em .4em;border-radius:12px;
+  font-family:var(--display);font-size:clamp(13px,2.3vw,26px);line-height:1.25;text-align:center;text-wrap:balance}
+.sub .who{color:var(--soap);margin-right:.35em}
+.bigplay{position:absolute;inset:0;margin:auto;width:92px;height:92px;border-radius:50%;border:0;cursor:pointer;
+  background:var(--soap);color:var(--ink);font-size:2.1rem;display:grid;place-items:center;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.bigplay:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--soap);outline-offset:3px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:inherit;font-weight:700;font-size:.95rem;color:var(--fg);background:var(--panel);border:1px solid var(--line);
+  border-radius:999px;padding:.5em 1.05em;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--soap);color:var(--ink);border-color:var(--soap)}
+button[aria-pressed="false"]{color:var(--muted)}
+.seekrow{display:flex;gap:12px;align-items:center;flex:1 1 260px;min-width:0}
+#seek{flex:1;min-width:0;accent-color:var(--soap)}
+.time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem;white-space:nowrap}
+.status{color:var(--muted);font-size:.88rem;margin:0;min-height:1.4em}
+h2{font-family:var(--display);font-weight:400;font-size:1.6rem;margin:0;color:var(--fg)}
+.chapters{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.chapters button{width:100%;text-align:left;border-radius:12px;display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.chapters button .t{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:400}
+.chapters button.on{border-color:var(--soap);box-shadow:inset 0 0 0 1px var(--soap)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.note h3{margin:0 0 6px;font-size:1rem;color:var(--soap)}
+.note ul{margin:0;padding-left:1.1em;color:var(--fg)}
+.note li+li{margin-top:4px}
+@media (prefers-reduced-motion: reduce){.bigplay{transition:none}}
+</style>
+
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Прототип-аниматик · по мотивам темы гигиены</div>
+    <h1>Чистон. Перезагрузка</h1>
+    <p class="lead">Тимур не умывается и не выпускает из рук планшет, и вещи от него убегают. Умное зеркало Чистон предлагает пройти квест чистоты из трёх уровней. Это черновая версия: сцены, тайминг, реплики и песни уже на месте, поэтому сюжет и ритм можно проверить на детях до настоящей анимации.</p>
+  </header>
+
+  <div class="player" id="player">
+    <canvas id="cv" width="1280" height="720" aria-label="Мультфильм «Чистон. Перезагрузка»"></canvas>
+    <div class="sub" id="sub" hidden><span class="who" id="who"></span><span id="line"></span></div>
+    <button class="bigplay" id="bigplay" aria-label="Смотреть мультфильм">▶</button>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="play">Смотреть</button>
+    <button id="restart">С начала</button>
+    <div class="seekrow">
+      <input type="range" id="seek" min="0" max="100" step="0.1" value="0" aria-label="Перемотка">
+      <span class="time" id="time">0:00 / 0:00</span>
+    </div>
+    <button id="voice" aria-pressed="true">Голос: вкл</button>
+    <button id="music" aria-pressed="true">Музыка: вкл</button>
+    <button id="fs">На весь экран</button>
+  </div>
+  <p class="status" id="status"></p>
+
+  <section style="display:grid;gap:10px">
+    <h2>Сцены</h2>
+    <ol class="chapters" id="chapters"></ol>
+  </section>
+
+  <section class="notes">
+    <div class="note">
+      <h3>Что уже есть</h3>
+      <ul>
+        <li>Весь сюжет: 10 сцен, около 2,5 минуты.</li>
+        <li>Все персонажи: Тимур, Лея, Чистон, Пиксель, Кроссовки, Хрум и Липучки.</li>
+        <li>Песня «20 секунд» длится ровно столько, сколько нужно мыть руки.</li>
+        <li>Таймер чистки зубов на 2 минуты. Он ускорен в 10 раз и помечен на экране.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Чем прототип отличается от фильма</h3>
+      <ul>
+        <li>Все роли озвучивает один синтезированный голос (Piper, русский голос «Ирина»). Персонажей различает только высота тона. Живые актёры звучали бы гораздо лучше.</li>
+        <li>Движения простые, мимика условная. Это раскадровка в движении, а не финальная анимация.</li>
+        <li>Музыка написана кодом и звучит как старая приставка.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
